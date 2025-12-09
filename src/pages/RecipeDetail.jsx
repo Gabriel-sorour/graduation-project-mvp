@@ -73,7 +73,7 @@ function RecipeDetail() {
             </ul>
           </div>
 
-          <div>
+          <div className='instructions-div'>
             <h3 className="section-heading">Instructions</h3>
             <div className="steps-list">
               {recipe.steps && recipe.steps.map((step, idx) => (
