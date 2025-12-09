@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'; // useLocation to check active page
 import { ChefHat, User } from 'lucide-react';
-
+import '../../styles/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
