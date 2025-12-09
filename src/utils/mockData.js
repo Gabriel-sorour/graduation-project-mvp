@@ -6,7 +6,7 @@ export const RECIPES = [
     time: "30 min",
     difficulty: "Easy",
     calories: "280 kcal",
-    image: "https://images.unsplash.com/photo-1547592166-23ac797d6333?auto=format&fit=crop&w=800&q=80", // Real image URL
+    image: "https://images.unsplash.com/photo-1594756202469-9ff9799b2e4e?auto=format&fit=crop&w=800&q=80",
     steps: ["Roast tomatoes and garlic.", "Sauté onions.", "Blend everything.", "Simmer with cream."]
   },
   {
@@ -16,7 +16,7 @@ export const RECIPES = [
     time: "10 min",
     difficulty: "Easy",
     calories: "320 kcal",
-    image: "https://images.unsplash.com/photo-1525351484163-7529414395d8?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1548365329-701a48b295b3?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     steps: ["Toast the bread.", "Mash avocado with lemon.", "Fry the egg.", "Assemble."]
   },
   {
