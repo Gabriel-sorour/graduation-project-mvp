@@ -8,6 +8,18 @@ function RecipeDetail() {
   const navigate = useNavigate();
   const recipe = RECIPES.find(r => r.id === parseInt(id));
 
+  // Handle the not found recipe
+  if (!recipe) {
+    return (
+      <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
+        <h2>Recipe not found</h2>
+        <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '1rem' }}>
+          Go Home
+        </button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="recipe-detail container">
