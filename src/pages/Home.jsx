@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
-
+import '../styles/Home.css';
 
 function Home() {
   const navigate = useNavigate();
