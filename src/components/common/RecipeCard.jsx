@@ -6,7 +6,7 @@ function RecipeCard({ recipe, onClick }) {
   return (
     <div className="recipe-card" onClick={() => onClick(recipe.id)}>
       <div className="card-image-wrapper">
-        <img src={recipe.image} alt={recipe.title} className="card-image" />
+        <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="card-image" />
         <div className="card-badge">
           <Clock size={12} /> {recipe.time}
         </div>

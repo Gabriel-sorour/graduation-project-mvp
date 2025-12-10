@@ -50,7 +50,7 @@ function RecipeDetail() {
       <div className="recipe-content">
         {/* Left: Visuals */}
         <div className="recipe-visuals">
-          <img src={recipe.image} alt={recipe.title} className="detail-image" />
+          <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="detail-image" />
           <div className="recipe-meta">
             <span className="meta-item"><Clock size={18} /> {recipe.time}</span>
             <span className="meta-item"><Flame size={18} /> {recipe.calories}</span>
