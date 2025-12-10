@@ -13,7 +13,7 @@ function RecipeDetail() {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
       .then(res => res.json())
       .then(data => {
-        
+
         const formattedRecipe = {
           ...data,
           ingredients: typeof data.ingredients === 'string' ? JSON.parse(data.ingredients) : data.ingredients,
@@ -28,11 +28,22 @@ function RecipeDetail() {
       });
   }, [id]);
 
-  if (loading) return <div className="container" style={{padding:'4rem', textAlign:'center'}}>Loading details...</div>;
+  if (loading)
+    return (
+      <div
+        className="container"
+        style={{ padding: '4rem', textAlign: 'center' }}
+      >
+        Loading details...
+      </div>
+    );
 
   if (!recipe) {
     return (
-      <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
+      <div
+        className="container"
+        style={{ padding: '4rem', textAlign: 'center' }}
+      >
         <h2>Recipe not found</h2>
         <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '1rem' }}>Go Home</button>
       </div>

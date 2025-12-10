@@ -40,10 +40,22 @@ function Home() {
       {/* Hero Section  */}
       <section className="hero">
         <h1>Cook with what <br /> you <span>have.</span></h1>
-        <p>Minimalist recipe finder based on your pantry. No clutter, just good food.</p>
+        <p>
+          Minimalist recipe finder based on your pantry. No clutter, just good food.
+        </p>
         <div className="hero-buttons">
-          <button className="btn-primary btn-large" onClick={() => navigate('/explore')}>Explore Recipes</button>
-          <button className="btn-secondary btn-large" onClick={() => alert('Coming soon!')}>Surprise Me</button>
+          <button
+            className="btn-primary btn-large"
+            onClick={() => navigate('/explore')}
+          >
+            Explore Recipes
+          </button>
+          <button
+            className="btn-secondary btn-large"
+            onClick={() => alert('Coming soon!')}
+          >
+            Surprise Me
+          </button>
         </div>
       </section>
 
@@ -51,7 +63,9 @@ function Home() {
       <section className="home-content">
         <div className="container">
           {loading ? (
-            <p style={{ textAlign: 'center', padding: '2rem' }}>Loading recipes...</p>
+            <p style={{ textAlign: 'center', padding: '2rem' }}>
+              Loading recipes...
+            </p>
           ) : (
             <div className="recipe-grid">
               {recipes.map(recipe => (
