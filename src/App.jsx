@@ -6,6 +6,7 @@ import Explore from './pages/Explore';
 import RecipeDetail from './pages/RecipeDetail';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import MobileNav from './components/layout/MobileNav';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
       </Routes>
+      <MobileNav />
     </>
   )
 
