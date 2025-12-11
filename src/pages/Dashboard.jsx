@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, ShoppingBag, Heart } from 'lucide-react';
+import PantryTab from '../components/dashboard/PantryTab';
 import '../styles/Dashboard.css';
 
 function Dashboard() {
@@ -33,17 +34,8 @@ function Dashboard() {
 
       {/* Main Content */}
       <main className="dashboard-content">
-        {activeTab === 'pantry' && (
-          <div>
-            <div className="section-header">
-              <h2>My Pantry</h2>
-              <button className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                + Add Item
-              </button>
-            </div>
-            <p className="text-gray-500">Pantry items will appear here...</p>
-          </div>
-        )}
+
+        {activeTab === 'pantry' && <PantryTab />}
 
         {activeTab === 'shopping' && (
           <div>
