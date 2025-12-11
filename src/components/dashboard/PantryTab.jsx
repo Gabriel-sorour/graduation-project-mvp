@@ -82,6 +82,11 @@ function PantryTab() {
             </button>
           </div>
         ))}
+        {items.length === 0 && (
+          <p style={{ color: 'var(--gray)', fontStyle: 'italic', width: '100%', textAlign: 'center' }}>
+            Your pantry is empty. Start adding ingredients!
+          </p>
+        )}
       </div>
     </div>
   );
