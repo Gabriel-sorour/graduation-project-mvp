@@ -47,7 +47,7 @@
 .search-icon-fixed {
   position: absolute;
   right: 1rem;
-  top: 50%;
+  top: 30%;
   color: var(--gray);
   pointer-events: none;
 }
