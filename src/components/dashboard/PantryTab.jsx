@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Search, X } from 'lucide-react'; 
+import { ALL_INGREDIENTS } from '../../utils/allIngredients';
 
 function PantryTab() {
   // Mock Data
   const [items, setItems] = useState(["Rice", "Salt", "Olive Oil", "Pasta"]);
   const [inputValue, setInputValue] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
 
-  const handleAddItem = (e) => {
-    e.preventDefault();
-    const trimmedInput = inputValue.trim();
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInputValue(value);
 
-    // Handel adding the same item & prevent adding empty space
-    if (trimmedInput && !items.includes(trimmedInput)) {
-      setItems([...items, trimmedInput]);
-      setInputValue("");
+    if (value.length > 0) {
+
+      const filtered = ALL_INGREDIENTS.filter(ingredient => 
+        ingredient.toLowerCase().includes(value.toLowerCase()) && 
+        !items.includes(ingredient) 
+      );
+      setSuggestions(filtered);
+    } else {
+      setSuggestions([]);
     }
+  };
+
+
+  const handleSelectSuggestion = (suggestion) => {
+    setItems([...items, suggestion]);
+    setInputValue("");
+    setSuggestions([]); 
   };
 
   const handleRemoveItem = (itemToRemove) => {
@@ -28,37 +42,46 @@ function PantryTab() {
         <span className="text-gray-400 text-sm">{items.length} items</span>
       </div>
 
-      {/* Input Form */}
-      <form onSubmit={handleAddItem} className="pantry-input-group">
-        <input
-          type="text"
-          className="pantry-input"
-          placeholder="Add ingredient (e.g., Tomato)..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        <button type="submit" className="btn-add">
-          <Plus size={20} /> Add
-        </button>
-      </form>
+      <div className="pantry-input-group">
+        <div className="input-wrapper">
 
-      {/* Items List */}
+          <Search className="search-icon" size={18} />
+          
+          <input 
+            type="text" 
+            className="pantry-input"
+            placeholder="Type to search ingredients..." 
+            value={inputValue}
+            onChange={handleInputChange}
+          />
+          
+          {/* Show suggestions */}
+          {suggestions.length > 0 && (
+            <div className="suggestions-list">
+              {suggestions.map((suggestion, index) => (
+                <div 
+                  key={index} 
+                  className="suggestion-item"
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                >
+                  {suggestion}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+      </div>
+
       <div className="pantry-grid">
         {items.map((item, index) => (
           <div key={index} className="pantry-item">
             <span>{item}</span>
-            <button
-              className="btn-remove"
-              onClick={() => handleRemoveItem(item)}
-            >
+            <button className="btn-remove" onClick={() => handleRemoveItem(item)}>
               <X size={12} />
             </button>
           </div>
         ))}
-
-        {items.length === 0 && (
-          <p className="text-gray-400 italic">Your pantry is empty.</p>
-        )}
       </div>
     </div>
   );
