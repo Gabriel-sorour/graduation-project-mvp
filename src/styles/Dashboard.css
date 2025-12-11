@@ -1,0 +1,85 @@
+.dashboard-container {
+  max-width: var(--max-width);
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+  display: flex;
+  gap: 2rem;
+  min-height: 60vh;
+}
+
+/* Sidebar Styling */
+.dashboard-sidebar {
+  width: 250px;
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray);
+  transition: all 0.2s;
+  background: transparent;
+  cursor: pointer;
+}
+
+.sidebar-btn:hover {
+  background-color: var(--light-gray);
+  color: var(--dark);
+}
+
+.sidebar-btn.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Main Content Area */
+.dashboard-content {
+  flex: 1;
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header h2 {
+  font-size: 1.5rem;
+  color: var(--dark);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .sidebar-btn {
+    white-space: nowrap;
+    justify-content: center;
+  }
+}
