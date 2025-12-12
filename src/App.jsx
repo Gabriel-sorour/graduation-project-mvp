@@ -7,6 +7,7 @@ import RecipeDetail from './pages/RecipeDetail';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import MobileNav from './components/layout/MobileNav';
+import ChatWidget from './components/chat/ChatWidget';
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
       </Routes>
+      <ChatWidget />
       <MobileNav />
     </>
   )
