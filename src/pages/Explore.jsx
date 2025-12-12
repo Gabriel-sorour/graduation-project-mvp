@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, X, ChefHat } from 'lucide-react';
 import RecipeCard from '../components/common/RecipeCard';
-import { RECIPES } from '../utils/mockData';
-import { ALL_INGREDIENTS } from '../utils/allIngredients'; // Mock Data
 import { useNavigate } from 'react-router-dom';
 import '../styles/Explore.css';
 
@@ -13,13 +11,47 @@ function Explore() {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
+  // Backend data
+  const [allIngredients, setAllIngredients] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // Fetch Data from API
+  useEffect(() => {
+    // 1. Get Ingredients
+    fetch('http://127.0.0.1:8000/api/ingredients')
+      .then(res => res.json())
+      .then(data => {
+        setAllIngredients(data);
+      })
+      .catch(err => console.error("Error fetching ingredients:", err));
+
+    // 2. Get Recipes (Updated with JSON.parse)
+    fetch('http://127.0.0.1:8000/api/recipes')
+      .then(res => res.json())
+      .then(data => {
+
+        const formattedRecipes = data.data.map(recipe => ({
+          ...recipe,
+          ingredients: typeof recipe.ingredients === 'string'
+            ? JSON.parse(recipe.ingredients)
+            : recipe.ingredients
+        }));
+
+        setRecipes(formattedRecipes);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching recipes:", err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
 
     if (value.length > 0) {
-      const filtered = ALL_INGREDIENTS.filter(ing =>
+      const filtered = allIngredients.filter(ing =>
         ing.toLowerCase().includes(value.toLowerCase()) &&
         !selectedTags.includes(ing)
       );
@@ -42,12 +74,15 @@ function Explore() {
   };
 
   // Results Logic 
-  const filteredRecipes = RECIPES.filter(recipe => {
+  const filteredRecipes = recipes.filter(recipe => {
 
     if (selectedTags.length === 0) return true;
 
     const hasAllIngredients = selectedTags.every(tag =>
-      recipe.ingredients.some(recipeIng => recipeIng.toLowerCase().includes(tag.toLowerCase()))
+      recipe.ingredients.some(recipeIng =>
+        (typeof recipeIng === 'string' ? recipeIng : recipeIng.name)
+          .toLowerCase().includes(tag.toLowerCase())
+      )
     );
 
     return hasAllIngredients;
@@ -105,14 +140,15 @@ function Explore() {
 
       <div>
         <div className="results-info">
-          {selectedTags.length > 0
-            ? `Found ${filteredRecipes.length} recipes with your ingredients.`
-            : "Showing all recipes."
+          {loading ? "Loading recipes..." :
+            selectedTags.length > 0
+              ? `Found ${filteredRecipes.length} recipes with your ingredients.`
+              : "Showing all recipes."
           }
         </div>
 
         <div className="recipe-grid">
-          {filteredRecipes.length > 0 ? (
+          {!loading && filteredRecipes.length > 0 ? (
             filteredRecipes.map(recipe => (
               <RecipeCard
                 key={recipe.id}
@@ -120,7 +156,7 @@ function Explore() {
                 onClick={(id) => navigate(`/recipe/${id}`)}
               />
             ))
-          ) : (
+          ) : !loading && (
             <div className="no-results">
               <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
               <h3>No matching recipes</h3>

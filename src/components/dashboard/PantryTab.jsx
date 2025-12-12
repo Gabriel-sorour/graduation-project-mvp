@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react'; 
-import { ALL_INGREDIENTS } from '../../utils/allIngredients';
+// import { ALL_INGREDIENTS } from '../../utils/allIngredients';
 
 function PantryTab() {
-  // Mock Data
-  const [items, setItems] = useState(["Rice", "Salt", "Olive Oil", "Pasta"]);
+  // User mock data
+  const [items, setItems] = useState(["Rice", "Pasta"]);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+
+  const [allIngredients, setAllIngredients] = useState([]);
+
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/ingredients')
+      .then(response => response.json())
+      .then(data => {   
+        
+        setAllIngredients(data); 
+      })
+      .catch(error => console.error("Error fetching ingredients:", error));
+  }, []);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -14,7 +26,7 @@ function PantryTab() {
 
     if (value.length > 0) {
 
-      const filtered = ALL_INGREDIENTS.filter(ingredient => 
+      const filtered = allIngredients.filter(ingredient => 
         ingredient.toLowerCase().includes(value.toLowerCase()) && 
         !items.includes(ingredient) 
       );
