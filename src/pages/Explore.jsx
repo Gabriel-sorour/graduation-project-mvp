@@ -24,27 +24,88 @@ function Explore() {
         setAllIngredients(data);
       })
       .catch(err => console.error("Error fetching ingredients:", err));
+  }, []);
 
-    // 2. Get Recipes (Updated with JSON.parse)
-    fetch('http://127.0.0.1:8000/api/recipes')
-      .then(res => res.json())
-      .then(data => {
+  // 2. Fetch Recipes 
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      setLoading(true);
+      try {
+        let url = 'http://127.0.0.1:8000/api/recipes';
+        let options = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }
+        };
 
-        const formattedRecipes = data.data.map(recipe => ({
-          ...recipe,
-          ingredients: typeof recipe.ingredients === 'string'
-            ? JSON.parse(recipe.ingredients)
-            : recipe.ingredients
-        }));
+        // If user selected ingredients, switch to SEARCH endpoint
+        if (selectedTags.length > 0) {
+          url = 'http://127.0.0.1:8000/api/recipes/search';
+          options = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+              ingredients: selectedTags
+            })
+          };
+        }
+
+        const response = await fetch(url, options);
+        const result = await response.json();
+
+        // Check if response is successful
+        const rawData = result.data || []; 
+
+        // --- FIX: Format recipes to ensure ingredients are Strings ---
+        const formattedRecipes = rawData.map(recipe => {
+          let ingredients = recipe.ingredients;
+
+          // Case A: Ingredients stored as JSON string -> Parse it
+          if (typeof ingredients === 'string') {
+            try {
+              ingredients = JSON.parse(ingredients);
+            } catch (e) {
+              console.error("Error parsing ingredients JSON:", e); 
+              ingredients = [];
+            }
+          }
+
+          // Case B: Ingredients coming as Objects (from DB relation) -> Extract names
+          if (Array.isArray(ingredients)) {
+            ingredients = ingredients.map(ing => {
+              // If item is an object like {id: 1, name: "Salt"}, return "Salt"
+              if (typeof ing === 'object' && ing !== null && ing.name) {
+                return ing.name;
+              }
+              // If it's already a string, return as is
+              return ing;
+            });
+          }
+
+          return {
+            ...recipe,
+            ingredients: ingredients
+          };
+        });
 
         setRecipes(formattedRecipes);
-        setLoading(false);
-      })
-      .catch(err => {
+
+      } catch (err) {
         console.error("Error fetching recipes:", err);
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchRecipes();
+
+  }, [selectedTags]); // Re-run whenever selectedTags changes
+
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -73,27 +134,12 @@ function Explore() {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
-  // Results Logic 
-  const filteredRecipes = recipes.filter(recipe => {
-
-    if (selectedTags.length === 0) return true;
-
-    const hasAllIngredients = selectedTags.every(tag =>
-      recipe.ingredients.some(recipeIng =>
-        (typeof recipeIng === 'string' ? recipeIng : recipeIng.name)
-          .toLowerCase().includes(tag.toLowerCase())
-      )
-    );
-
-    return hasAllIngredients;
-  });
 
   return (
     <div className="explore-container">
       <div className="explore-header">
         <h1>Find recipes by ingredients</h1>
-        {/* <p>What do you have in your kitchen?</p> */}
-
+        
         {/* Multi-select Search Component */}
         <div className="search-wrapper">
           <div className="search-box-container">
@@ -142,14 +188,14 @@ function Explore() {
         <div className="results-info">
           {loading ? "Loading recipes..." :
             selectedTags.length > 0
-              ? `Found ${filteredRecipes.length} recipes with your ingredients.`
+              ? `Found ${recipes.length} recipes with your ingredients.`
               : "Showing all recipes."
           }
         </div>
 
         <div className="recipe-grid">
-          {!loading && filteredRecipes.length > 0 ? (
-            filteredRecipes.map(recipe => (
+          {!loading && recipes.length > 0 ? (
+            recipes.map(recipe => (
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
