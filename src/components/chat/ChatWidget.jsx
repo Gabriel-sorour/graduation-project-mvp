@@ -10,13 +10,29 @@ function ChatWidget() {
   const [inputValue, setInputValue] = useState("");
   
   const messagesEndRef = useRef(null);
+  const widgetRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (isOpen && widgetRef.current && !widgetRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (isOpen) {
+      scrollToBottom();
+    }
   }, [messages, isOpen]);
 
   const handleSend = (e) => {
@@ -39,7 +55,7 @@ function ChatWidget() {
   };
 
   return (
-    <>
+    <div ref={widgetRef} className="chat-widget-container">
       <button 
         className="chat-toggle-btn" 
         onClick={() => setIsOpen(!isOpen)}
@@ -86,7 +102,7 @@ function ChatWidget() {
           </form>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
