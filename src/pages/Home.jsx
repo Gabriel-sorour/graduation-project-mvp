@@ -61,7 +61,7 @@ function Home() {
       <section className="home-content">
         <div className="container">
 
-          <h2 style={{ color: 'var(--text-color)' }}>
+          <h2 style={{ color: 'var(--text-color)', textAlign: 'center', padding: '1rem' }}>
             Trending Now
           </h2>
 
