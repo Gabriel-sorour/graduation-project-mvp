@@ -3,14 +3,28 @@ import { Search, X } from 'lucide-react';
 // import { ALL_INGREDIENTS } from '../../utils/allIngredients';
 
 function PantryTab() {
-  // User mock data
-  const [items, setItems] = useState(["Rice", "Pasta"]);
+  // User mock data -> Changed to Empty Array for API data
+  const [items, setItems] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
   const [allIngredients, setAllIngredients] = useState([]);
 
+  // Helper to refresh data
+  const fetchPantry = () => {
+    fetch('http://127.0.0.1:8000/api/user/pantry')
+      .then(res => res.json())
+      .then(data => {
+        if(data.data) setItems(data.data);
+      })
+      .catch(err => console.error(err));
+  };
+
   useEffect(() => {
+    // 1. Get Pantry Items
+    fetchPantry();
+
+    // 2. Get All Ingredients
     fetch('http://127.0.0.1:8000/api/ingredients')
       .then(response => response.json())
       .then(data => {   
@@ -28,7 +42,8 @@ function PantryTab() {
 
       const filtered = allIngredients.filter(ingredient => 
         ingredient.toLowerCase().includes(value.toLowerCase()) && 
-        !items.includes(ingredient) 
+        // Prevent adding duplicates (Check if item_name exists in objects)
+        !items.some(item => item.item_name === ingredient) 
       );
       setSuggestions(filtered);
     } else {
@@ -38,13 +53,31 @@ function PantryTab() {
 
 
   const handleSelectSuggestion = (suggestion) => {
-    setItems([...items, suggestion]);
-    setInputValue("");
-    setSuggestions([]); 
+    // API Add (POST)
+    fetch('http://127.0.0.1:8000/api/user/pantry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item_name: suggestion })
+    })
+    .then(res => {
+      if(res.ok) {
+        fetchPantry(); // Refresh list to get new ID
+        setInputValue("");
+        setSuggestions([]);
+      }
+    });
   };
 
-  const handleRemoveItem = (itemToRemove) => {
-    setItems(items.filter(item => item !== itemToRemove));
+  const handleRemoveItem = (id) => {
+    // API Remove (DELETE)
+    fetch(`http://127.0.0.1:8000/api/user/pantry/${id}`, {
+      method: 'DELETE'
+    })
+    .then(res => {
+      if(res.ok) {
+        setItems(items.filter(item => item.id !== id));
+      }
+    });
   };
 
   return (
@@ -87,9 +120,9 @@ function PantryTab() {
 
       <div className="pantry-grid">
         {items.map((item, index) => (
-          <div key={index} className="pantry-item">
-            <span>{item}</span>
-            <button className="btn-remove" onClick={() => handleRemoveItem(item)}>
+          <div key={item.id || index} className="pantry-item">
+            <span>{item.item_name}</span>
+            <button className="btn-remove" onClick={() => handleRemoveItem(item.id)}>
               <X size={12} />
             </button>
           </div>
