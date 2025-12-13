@@ -3,6 +3,7 @@ import { Search, X, ChefHat } from 'lucide-react';
 import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Explore.css';
+import { formatRecipe } from '../utils/recipeUtils';
 
 function Explore() {
   const navigate = useNavigate();
@@ -59,39 +60,10 @@ function Explore() {
         const result = await response.json();
 
         // Check if response is successful
-        const rawData = result.data || []; 
+        const rawData = result.data || [];
 
         // --- FIX: Format recipes to ensure ingredients are Strings ---
-        const formattedRecipes = rawData.map(recipe => {
-          let ingredients = recipe.ingredients;
-
-          // Case A: Ingredients stored as JSON string -> Parse it
-          if (typeof ingredients === 'string') {
-            try {
-              ingredients = JSON.parse(ingredients);
-            } catch (e) {
-              console.error("Error parsing ingredients JSON:", e); 
-              ingredients = [];
-            }
-          }
-
-          // Case B: Ingredients coming as Objects (from DB relation) -> Extract names
-          if (Array.isArray(ingredients)) {
-            ingredients = ingredients.map(ing => {
-              // If item is an object like {id: 1, name: "Salt"}, return "Salt"
-              if (typeof ing === 'object' && ing !== null && ing.name) {
-                return ing.name;
-              }
-              // If it's already a string, return as is
-              return ing;
-            });
-          }
-
-          return {
-            ...recipe,
-            ingredients: ingredients
-          };
-        });
+        const formattedRecipes = rawData.map(recipe => formatRecipe(recipe));
 
         setRecipes(formattedRecipes);
 
@@ -139,7 +111,7 @@ function Explore() {
     <div className="explore-container">
       <div className="explore-header">
         <h1>Find recipes by ingredients</h1>
-        
+
         {/* Multi-select Search Component */}
         <div className="search-wrapper">
           <div className="search-box-container">

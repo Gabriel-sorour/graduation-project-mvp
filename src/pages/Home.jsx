@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RecipeCard from '../components/common/RecipeCard';
 import '../styles/Home.css';
+import { formatRecipe } from '../utils/recipeUtils';
 
 function Home() {
   const navigate = useNavigate();
@@ -14,15 +15,12 @@ function Home() {
       .then(response => response.json())
       .then(data => {
 
-        const formattedRecipes = data.data.map(recipe => ({
-          ...recipe,
-          ingredients: typeof recipe.ingredients === 'string'
-            ? JSON.parse(recipe.ingredients)
-            : recipe.ingredients
-        }));
+        // --- FIX: Format recipes to ensure ingredients are Strings ---
+        const formattedRecipes = data.data.map(recipe => formatRecipe(recipe));
 
 
-        setRecipes(formattedRecipes.slice(0, 4));
+        // Show only first 3 recipes
+        setRecipes(formattedRecipes.slice(0, 3));
         setLoading(false);
       })
       .catch(error => {
@@ -62,6 +60,11 @@ function Home() {
       {/* Featured Recipes Grid */}
       <section className="home-content">
         <div className="container">
+
+          <h2 style={{ color: 'var(--text-color)' }}>
+            Trending Now
+          </h2>
+
           {loading ? (
             <p style={{ textAlign: 'center', padding: '2rem' }}>
               Loading recipes...

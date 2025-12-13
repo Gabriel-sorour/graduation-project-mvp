@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Clock, Flame } from 'lucide-react';
 import '../styles/RecipeDetail.css';
+import { formatRecipe } from '../utils/recipeUtils'; // 1. Import Utility
 
 function RecipeDetail() {
   const { id } = useParams();
@@ -14,11 +15,23 @@ function RecipeDetail() {
       .then(res => res.json())
       .then(data => {
 
-        const formattedRecipe = {
-          ...data,
-          ingredients: typeof data.ingredients === 'string' ? JSON.parse(data.ingredients) : data.ingredients,
-          steps: typeof data.steps === 'string' ? JSON.parse(data.steps) : data.steps
-        };
+        // Handle if data is wrapped in { data: ... } or comes directly
+        const rawRecipe = data.data || data;
+
+        // 2. Use Utility function for Ingredients
+        let formattedRecipe = formatRecipe(rawRecipe);
+
+        // 3. Ensure steps are parsed (if not handled by utility yet)
+        if (typeof formattedRecipe.steps === 'string') {
+          try {
+            formattedRecipe.steps = JSON.parse(formattedRecipe.steps);
+          } catch (e) {
+            console.log("Error", e);
+
+            formattedRecipe.steps = [];
+          }
+        }
+
         setRecipe(formattedRecipe);
         setLoading(false);
       })
