@@ -8,7 +8,7 @@ function ChatWidget() {
     { id: 1, text: "Hi there! I'm Sage. What can I cook for you today?", sender: 'bot' }
   ]);
   const [inputValue, setInputValue] = useState("");
-  
+
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
 
@@ -45,10 +45,10 @@ function ChatWidget() {
 
     // Fake robot replay fro testing
     setTimeout(() => {
-      const botMsg = { 
-        id: Date.now() + 1, 
-        text: "This feature is coming soon! I'll be able to suggest recipes based on your ingredients.", 
-        sender: 'bot' 
+      const botMsg = {
+        id: Date.now() + 1,
+        text: "This feature is coming soon! I'll be able to suggest recipes based on your ingredients.",
+        sender: 'bot'
       };
       setMessages(prev => [...prev, botMsg]);
     }, 1000);
@@ -56,8 +56,8 @@ function ChatWidget() {
 
   return (
     <div ref={widgetRef} className="chat-widget-container">
-      <button 
-        className="chat-toggle-btn" 
+      <button
+        className="chat-toggle-btn"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X size={24} /> : <MessageCircle size={28} />}
@@ -69,9 +69,9 @@ function ChatWidget() {
           {/* Header */}
           <div className="chat-header">
             <h3><Sparkles size={18} /> Chef Sage</h3>
-            <button 
+            <button
               onClick={() => setIsOpen(false)}
-              style={{background:'none', border:'none', color:'white', cursor:'pointer'}}
+              style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
             >
               <X size={20} />
             </button>
@@ -89,8 +89,8 @@ function ChatWidget() {
 
           {/* Input */}
           <form onSubmit={handleSend} className="chat-input-area">
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="chat-input"
               placeholder="Ask the chef..."
               value={inputValue}
