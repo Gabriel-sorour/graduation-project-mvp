@@ -7,55 +7,59 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState('pantry'); // Default Tab
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar */}
-      <aside className="dashboard-sidebar">
-        <button
-          className={`sidebar-btn ${activeTab === 'pantry' ? 'active' : ''}`}
-          onClick={() => setActiveTab('pantry')}
-        >
-          <LayoutDashboard size={20} /> Virtual Pantry
-        </button>
+    <>
+      <title>Dash</title>
 
-        <button
-          className={`sidebar-btn ${activeTab === 'shopping' ? 'active' : ''}`}
-          onClick={() => setActiveTab('shopping')}
-        >
-          <ShoppingBag size={20} /> Shopping List
-        </button>
+      <div className="dashboard-container">
+        {/* Sidebar */}
+        <aside className="dashboard-sidebar">
+          <button
+            className={`sidebar-btn ${activeTab === 'pantry' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pantry')}
+          >
+            <LayoutDashboard size={20} /> Virtual Pantry
+          </button>
 
-        <button
-          className={`sidebar-btn ${activeTab === 'favorites' ? 'active' : ''}`}
-          onClick={() => setActiveTab('favorites')}
-        >
-          <Heart size={20} /> Favorites
-        </button>
-      </aside>
+          <button
+            className={`sidebar-btn ${activeTab === 'shopping' ? 'active' : ''}`}
+            onClick={() => setActiveTab('shopping')}
+          >
+            <ShoppingBag size={20} /> Shopping List
+          </button>
 
-      {/* Main Content */}
-      <main className="dashboard-content">
+          <button
+            className={`sidebar-btn ${activeTab === 'favorites' ? 'active' : ''}`}
+            onClick={() => setActiveTab('favorites')}
+          >
+            <Heart size={20} /> Favorites
+          </button>
+        </aside>
 
-        {activeTab === 'pantry' && <PantryTab />}
+        {/* Main Content */}
+        <main className="dashboard-content">
 
-        {activeTab === 'shopping' && (
-          <div>
-            <div className="section-header">
-              <h2>Shopping List</h2>
+          {activeTab === 'pantry' && <PantryTab />}
+
+          {activeTab === 'shopping' && (
+            <div>
+              <div className="section-header">
+                <h2>Shopping List</h2>
+              </div>
+              <p className="text-gray-500">Shopping list items will appear here...</p>
             </div>
-            <p className="text-gray-500">Shopping list items will appear here...</p>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'favorites' && (
-          <div>
-            <div className="section-header">
-              <h2>My Favorites</h2>
+          {activeTab === 'favorites' && (
+            <div>
+              <div className="section-header">
+                <h2>My Favorites</h2>
+              </div>
+              <p className="text-gray-500">Favorite recipes will appear here...</p>
             </div>
-            <p className="text-gray-500">Favorite recipes will appear here...</p>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
 

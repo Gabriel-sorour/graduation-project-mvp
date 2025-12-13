@@ -34,55 +34,59 @@ function Home() {
   };
 
   return (
-    <div className="home-page">
-      {/* Hero Section  */}
-      <section className="hero">
-        <h1>Cook with what <br /> you <span>have.</span></h1>
-        <p>
-          Minimalist recipe finder based on your pantry. No clutter, just good food.
-        </p>
-        <div className="hero-buttons">
-          <button
-            className="btn-primary btn-large"
-            onClick={() => navigate('/explore')}
-          >
-            Explore Recipes
-          </button>
-          <button
-            className="btn-secondary btn-large"
-            onClick={() => alert('Coming soon!')}
-          >
-            Surprise Me
-          </button>
-        </div>
-      </section>
+    <>
+      <title>Home</title>
 
-      {/* Featured Recipes Grid */}
-      <section className="home-content">
-        <div className="container">
+      <div className="home-page">
+        {/* Hero Section  */}
+        <section className="hero">
+          <h1>Cook with what <br /> you <span>have.</span></h1>
+          <p>
+            Minimalist recipe finder based on your pantry. No clutter, just good food.
+          </p>
+          <div className="hero-buttons">
+            <button
+              className="btn-primary btn-large"
+              onClick={() => navigate('/explore')}
+            >
+              Explore Recipes
+            </button>
+            <button
+              className="btn-secondary btn-large"
+              onClick={() => alert('Coming soon!')}
+            >
+              Surprise Me
+            </button>
+          </div>
+        </section>
 
-          <h2 style={{ color: 'var(--text-color)', textAlign: 'center', padding: '1rem' }}>
-            Trending Now
-          </h2>
+        {/* Featured Recipes Grid */}
+        <section className="home-content">
+          <div className="container">
 
-          {loading ? (
-            <p style={{ textAlign: 'center', padding: '2rem' }}>
-              Loading recipes...
-            </p>
-          ) : (
-            <div className="recipe-grid">
-              {recipes.map(recipe => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  onClick={handleRecipeClick}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
+            <h2 style={{ color: 'var(--text-color)', textAlign: 'center', padding: '1rem' }}>
+              Trending Now
+            </h2>
+
+            {loading ? (
+              <p style={{ textAlign: 'center', padding: '2rem' }}>
+                Loading recipes...
+              </p>
+            ) : (
+              <div className="recipe-grid">
+                {recipes.map(recipe => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onClick={handleRecipeClick}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </>
   );
 }
 

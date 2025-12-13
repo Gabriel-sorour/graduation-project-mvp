@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> API </title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 40px;
+      color: #333;
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+    }
+
+    p.subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0 6px;
+      flex-wrap: wrap;
+    }
+
+    .method {
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .get {
+      background: #4caf50;
+    }
+
+    .post {
+      background: #2196f3;
+    }
+
+    .delete {
+      background: #f44336;
+    }
+
+    a {
+      text-decoration: none;
+      color: blue;
+    }
+
+    code {
+      background: #f1f1f1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: block;
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+
+    .desc {
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    strong {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 20px 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #999;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🍽️ Recipe Backend API</h1>
+    <p class="subtitle">Simple documentation for Laravel backend endpoints</p>
+
+    <div class="card">
+      <h2>📦 Recipes</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes" target="_blank"><code>http://127.0.0.1:8000/api/recipes</code></a>
+      </div>
+      <p class="desc">Get all recipes with ingredients</p>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes/1"
+          target="_blank"><code>http://127.0.0.1:8000/api/recipes/{id}</code></a>
+      </div>
+      <p class="desc">Get a single recipe by ID</p>
+    </div>
+
+    <div class="card">
+      <h2>🥕 Ingredients</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/ingredients"
+          target="_blank"><code>http://127.0.0.1:8000/api/ingredients</code></a>
+      </div>
+      <p class="desc">Get all available ingredients</p>
+    </div>
+
+    <div class="card">
+      <h2>🔍 Search Recipes</h2>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="http://127.0.0.1:8000/api/recipes/search"
+          target="_blank"><code>http://127.0.0.1:8000/api/recipes/search</code></a>
+      </div>
+      <p class="desc">Search recipes by ingredients (JSON body)</p>
+      <strong>Headers:</strong>
+      <code>Content-Type: application/json</code>
+      <code>Accept: application/json</code>
+
+      <strong>Body:</strong>
+      <code>{
+  "ingredients": ["Salt", "Tomato"]
+}</code>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes/search?ingredients=Salt,Tomato"
+          target="_blank"><code>http://127.0.0.1:8000/api/recipes/search?ingredients=Salt,Tomato</code></a>
+      </div>
+      <p class="desc">Search recipes using query params (no body)</p>
+    </div>
+
+    <div class="card">
+      <h2>🧺 User Pantry</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/user/pantry"
+          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry</code></a>
+      </div>
+      <p class="desc">Get user pantry items</p>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="http://127.0.0.1:8000/api/user/pantry"
+          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry</code></a>
+      </div>
+      <p class="desc">Add item to pantry</p>
+      <strong>Headers:</strong>
+      <code>Content-Type: application/json</code>
+      <code>Authorization: Bearer {token}</code>
+      <strong>Body:</strong>
+      <code>{
+  "ingredient_id": 1,
+  "quantity": 2
+}</code>
+
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <a href="http://127.0.0.1:8000/api/user/pantry/{id}"
+          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry/{id}</code></a>
+      </div>
+      <p class="desc">Delete pantry item by ID</p>
+      <strong>Headers:</strong>
+      <code>Authorization: Bearer {token}</code>
+    </div>
+
+    <footer>
+      API End Points
+    </footer>
+  </div>
+</body>
+
+</html>

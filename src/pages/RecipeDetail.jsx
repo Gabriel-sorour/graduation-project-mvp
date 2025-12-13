@@ -64,6 +64,9 @@ function RecipeDetail() {
   }
 
   return (
+    <>
+    <title>{recipe.title}</title>
+
     <div className="recipe-detail container">
       <div className="detail-header">
         <button onClick={() => navigate(-1)} className="back-btn">
@@ -111,6 +114,7 @@ function RecipeDetail() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

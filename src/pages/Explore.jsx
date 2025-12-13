@@ -108,82 +108,86 @@ function Explore() {
 
 
   return (
-    <div className="explore-container">
-      <div className="explore-header">
-        <h1>Find recipes by ingredients</h1>
+    <>
+      <title>Explore</title>
 
-        {/* Multi-select Search Component */}
-        <div className="search-wrapper">
-          <div className="search-box-container">
+      <div className="explore-container">
+        <div className="explore-header">
+          <h1>Find recipes by ingredients</h1>
 
-            {selectedTags.map((tag, index) => (
-              <div key={index} className="search-tag">
-                {tag}
-                <span className="tag-remove" onClick={() => removeTag(tag)}>
-                  <X size={14} />
-                </span>
-              </div>
-            ))}
+          {/* Multi-select Search Component */}
+          <div className="search-wrapper">
+            <div className="search-box-container">
 
-
-            <input
-              type="text"
-              className="search-input-transparent"
-              placeholder={selectedTags.length === 0 ? "Type an ingredient (e.g. Tomato)..." : ""}
-              value={inputValue}
-              onChange={handleInputChange}
-            />
-
-
-            <Search className='search-icon-fixed ' color="var(--gray)" size={20} />
-          </div>
-
-
-          {suggestions.length > 0 && (
-            <div className="suggestions-dropdown">
-              {suggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="dropdown-item"
-                  onClick={() => addTag(suggestion)}
-                >
-                  {suggestion}
+              {selectedTags.map((tag, index) => (
+                <div key={index} className="search-tag">
+                  {tag}
+                  <span className="tag-remove" onClick={() => removeTag(tag)}>
+                    <X size={14} />
+                  </span>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-      </div>
 
 
-      <div>
-        <div className="results-info">
-          {loading ? "Loading recipes..." :
-            selectedTags.length > 0
-              ? `Found ${recipes.length} recipes with your ingredients.`
-              : "Showing all recipes."
-          }
-        </div>
-
-        <div className="recipe-grid">
-          {!loading && recipes.length > 0 ? (
-            recipes.map(recipe => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onClick={(id) => navigate(`/recipe/${id}`)}
+              <input
+                type="text"
+                className="search-input-transparent"
+                placeholder={selectedTags.length === 0 ? "Type an ingredient (e.g. Tomato)..." : ""}
+                value={inputValue}
+                onChange={handleInputChange}
               />
-            ))
-          ) : !loading && (
-            <div className="no-results">
-              <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-              <h3>No matching recipes</h3>
-              <p>Try removing some ingredients to see more results.</p>
+
+
+              <Search className='search-icon-fixed ' color="var(--gray)" size={20} />
             </div>
-          )}
+
+
+            {suggestions.length > 0 && (
+              <div className="suggestions-dropdown">
+                {suggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="dropdown-item"
+                    onClick={() => addTag(suggestion)}
+                  >
+                    {suggestion}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+
+        <div>
+          <div className="results-info">
+            {loading ? "Loading recipes..." :
+              selectedTags.length > 0
+                ? `Found ${recipes.length} recipes with your ingredients.`
+                : "Showing all recipes."
+            }
+          </div>
+
+          <div className="recipe-grid">
+            {!loading && recipes.length > 0 ? (
+              recipes.map(recipe => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  onClick={(id) => navigate(`/recipe/${id}`)}
+                />
+              ))
+            ) : !loading && (
+              <div className="no-results">
+                <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+                <h3>No matching recipes</h3>
+                <p>Try removing some ingredients to see more results.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

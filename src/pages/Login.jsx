@@ -1,6 +1,10 @@
 function Login() {
   return (
-    <div className="container"><h1>Login page</h1></div>
+    <>
+      <title>Login</title>
+
+      <div className="container"><h1>Login page</h1></div>
+    </>
   )
 }
 
