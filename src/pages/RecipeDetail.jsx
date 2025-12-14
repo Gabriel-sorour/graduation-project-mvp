@@ -10,7 +10,7 @@ function RecipeDetail() {
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false); // New State
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
@@ -23,7 +23,7 @@ function RecipeDetail() {
         // Use Utility function for Ingredients
         let formattedRecipe = formatRecipe(rawRecipe);
 
-        // 3. Ensure steps are parsed (if not handled by utility yet)
+        // Ensure steps are parsed
         if (typeof formattedRecipe.steps === 'string') {
           try {
             formattedRecipe.steps = JSON.parse(formattedRecipe.steps);
@@ -54,11 +54,19 @@ function RecipeDetail() {
     }
   };
 
+  // Helper to determine difficulty class
+  const getDifficultyClass = (level) => {
+    switch (level?.toLowerCase()) {
+      case 'medium': return 'diff-medium';
+      case 'hard': return 'diff-hard';
+      default: return 'diff-easy';
+    }
+  };
+
   if (loading)
     return (
       <div
-        className="container"
-        style={{ padding: '4rem', textAlign: 'center' }}
+        className="container status-container"
       >
         Loading details...
       </div>
@@ -67,11 +75,10 @@ function RecipeDetail() {
   if (!recipe) {
     return (
       <div
-        className="container"
-        style={{ padding: '4rem', textAlign: 'center' }}
+        className="container status-container"
       >
         <h2>Recipe not found</h2>
-        <button onClick={() => navigate('/')} className="btn-primary" style={{ marginTop: '1rem' }}>Go Home</button>
+        <button onClick={() => navigate('/')} className="btn-primary home-btn">Go Home</button>
       </div>
     );
   }
@@ -89,11 +96,11 @@ function RecipeDetail() {
 
       <div className="recipe-content">
         {/* Left: Visuals */}
-        <div className="recipe-visuals" style={{ position: 'relative' }}> {/* Added relative positioning */}
+        <div className="recipe-visuals" style={{ position: 'relative' }}>
           
           <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="detail-image" />
           
-          {/* NEW: Detail Like Button */}
+          {/* Detail Like Button */}
           <button 
             className="detail-like-btn"
             onClick={handleToggleLike}
@@ -108,7 +115,7 @@ function RecipeDetail() {
           <div className="recipe-meta">
             <span className="meta-item"><Clock size={18} /> {recipe.time}</span>
             <span className="meta-item"><Flame size={18} /> {recipe.calories}</span>
-            <span className="meta-item" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+            <span className={`meta-item difficulty-text ${getDifficultyClass(recipe.difficulty)}`}>
               {recipe.difficulty}
             </span>
           </div>

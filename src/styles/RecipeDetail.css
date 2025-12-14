@@ -157,6 +157,33 @@
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
 
+/* Difficulty Colors */
+.difficulty-text {
+  font-weight: 600;
+}
+
+.diff-easy {
+  color: var(--primary); /* Easy defaults to Primary */
+}
+
+.diff-medium {
+  color: #f97316; /* Orange */
+}
+
+.diff-hard {
+  color: #ef4444; /* Red */
+}
+
+/* Status container for Loading/Error (if not already added) */
+.status-container {
+  padding: 4rem !important; 
+  text-align: center;
+}
+
+.home-btn {
+  margin-top: 1rem;
+}
+
 @media (min-width: 768px) {
   .recipe-content {
     flex-direction: row;
