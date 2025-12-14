@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame, Heart } from 'lucide-react';
+import { ChevronLeft, Clock, Flame, Heart, Plus, Check } from 'lucide-react'; // Added icons
 import { formatRecipe } from '../utils/recipeUtils';
 import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
+import { addItem } from '../utils/shoppingService'; // Import Shopping Service
 import '../styles/RecipeDetail.css';
 
 function RecipeDetail() {
@@ -11,6 +12,7 @@ function RecipeDetail() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [addedIngredients, setAddedIngredients] = useState({}); // Track added items
 
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
@@ -52,6 +54,18 @@ function RecipeDetail() {
     if (recipe) {
       const newStatus = await toggleFavorite(recipe.id, isLiked);
       setIsLiked(newStatus);
+    }
+  };
+
+  // Handle Add to Shopping List
+  const handleAddToShopping = async (ingredient) => {
+    // Avoid double adding visually
+    if (addedIngredients[ingredient]) return;
+
+    const result = await addItem(ingredient);
+    if (result) {
+      // Mark as added locally for UI feedback
+      setAddedIngredients(prev => ({ ...prev, [ingredient]: true }));
     }
   };
 
@@ -130,7 +144,18 @@ function RecipeDetail() {
             <h3 className="section-heading">Ingredients</h3>
             <ul className="ingredient-list">
               {recipe.ingredients && recipe.ingredients.map((ing, idx) => (
-                <li key={idx} className="ingredient-item">{ing}</li>
+                <li key={idx} className="ingredient-item">
+                  <span>{ing}</span>
+                  
+                  {/* Shopping List Button */}
+                  <button 
+                    className={`add-ing-btn ${addedIngredients[ing] ? 'added' : ''}`}
+                    onClick={() => handleAddToShopping(ing)}
+                    title={addedIngredients[ing] ? "Added to list" : "Add to Shopping List"}
+                  >
+                    {addedIngredients[ing] ? <Check size={16} /> : <Plus size={16} />}
+                  </button>
+                </li>
               ))}
             </ul>
           </div>
