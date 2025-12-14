@@ -69,9 +69,6 @@ function Dashboard() {
 
           {activeTab === 'shopping' && (
             <div>
-              <div className="section-header">
-                <h2>Shopping List</h2>
-              </div>
               <ShoppingListTab />
             </div>
           )}
