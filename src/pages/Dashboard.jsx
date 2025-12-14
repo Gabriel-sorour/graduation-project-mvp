@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react'; 
 import { LayoutDashboard, ShoppingBag, Heart } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import PantryTab from '../components/dashboard/PantryTab';
+import FavoritesTap from '../components/dashboard/FavoritesTap';
 import '../styles/Dashboard.css';
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState('pantry'); // Default Tab
+
+  // Handle back button inside Dashboard taps
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get('tab') || 'pantry';
+
+  const handleTabChange = (tabName) => {
+    setSearchParams({ tab: tabName });
+  };
 
   return (
     <>
@@ -15,21 +25,21 @@ function Dashboard() {
         <aside className="dashboard-sidebar">
           <button
             className={`sidebar-btn ${activeTab === 'pantry' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pantry')}
+            onClick={() => handleTabChange('pantry')} 
           >
             <LayoutDashboard size={20} /> Virtual Pantry
           </button>
 
           <button
             className={`sidebar-btn ${activeTab === 'shopping' ? 'active' : ''}`}
-            onClick={() => setActiveTab('shopping')}
+            onClick={() => handleTabChange('shopping')}
           >
             <ShoppingBag size={20} /> Shopping List
           </button>
 
           <button
             className={`sidebar-btn ${activeTab === 'favorites' ? 'active' : ''}`}
-            onClick={() => setActiveTab('favorites')}
+            onClick={() => handleTabChange('favorites')}
           >
             <Heart size={20} /> Favorites
           </button>
@@ -54,7 +64,7 @@ function Dashboard() {
               <div className="section-header">
                 <h2>My Favorites</h2>
               </div>
-              <p className="text-gray-500">Favorite recipes will appear here...</p>
+              <FavoritesTap />
             </div>
           )}
         </main>

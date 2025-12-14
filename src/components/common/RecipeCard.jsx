@@ -1,12 +1,43 @@
-import React from 'react';
-import { Clock, Flame, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, Flame, Heart } from 'lucide-react';
+import { checkIsFavorite, toggleFavorite } from '../../utils/favoritesService';
 import '../../styles/RecipeCard.css';
 
 function RecipeCard({ recipe, onClick }) {
+  const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+
+    setIsLiked(checkIsFavorite(recipe.id));
+  }, [recipe.id]);
+
+  const handleToggleLike = (e) => {
+    e.stopPropagation();
+    toggleFavorite(recipe);
+    setIsLiked(!isLiked);
+  };
+
   return (
     <div className="recipe-card" onClick={() => onClick(recipe.id)}>
       <div className="card-image-wrapper">
-        <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="card-image" />
+        <img
+          src={`http://127.0.0.1:8000/${recipe.image}`}
+          alt={recipe.title}
+          className="card-image"
+        />
+
+        {/* Like Button */}
+        <button
+          className="card-like-btn"
+          onClick={handleToggleLike}
+        >
+          <Heart
+            size={18}
+            fill={isLiked ? "#ef4444" : "none"}
+            color={isLiked ? "#ef4444" : "#6b7280"}
+          />
+        </button>
+
         <div className="card-badge">
           <Clock size={12} /> {recipe.time}
         </div>

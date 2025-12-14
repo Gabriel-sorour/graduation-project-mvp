@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame } from 'lucide-react';
+import { ChevronLeft, Clock, Flame, Heart } from 'lucide-react';
+import { formatRecipe } from '../utils/recipeUtils';
+import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService'; // Import Service as Mock Data
 import '../styles/RecipeDetail.css';
-import { formatRecipe } from '../utils/recipeUtils'; // 1. Import Utility
 
 function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false); // New State
 
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
@@ -18,7 +20,7 @@ function RecipeDetail() {
         // Handle if data is wrapped in { data: ... } or comes directly
         const rawRecipe = data.data || data;
 
-        // 2. Use Utility function for Ingredients
+        // Use Utility function for Ingredients
         let formattedRecipe = formatRecipe(rawRecipe);
 
         // 3. Ensure steps are parsed (if not handled by utility yet)
@@ -26,13 +28,16 @@ function RecipeDetail() {
           try {
             formattedRecipe.steps = JSON.parse(formattedRecipe.steps);
           } catch (e) {
-            console.log("Error", e);
-
+            console.log("Error parsing steps", e);
             formattedRecipe.steps = [];
           }
         }
 
         setRecipe(formattedRecipe);
+        
+        // CHECK FAVORITE STATUS
+        setIsLiked(checkIsFavorite(formattedRecipe.id));
+        
         setLoading(false);
       })
       .catch(err => {
@@ -40,6 +45,14 @@ function RecipeDetail() {
         setLoading(false);
       });
   }, [id]);
+
+  // Handle Click
+  const handleToggleLike = () => {
+    if (recipe) {
+      toggleFavorite(recipe);
+      setIsLiked(!isLiked);
+    }
+  };
 
   if (loading)
     return (
@@ -76,8 +89,22 @@ function RecipeDetail() {
 
       <div className="recipe-content">
         {/* Left: Visuals */}
-        <div className="recipe-visuals">
+        <div className="recipe-visuals" style={{ position: 'relative' }}> {/* Added relative positioning */}
+          
           <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="detail-image" />
+          
+          {/* NEW: Detail Like Button */}
+          <button 
+            className="detail-like-btn"
+            onClick={handleToggleLike}
+          >
+             <Heart 
+                size={24} 
+                fill={isLiked ? "#ef4444" : "none"} 
+                color={isLiked ? "#ef4444" : "#6b7280"} 
+              />
+          </button>
+
           <div className="recipe-meta">
             <span className="meta-item"><Clock size={18} /> {recipe.time}</span>
             <span className="meta-item"><Flame size={18} /> {recipe.calories}</span>

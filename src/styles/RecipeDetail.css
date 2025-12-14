@@ -133,6 +133,30 @@
   line-height: 1.6;
 }
 
+
+.detail-like-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 45px; /* Slightly larger than the card button */
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detail-like-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
 @media (min-width: 768px) {
   .recipe-content {
     flex-direction: row;
