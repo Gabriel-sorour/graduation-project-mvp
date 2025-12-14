@@ -118,9 +118,9 @@ function ChatWidget() {
             ))}
             {/* Show a small loading indicator inside the chat if waiting */}
             {isLoading && (
-               <div className="message bot">
-                 <span className="typing-indicator">Thinking...</span>
-               </div>
+              <div className="message bot">
+                <span className="typing-indicator">Thinking...</span>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -135,9 +135,9 @@ function ChatWidget() {
               onChange={(e) => setInputValue(e.target.value)}
               disabled={isLoading} // Disable input while loading
             />
-            <button 
-              type="submit" 
-              className="chat-send-btn" 
+            <button
+              type="submit"
+              className="chat-send-btn"
               disabled={isLoading || !inputValue.trim()}
             >
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
