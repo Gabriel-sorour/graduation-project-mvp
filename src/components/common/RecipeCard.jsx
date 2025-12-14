@@ -7,14 +7,20 @@ function RecipeCard({ recipe, onClick }) {
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      const status = await checkIsFavorite(recipe.id);
+      setIsLiked(status);
+    };
 
-    setIsLiked(checkIsFavorite(recipe.id));
+    fetchFavoriteStatus();
   }, [recipe.id]);
 
-  const handleToggleLike = (e) => {
+  const handleToggleLike = async (e) => {
     e.stopPropagation();
-    toggleFavorite(recipe);
-    setIsLiked(!isLiked);
+    
+    // Pass recipe.id and current state, wait for API result
+    const newStatus = await toggleFavorite(recipe.id, isLiked);
+    setIsLiked(newStatus);
   };
 
   return (

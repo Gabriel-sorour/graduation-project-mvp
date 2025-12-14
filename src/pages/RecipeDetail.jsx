@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Clock, Flame, Heart } from 'lucide-react';
 import { formatRecipe } from '../utils/recipeUtils';
-import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService'; // Import Service as Mock Data
+import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
 import '../styles/RecipeDetail.css';
 
 function RecipeDetail() {
@@ -15,7 +15,7 @@ function RecipeDetail() {
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
       .then(res => res.json())
-      .then(data => {
+      .then(async (data) => {
 
         // Handle if data is wrapped in { data: ... } or comes directly
         const rawRecipe = data.data || data;
@@ -35,8 +35,9 @@ function RecipeDetail() {
 
         setRecipe(formattedRecipe);
         
-        // CHECK FAVORITE STATUS
-        setIsLiked(checkIsFavorite(formattedRecipe.id));
+        // CHECK FAVORITE STATUS (Async)
+        const status = await checkIsFavorite(formattedRecipe.id);
+        setIsLiked(status);
         
         setLoading(false);
       })
@@ -46,11 +47,11 @@ function RecipeDetail() {
       });
   }, [id]);
 
-  // Handle Click
-  const handleToggleLike = () => {
+  // Handle Click (Async)
+  const handleToggleLike = async () => {
     if (recipe) {
-      toggleFavorite(recipe);
-      setIsLiked(!isLiked);
+      const newStatus = await toggleFavorite(recipe.id, isLiked);
+      setIsLiked(newStatus);
     }
   };
 
