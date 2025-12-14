@@ -195,15 +195,34 @@
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    background: white;
+    padding: 1rem;
+    gap: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .dashboard-sidebar::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
   }
 
   .sidebar-btn {
-    white-space: nowrap;
-    justify-content: center;
-    flex: 0 0 auto;
-  }
+    flex: 0 0 62%;
+    min-width: 0;
+    background-color: rgba(255, 166, 0, 0.068);
 
-  .dashboard-content {
-    padding: 1rem;
+
+    justify-content: center;
+    border-radius: 0.75rem;
+    margin-bottom: 0;
+
+    scroll-snap-align: center;
   }
 }
