@@ -1,37 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react'; 
-// import { ALL_INGREDIENTS } from '../../utils/allIngredients';
+import { getPantryItems, addPantryItem, deletePantryItem } from '../../utils/pantryService';
+import { getAllIngredients } from '../../utils/shoppingService'; 
 
 function PantryTab() {
-  // User mock data -> Changed to Empty Array for API data
   const [items, setItems] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-
   const [allIngredients, setAllIngredients] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Helper to refresh data
-  const fetchPantry = () => {
-    fetch('http://127.0.0.1:8000/api/user/pantry')
-      .then(res => res.json())
-      .then(data => {
-        if(data.data) setItems(data.data);
-      })
-      .catch(err => console.error(err));
-  };
-
+  // Load Data on Mount
   useEffect(() => {
-    // 1. Get Pantry Items
-    fetchPantry();
+    const loadData = async () => {
+      // 1. Get Pantry Items
+      const pantryData = await getPantryItems();
+      setItems(pantryData);
 
-    // 2. Get All Ingredients
-    fetch('http://127.0.0.1:8000/api/ingredients')
-      .then(response => response.json())
-      .then(data => {   
-        
-        setAllIngredients(data); 
-      })
-      .catch(error => console.error("Error fetching ingredients:", error));
+      // 2. Get All Ingredients (for Autocomplete)
+      const ingredientsData = await getAllIngredients();
+      setAllIngredients(ingredientsData);
+      
+      setLoading(false);
+    };
+    loadData();
   }, []);
 
   const handleInputChange = (e) => {
@@ -41,9 +33,10 @@ function PantryTab() {
     if (value.length > 0) {
 
       const filtered = allIngredients.filter(ingredient => 
+        // Match string
         ingredient.toLowerCase().includes(value.toLowerCase()) && 
-        // Prevent adding duplicates (Check if item_name exists in objects)
-        !items.some(item => item.item_name === ingredient) 
+        // Prevent duplicates in Pantry
+        !items.some(item => item.item_name.toLowerCase() === ingredient.toLowerCase())
       );
       setSuggestions(filtered);
     } else {
@@ -51,34 +44,43 @@ function PantryTab() {
     }
   };
 
+  const handleSelectSuggestion = async (suggestion) => {
+    // Clear UI immediately
+    setInputValue("");
+    setSuggestions([]);
 
-  const handleSelectSuggestion = (suggestion) => {
-    // API Add (POST)
-    fetch('http://127.0.0.1:8000/api/user/pantry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_name: suggestion })
-    })
-    .then(res => {
-      if(res.ok) {
-        fetchPantry(); // Refresh list to get new ID
-        setInputValue("");
-        setSuggestions([]);
-      }
-    });
+    // API Call via Service
+    const newItem = await addPantryItem(suggestion);
+    
+    if (newItem) {
+      // Update State locally (No need to re-fetch entire list)
+      setItems(prev => [...prev, newItem]);
+    }
   };
 
-  const handleRemoveItem = (id) => {
-    // API Remove (DELETE)
-    fetch(`http://127.0.0.1:8000/api/user/pantry/${id}`, {
-      method: 'DELETE'
-    })
-    .then(res => {
-      if(res.ok) {
-        setItems(items.filter(item => item.id !== id));
-      }
-    });
+  const handleRemoveItem = async (id) => {
+    // Store old state for rollback
+    const originalItems = [...items];
+    
+    // Optimistic Update (Remove from UI immediately)
+    setItems(prev => prev.filter(item => item.id !== id));
+
+    // API Call via Service
+    const success = await deletePantryItem(id);
+    
+    // Rollback if failed
+    if (!success) {
+      setItems(originalItems);
+    }
   };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
+        Loading pantry...
+      </div>
+    );
+  }
 
   return (
     <div>
