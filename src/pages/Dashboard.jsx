@@ -1,5 +1,5 @@
 import React from 'react'; 
-import { LayoutDashboard, ShoppingBag, Heart } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Heart , Refrigerator} from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import PantryTab from '../components/dashboard/PantryTab';
 import FavoritesTap from '../components/dashboard/FavoritesTap';
@@ -11,7 +11,7 @@ function Dashboard() {
   // Handle back button inside Dashboard taps
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const activeTab = searchParams.get('tab') || 'pantry';
+  const activeTab = searchParams.get('tab') || 'favorites';
 
   const handleTabChange = (tabName) => {
     setSearchParams({ tab: tabName });
@@ -25,10 +25,16 @@ function Dashboard() {
         {/* Sidebar */}
         <aside className="dashboard-sidebar">
           <button
+            className={`sidebar-btn ${activeTab === 'favorites' ? 'active' : ''}`}
+            onClick={() => handleTabChange('favorites')}
+          >
+            <Heart size={20} /> Favorites
+          </button>
+          <button
             className={`sidebar-btn ${activeTab === 'pantry' ? 'active' : ''}`}
             onClick={() => handleTabChange('pantry')} 
           >
-            <LayoutDashboard size={20} /> Virtual Pantry
+            <Refrigerator size={20} /> Virtual Pantry
           </button>
 
           <button
@@ -36,13 +42,6 @@ function Dashboard() {
             onClick={() => handleTabChange('shopping')}
           >
             <ShoppingBag size={20} /> Shopping List
-          </button>
-
-          <button
-            className={`sidebar-btn ${activeTab === 'favorites' ? 'active' : ''}`}
-            onClick={() => handleTabChange('favorites')}
-          >
-            <Heart size={20} /> Favorites
           </button>
         </aside>
 
