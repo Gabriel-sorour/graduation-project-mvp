@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, ShoppingCart, Check, Search } from 'lucide-react';
 import { getShoppingList, addItem, updateItemStatus, deleteItem, getAllIngredients } from '../../utils/shoppingService';
 
+// استدعاء ملف الـ CSS اللي عملناه
+import './ShoppingListTab.css';
+
 const ShoppingListTab = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,79 +96,43 @@ const ShoppingListTab = () => {
     if (!success) setItems(originalItems);
   };
 
-  if (loading) return <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
+  if (loading) return <div className="empty-state">Loading...</div>;
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+    <div className="shopping-container">
       
       {/* Header */}
-      <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '1.5rem', fontWeight: 'bold', color: '#1f2937' }}>
+      <div className="shopping-header">
+        <h2 className="shopping-title">
           <ShoppingCart size={24} /> Shopping List
         </h2>
-        <p style={{ color: '#6b7280' }}>Manage ingredients you need to buy.</p>
+        <p className="shopping-subtitle">Manage ingredients you need to buy.</p>
       </div>
 
       {/* Autocomplete Input */}
-      <div ref={wrapperRef} style={{ position: 'relative', marginBottom: '2rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          border: '1px solid #e5e7eb', 
-          borderRadius: '0.5rem', 
-          backgroundColor: 'white',
-          padding: '0.5rem 1rem',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-        }}>
-          <Search size={20} color="#9ca3af" />
+      <div ref={wrapperRef} className="search-wrapper">
+        <div className="search-input-group">
+          {/* الأيقونة خدت كلاس عشان نتحكم فيها */}
+          <Search size={20} className="search-icon" />
           
           <input
-            type="text"
+            type="search"
+            className="search-input"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === 'Enter' && handleAddItem(inputValue)}
             placeholder="Type to search ingredients..."
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              paddingLeft: '0.75rem',
-              fontSize: '1rem',
-              color: '#374151',
-              height: '100%'
-            }}
           />
         </div>
 
         {/* Suggestions Dropdown */}
         {suggestions.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
-            borderRadius: '0.5rem',
-            marginTop: '0.5rem',
-            maxHeight: '200px',
-            overflowY: 'auto',
-            zIndex: 50,
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-          }}>
+          <div className="suggestions-dropdown">
             {suggestions.map((suggestion, index) => (
               <div 
                 key={index}
+                className="suggestion-item"
                 onClick={() => handleSelectSuggestion(suggestion)}
-                style={{
-                  padding: '0.75rem 1rem',
-                  cursor: 'pointer',
-                  borderBottom: index !== suggestions.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  color: '#374151',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
               >
                 {suggestion}
               </div>
@@ -175,47 +142,31 @@ const ShoppingListTab = () => {
       </div>
 
       {/* List Items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div className="shopping-list">
         {items.length === 0 && !loading ? (
-           <div style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af' }}>
+           <div className="empty-state">
              Your list is empty. Start typing to add items!
            </div>
         ) : (
           items.map(item => (
             <div 
               key={item.id} 
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '0.75rem 1rem', backgroundColor: 'white',
-                border: '1px solid #e5e7eb', borderRadius: '0.5rem',
-                opacity: item.is_checked ? 0.6 : 1
-              }}
+              className={`list-item ${item.is_checked ? 'checked' : ''}`}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1 }}>
+              <div className="item-left">
                 <div 
                   onClick={() => handleToggle(item.id, item.is_checked)}
-                  style={{
-                    width: '24px', height: '24px', borderRadius: '50%',
-                    border: `2px solid ${item.is_checked ? '#22c55e' : '#d1d5db'}`,
-                    backgroundColor: item.is_checked ? '#22c55e' : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
+                  className={`custom-checkbox ${item.is_checked ? 'checked' : ''}`}
                 >
-                  {/* Use !! to bring the actual boolean value (true/false) */}
                   {!!item.is_checked && <Check size={14} color="white" strokeWidth={3} />}
                 </div>
                 
-                <span style={{ 
-                  fontSize: '1rem', 
-                  textDecoration: item.is_checked ? 'line-through' : 'none',
-                  color: item.is_checked ? '#6b7280' : '#1f2937'
-                }}>
+                <span className={`item-name ${item.is_checked ? 'checked' : ''}`}>
                   {item.item_name}
                 </span>
               </div>
 
-              <button onClick={() => handleDelete(item.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+              <button onClick={() => handleDelete(item.id)} className="btn-delete">
                 <Trash2 size={18} />
               </button>
             </div>
