@@ -73,12 +73,7 @@ const FavoritesTap = () => {
 
 
   return (
-    <div style={{ 
-      display: 'grid', 
-      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
-      gap: '1.5rem',
-      padding: '1rem' 
-    }}>
+    <div className="favorites-grid">
       {favorites.map(recipe => (
         <RecipeCard 
           key={recipe.id} 

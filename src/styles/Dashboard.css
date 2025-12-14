@@ -189,6 +189,9 @@
 @media (max-width: 768px) {
   .dashboard-container {
     flex-direction: column;
+    /* Reduce spacess */
+    padding: 0 1rem;
+    margin-top: 1rem;
   }
 
   .dashboard-sidebar {
@@ -224,5 +227,31 @@
     margin-bottom: 0;
 
     scroll-snap-align: center;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* For the FavoritesTap.jsx  */
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .favorites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+    gap: 1rem;
+    padding: 0;
   }
 }
