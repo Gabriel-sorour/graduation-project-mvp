@@ -3,6 +3,7 @@ import { LayoutDashboard, ShoppingBag, Heart } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import PantryTab from '../components/dashboard/PantryTab';
 import FavoritesTap from '../components/dashboard/FavoritesTap';
+import ShoppingListTab from '../components/dashboard/ShoppingListTab';
 import '../styles/Dashboard.css';
 
 function Dashboard() {
@@ -55,7 +56,7 @@ function Dashboard() {
               <div className="section-header">
                 <h2>Shopping List</h2>
               </div>
-              <p className="text-gray-500">Shopping list items will appear here...</p>
+            <ShoppingListTab />
             </div>
           )}
 
