@@ -31,7 +31,7 @@
   height: 500px;
   background: white;
   border-radius: 1.5rem;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(255, 140, 57, 0.274);
   display: flex;
   flex-direction: column;
   z-index: 1001;
@@ -144,8 +144,8 @@
   .chat-window {
     width: 90%;
     right: 5%;
-    bottom: 6rem;
-    height: 60vh;
+    bottom: 4.5rem;
+    height: 82vh;
   }
 
   .chat-toggle-btn {

@@ -128,7 +128,7 @@ function ChatWidget() {
           {/* Input */}
           <form onSubmit={handleSend} className="chat-input-area">
             <input
-              type="text"
+              type="search"
               className="chat-input"
               placeholder="Ask the chef..."
               value={inputValue}
