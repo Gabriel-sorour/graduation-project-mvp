@@ -6,7 +6,8 @@ import Home from './pages/Home';
 import Explore from './pages/Explore';
 import RecipeDetail from './pages/RecipeDetail';
 import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import MobileNav from './components/layout/MobileNav';
 import ChatWidget from './components/chat/ChatWidget';
 import PageTransition from './components/common/PageTransition';
@@ -50,6 +51,12 @@ function App() {
           <Route path="/login" element={
             <PageTransition>
               <Login />
+            </PageTransition>
+          } />
+
+          <Route path="/register" element={
+            <PageTransition>
+              <Register />
             </PageTransition>
           } />
 
