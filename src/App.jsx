@@ -13,6 +13,7 @@ import ChatWidget from './components/chat/ChatWidget';
 import PageTransition from './components/common/PageTransition';
 import Profile from './pages/auth/Profile';
 import ProtectedRoute from './pages/auth/ProtectedRoute';
+import NotFound from './pages/NotFound';
 
 function App() {
   const location = useLocation();
@@ -70,6 +71,12 @@ function App() {
                 <Profile />
               </PageTransition>
             </ProtectedRoute>
+          } />
+
+          <Route path="*" element={
+            <PageTransition>
+              <NotFound />
+            </PageTransition>
           } />
 
         </Routes>
