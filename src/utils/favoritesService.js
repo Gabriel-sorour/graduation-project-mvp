@@ -1,47 +1,39 @@
-const API_URL = 'http://127.0.0.1:8000/api/favorites';
+import api from './api';
 
+// 1. Get All Favorites
 export const getFavorites = async () => {
   try {
-    const response = await fetch(API_URL);
-    return response.ok ? await response.json() : [];
+    const response = await api.get('/favorites');
+    // Axios returns data directly in response.data
+    return response.data || [];
   } catch (error) {
     console.error("Error fetching favorites:", error);
     return [];
   }
 };
 
+// 2. Check if specific recipe is favorited
 export const checkIsFavorite = async (recipeId) => {
   const favorites = await getFavorites();
-  // API returns array of items, checking if recipe_id exists in them
   return favorites.some(item => item.recipe_id === recipeId);
 };
 
+// 3. Toggle Favorite (Add/Remove)
 export const toggleFavorite = async (recipeId, isLiked) => {
   try {
     if (isLiked) {
-      // DELETE request
-      await fetch(`${API_URL}/${recipeId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        }
-      });
-      return false; // Return new state (Not Liked)
+
+      await api.delete(`/favorites/${recipeId}`);
+      return false;
     } else {
-      // POST request
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ recipe_id: recipeId })
+
+      await api.post('/favorites', {
+        recipe_id: recipeId
       });
-      return true; // Return new state (Liked)
+      return true;
     }
   } catch (error) {
     console.error("Error toggling favorite:", error);
-    return isLiked; // Return original state on error
+    return isLiked;
   }
 };

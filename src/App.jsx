@@ -12,6 +12,7 @@ import MobileNav from './components/layout/MobileNav';
 import ChatWidget from './components/chat/ChatWidget';
 import PageTransition from './components/common/PageTransition';
 import Profile from './pages/auth/Profile';
+import ProtectedRoute from './pages/auth/ProtectedRoute';
 
 function App() {
   const location = useLocation();
@@ -44,9 +45,11 @@ function App() {
           } />
 
           <Route path="/dashboard" element={
-            <PageTransition>
-              <Dashboard />
-            </PageTransition>
+            <ProtectedRoute>
+              <PageTransition>
+                <Dashboard />
+              </PageTransition>
+            </ProtectedRoute>
           } />
 
           <Route path="/login" element={

@@ -1,13 +1,12 @@
-const API_URL = 'http://127.0.0.1:8000/api/user/pantry';
+import api from './api';
 
 // 1. Get All Pantry Items
 export const getPantryItems = async () => {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) return [];
-    
-    const data = await response.json();
-    return data.data || []; // Handle { data: [...] } structure
+    const response = await api.get('/user/pantry');
+    // Axios puts the body in response.data.
+    // Assuming the API returns { data: [...] }
+    return response.data.data || []; 
   } catch (error) {
     console.error("Error fetching pantry:", error);
     return [];
@@ -17,20 +16,12 @@ export const getPantryItems = async () => {
 // 2. Add Item
 export const addPantryItem = async (itemName) => {
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ item_name: itemName })
+    const response = await api.post('/user/pantry', { 
+      item_name: itemName 
     });
     
-    if (!response.ok) return null;
-    
-    // Assuming API returns the created object directly or wrapped in data
-    const result = await response.json();
-    return result.data || result; 
+    // Assuming API returns { data: { ... } } or similar
+    return response.data.data || response.data; 
   } catch (error) {
     console.error("Error adding pantry item:", error);
     return null;
@@ -40,13 +31,7 @@ export const addPantryItem = async (itemName) => {
 // 3. Delete Item
 export const deletePantryItem = async (id) => {
   try {
-    await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
-    });
+    await api.delete(`/user/pantry/${id}`);
     return true;
   } catch (error) {
     console.error("Error deleting pantry item:", error);
