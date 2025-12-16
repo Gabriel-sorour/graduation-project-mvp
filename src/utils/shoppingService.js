@@ -2,6 +2,11 @@ import api from './api';
 
 // 1. Get All Items
 export const getShoppingList = async () => {
+
+  // Check if there is token or not
+  const token = localStorage.getItem('token');
+  if (!token) return [];
+
   try {
     const response = await api.get('/shopping-list');
     return response.data;
@@ -14,13 +19,11 @@ export const getShoppingList = async () => {
 // 2. Add New Item
 export const addItem = async (itemName) => {
   try {
-    const response = await api.post('/shopping-list', { 
-      item_name: itemName 
+    const response = await api.post('/shopping-list', {
+      item_name: itemName
     });
 
-    // API returns { status: "success", data: { ... } }
-    // Axios puts the body in response.data, so to get the inner 'data':
-    return response.data.data; 
+    return response.data.data;
   } catch (error) {
     console.error("Error adding item:", error);
     return null;
@@ -30,8 +33,8 @@ export const addItem = async (itemName) => {
 // 3. Update Status (Check/Uncheck)
 export const updateItemStatus = async (id, isChecked) => {
   try {
-    await api.patch(`/shopping-list/${id}`, { 
-      is_checked: isChecked 
+    await api.patch(`/shopping-list/${id}`, {
+      is_checked: isChecked
     });
     return true;
   } catch (error) {
@@ -58,7 +61,7 @@ export const getAllIngredients = async () => {
     // Axios returns the data directly in response.data
     const data = response.data;
     if (Array.isArray(data)) {
-        return data.map(item => item.name || item);
+      return data.map(item => item.name || item);
     }
     return [];
   } catch (error) {

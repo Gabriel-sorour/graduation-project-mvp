@@ -2,6 +2,11 @@ import api from './api';
 
 // 1. Get All Favorites
 export const getFavorites = async () => {
+
+  // Check if there is token or not
+  const token = localStorage.getItem('token');
+  if (!token) return [];
+
   try {
     const response = await api.get('/favorites');
     // Axios returns data directly in response.data
