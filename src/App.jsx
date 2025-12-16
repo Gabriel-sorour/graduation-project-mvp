@@ -65,9 +65,11 @@ function App() {
           } />
 
           <Route path="/profile" element={
-            <PageTransition>
-              <Profile />
-            </PageTransition>
+            <ProtectedRoute>
+              <PageTransition>
+                <Profile />
+              </PageTransition>
+            </ProtectedRoute>
           } />
 
         </Routes>
