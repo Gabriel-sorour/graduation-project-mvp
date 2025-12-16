@@ -98,3 +98,21 @@
 .auth-link:hover {
   text-decoration: underline;
 }
+
+
+
+.auth-error {
+  background-color: #fee2e2;
+  color: #ef4444;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  text-align: left;
+  border: 1px solid #fca5a5;
+}
+
+.btn-auth:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}

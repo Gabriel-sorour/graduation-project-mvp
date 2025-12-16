@@ -1,9 +1,12 @@
-import { Link, useLocation } from 'react-router-dom'; // useLocation to check active page
+import { Link, useLocation } from 'react-router-dom';
 import { ChefHat, User } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
+  const { user } = useAuth();
+
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
@@ -26,9 +29,15 @@ function Navbar() {
 
         {/* Auth / Profile */}
         <div className="nav-auth">
-          <Link to="/login" className="btn-primary">
-            Sign In
-          </Link>
+          {user ? (
+            <Link to="/profile" className={`nav-avatar ${isActive('/profile')}`} title={user.name}>
+              <User size={20} />
+            </Link>
+          ) : (
+            <Link to="/login" className="btn-primary">
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

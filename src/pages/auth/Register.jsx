@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Login.css'; //Use the same Login style
+import { useAuth } from '../../context/AuthContext';
+import './Login.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +11,11 @@ const Register = () => {
     password_confirmation: ''
   });
 
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,18 +24,31 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (formData.password !== formData.password_confirmation) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
-    console.log("Registering with:", formData);
-    // will connect an endpoint here 
+    setIsSubmitting(true);
 
-    // navigate to dashboard for now
-    navigate('/dashboard');
+
+    const result = await register(
+      formData.name,
+      formData.email,
+      formData.password,
+      formData.password_confirmation
+    );
+
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.message);
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -41,8 +59,10 @@ const Register = () => {
           <p>Join SageKitchen and start cooking!</p>
         </div>
 
+        {error && <div className="auth-error">{error}</div>}
+
         <form className="auth-form" onSubmit={handleSubmit}>
-          {/* Name Field */}
+          {/* Name */}
           <div className="form-group">
             <label>Full Name</label>
             <input
@@ -98,7 +118,9 @@ const Register = () => {
             />
           </div>
 
-          <button type="submit" className="btn-auth">Sign Up</button>
+          <button type="submit" className="btn-auth" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+          </button>
         </form>
 
         <div className="auth-footer">
