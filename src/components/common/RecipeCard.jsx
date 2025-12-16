@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Flame, Heart } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom'; 
+import { useAuth } from '../../context/AuthContext';
 import { checkIsFavorite, toggleFavorite } from '../../utils/favoritesService';
 import '../../styles/RecipeCard.css';
 
 function RecipeCard({ recipe, onClick }) {
   const [isLiked, setIsLiked] = useState(false);
+  
+  // Hooks
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchFavoriteStatus = async () => {
@@ -18,7 +25,11 @@ function RecipeCard({ recipe, onClick }) {
   const handleToggleLike = async (e) => {
     e.stopPropagation();
     
-    // Pass recipe.id and current state, wait for API result
+    if (!user) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
     const newStatus = await toggleFavorite(recipe.id, isLiked);
     setIsLiked(newStatus);
   };

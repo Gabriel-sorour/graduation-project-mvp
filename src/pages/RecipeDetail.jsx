@@ -1,31 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame, Heart, Plus, Check } from 'lucide-react'; // Added icons
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ChevronLeft, Clock, Flame, Heart, Plus, Check } from 'lucide-react';
 import { formatRecipe } from '../utils/recipeUtils';
 import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
-import { addItem } from '../utils/shoppingService'; // Import Shopping Service
+import { addItem } from '../utils/shoppingService';
+import { useAuth } from '../context/AuthContext';
 import '../styles/RecipeDetail.css';
 
 function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
-  const [addedIngredients, setAddedIngredients] = useState({}); // Track added items
+  const [addedIngredients, setAddedIngredients] = useState({});
 
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/recipes/${id}`)
       .then(res => res.json())
       .then(async (data) => {
-
-        // Handle if data is wrapped in { data: ... } or comes directly
         const rawRecipe = data.data || data;
-
-        // Use Utility function for Ingredients
         let formattedRecipe = formatRecipe(rawRecipe);
 
-        // Ensure steps are parsed
         if (typeof formattedRecipe.steps === 'string') {
           try {
             formattedRecipe.steps = JSON.parse(formattedRecipe.steps);
@@ -37,7 +36,6 @@ function RecipeDetail() {
 
         setRecipe(formattedRecipe);
         
-        // CHECK FAVORITE STATUS (Async)
         const status = await checkIsFavorite(formattedRecipe.id);
         setIsLiked(status);
         
@@ -49,8 +47,14 @@ function RecipeDetail() {
       });
   }, [id]);
 
-  // Handle Click (Async)
+  // Handle Click (Like)
   const handleToggleLike = async () => {
+
+    if (!user) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
     if (recipe) {
       const newStatus = await toggleFavorite(recipe.id, isLiked);
       setIsLiked(newStatus);
@@ -59,17 +63,20 @@ function RecipeDetail() {
 
   // Handle Add to Shopping List
   const handleAddToShopping = async (ingredient) => {
-    // Avoid double adding visually
+
+    if (!user) {
+        navigate('/login', { state: { from: location } });
+        return;
+    }
+
     if (addedIngredients[ingredient]) return;
 
     const result = await addItem(ingredient);
     if (result) {
-      // Mark as added locally for UI feedback
       setAddedIngredients(prev => ({ ...prev, [ingredient]: true }));
     }
   };
 
-  // Helper to determine difficulty class
   const getDifficultyClass = (level) => {
     switch (level?.toLowerCase()) {
       case 'medium': return 'diff-medium';
@@ -80,18 +87,14 @@ function RecipeDetail() {
 
   if (loading)
     return (
-      <div
-        className="container status-container"
-      >
+      <div className="container status-container">
         Loading details...
       </div>
     );
 
   if (!recipe) {
     return (
-      <div
-        className="container status-container"
-      >
+      <div className="container status-container">
         <h2>Recipe not found</h2>
         <button onClick={() => navigate('/')} className="btn-primary home-btn">Go Home</button>
       </div>
