@@ -13,15 +13,19 @@ function PantryTab() {
   // Load Data on Mount
   useEffect(() => {
     const loadData = async () => {
-      // 1. Get Pantry Items
-      const pantryData = await getPantryItems();
-      setItems(pantryData);
+      try {
+        // 1. Get Pantry Items
+        const pantryData = await getPantryItems();
+        setItems(Array.isArray(pantryData) ? pantryData : []);
 
-      // 2. Get All Ingredients (for Autocomplete)
-      const ingredientsData = await getAllIngredients();
-      setAllIngredients(ingredientsData);
-      
-      setLoading(false);
+        // 2. Get All Ingredients (for Autocomplete)
+        const ingredientsData = await getAllIngredients();
+        setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
+      } catch (error) {
+        console.error("Error loading pantry data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
   }, []);
@@ -31,7 +35,6 @@ function PantryTab() {
     setInputValue(value);
 
     if (value.length > 0) {
-
       const filtered = allIngredients.filter(ingredient => 
         // Match string
         ingredient.toLowerCase().includes(value.toLowerCase()) && 
@@ -49,12 +52,16 @@ function PantryTab() {
     setInputValue("");
     setSuggestions([]);
 
-    // API Call via Service
-    const newItem = await addPantryItem(suggestion);
-    
-    if (newItem) {
-      // Update State locally (No need to re-fetch entire list)
-      setItems(prev => [...prev, newItem]);
+    try {
+      // API Call via Service
+      const newItem = await addPantryItem(suggestion);
+      
+      if (newItem) {
+        // Update State locally (No need to re-fetch entire list)
+        setItems(prev => [...prev, newItem]);
+      }
+    } catch (error) {
+      console.error("Error adding pantry item:", error);
     }
   };
 

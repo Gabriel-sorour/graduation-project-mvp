@@ -12,25 +12,33 @@ const FavoritesTap = () => {
   // Load favorites
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getFavorites();
+      try {
+        const data = await getFavorites();
 
-      const formattedRecipes = data.map(item => {
-        let recipe = item.recipe;
+        if (Array.isArray(data)) {
+            const formattedRecipes = data.map(item => {
+            let recipe = item.recipe || item;
 
-        if (typeof recipe.ingredients === 'string') {
-          try {
-            recipe.ingredients = JSON.parse(recipe.ingredients);
-          } catch (e) {
-            console.log('Parsing Error in the favorites: ', e);
-            
-            recipe.ingredients = [];
-          }
+            if (recipe && typeof recipe.ingredients === 'string') {
+                try {
+                recipe.ingredients = JSON.parse(recipe.ingredients);
+                } catch (e) {
+                console.log('Parsing Error in the favorites: ', e);
+                recipe.ingredients = [];
+                }
+            }
+            return recipe;
+            }).filter(Boolean);
+
+            setFavorites(formattedRecipes);
+        } else {
+            setFavorites([]);
         }
-        return recipe;
-      });
-
-      setFavorites(formattedRecipes);
-      setLoading(false);
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();

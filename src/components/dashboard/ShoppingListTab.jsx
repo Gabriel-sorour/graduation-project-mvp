@@ -2,29 +2,32 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, ShoppingCart, Check, Search } from 'lucide-react';
 import { getShoppingList, addItem, updateItemStatus, deleteItem, getAllIngredients } from '../../utils/shoppingService';
 
-// استدعاء ملف الـ CSS اللي عملناه
 import './ShoppingListTab.css';
 
 const ShoppingListTab = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+   
   // Autocomplete States
   const [inputValue, setInputValue] = useState("");
   const [allIngredients, setAllIngredients] = useState([]); 
   const [suggestions, setSuggestions] = useState([]);
-  
+   
   const wrapperRef = useRef(null);
 
   // Load Data
   useEffect(() => {
     const fetchData = async () => {
-      const listData = await getShoppingList();
-      const ingredientsData = await getAllIngredients();
-      
-      setItems(listData);
-      setAllIngredients(ingredientsData);
-      setLoading(false);
+      try {
+        const listData = await getShoppingList();
+        const ingredientsData = await getAllIngredients();
+        setItems(Array.isArray(listData) ? listData : []);
+        setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
+      } catch (error) {
+        console.error("Failed to load shopping data", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
 
@@ -56,7 +59,7 @@ const ShoppingListTab = () => {
   // Add Item Logic
   const handleAddItem = async (nameToAdd) => {
     if (!nameToAdd || !nameToAdd.trim()) return;
-    
+     
     const finalName = nameToAdd.trim();
 
     // Check Duplicates
@@ -67,12 +70,17 @@ const ShoppingListTab = () => {
       return;
     }
 
+    // Clear input immediately for better UX
     setInputValue("");
     setSuggestions([]);
 
-    const addedItem = await addItem(finalName);
-    if (addedItem) {
-      setItems(prev => [...prev, addedItem]);
+    try {
+      const addedItem = await addItem(finalName);
+      if (addedItem) {
+        setItems(prev => [...prev, addedItem]);
+      }
+    } catch (error) {
+      console.error("Failed to add item", error);
     }
   };
 
@@ -83,24 +91,34 @@ const ShoppingListTab = () => {
   // Toggle Status
   const handleToggle = async (id, currentStatus) => {
     const newStatus = !currentStatus;
+    // Optimistic Update
     setItems(prev => prev.map(item => item.id === id ? { ...item, is_checked: newStatus } : item));
+    
     const success = await updateItemStatus(id, newStatus);
-    if (!success) setItems(prev => prev.map(item => item.id === id ? { ...item, is_checked: currentStatus } : item));
+    
+    if (!success) {
+        setItems(prev => prev.map(item => item.id === id ? { ...item, is_checked: currentStatus } : item));
+    }
   };
 
   // Delete Item
   const handleDelete = async (id) => {
     const originalItems = [...items];
+    // Optimistic Update
     setItems(prev => prev.filter(item => item.id !== id));
+    
     const success = await deleteItem(id);
-    if (!success) setItems(originalItems);
+    
+    if (!success) {
+        setItems(originalItems);
+    }
   };
 
   if (loading) return <div className="empty-state">Loading...</div>;
 
   return (
     <div className="shopping-container">
-      
+       
       {/* Header */}
       <div className="shopping-header">
         <h2 className="shopping-title">
@@ -112,9 +130,8 @@ const ShoppingListTab = () => {
       {/* Autocomplete Input */}
       <div ref={wrapperRef} className="search-wrapper">
         <div className="search-input-group">
-          {/* الأيقونة خدت كلاس عشان نتحكم فيها */}
           <Search size={20} className="search-icon" />
-          
+           
           <input
             type="search"
             className="search-input"
@@ -160,7 +177,7 @@ const ShoppingListTab = () => {
                 >
                   {!!item.is_checked && <Check size={14} color="white" strokeWidth={3} />}
                 </div>
-                
+                 
                 <span className={`item-name ${item.is_checked ? 'checked' : ''}`}>
                   {item.item_name}
                 </span>
