@@ -181,7 +181,7 @@ function Explore() {
               <div className="no-results">
                 <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
                 <h3>No matching recipes</h3>
-                <p>Try removing some ingredients to see more results.</p>
+                <p>Try adding some ingredients to see more results.</p>
               </div>
             )}
           </div>
