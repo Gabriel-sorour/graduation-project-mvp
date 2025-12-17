@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react'; 
 import './Login.css';
 
 const Register = () => {
@@ -10,6 +11,9 @@ const Register = () => {
     password: '',
     password_confirmation: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,6 +53,18 @@ const Register = () => {
       setError(result.message);
       setIsSubmitting(false);
     }
+  };
+
+  // Style helper
+  const toggleButtonStyle = {
+    position: 'absolute',
+    right: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#6b7280'
   };
 
   return (
@@ -93,29 +109,49 @@ const Register = () => {
           {/* Password Field */}
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              className="form-input"
-              placeholder="Create a strong password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                className="form-input"
+                placeholder="Create a strong password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={toggleButtonStyle}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           {/* Confirm Password Field */}
           <div className="form-group">
             <label>Confirm Password</label>
-            <input
-              type="password"
-              name="password_confirmation"
-              className="form-input"
-              placeholder="Repeat your password"
-              value={formData.password_confirmation}
-              onChange={handleChange}
-              required
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="password_confirmation"
+                className="form-input"
+                placeholder="Repeat your password"
+                value={formData.password_confirmation}
+                onChange={handleChange}
+                required
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={toggleButtonStyle}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="btn-auth" disabled={isSubmitting}>
