@@ -65,11 +65,16 @@ function RecipeCard({ recipe, onClick }) {
         
         {/* Show first 3 ingredients */}
         <div className="card-tags">
-          {recipe.ingredients.slice(0, 3).map((ing, index) => (
-            <span key={index} className="tag">{ing}</span>
+          {/* FIX: Add fallback (|| []) to prevent crash if ingredients is undefined */}
+          {(recipe.ingredients || []).slice(0, 3).map((ing, index) => (
+            <span key={index} className="tag">
+              {/* FIX: Check if ingredient is object (from DB relation) or string */}
+              {typeof ing === 'object' ? ing.name : ing}
+            </span>
           ))}
-          {recipe.ingredients.length > 3 && (
-            <span className="tag">+{recipe.ingredients.length - 3} more</span>
+          
+          {(recipe.ingredients || []).length > 3 && (
+            <span className="tag">+{(recipe.ingredients || []).length - 3} more</span>
           )}
         </div>
 
