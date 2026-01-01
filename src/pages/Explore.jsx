@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, X, ChefHat } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, X, ChefHat, Filter, ChevronDown, Check } from 'lucide-react'; // Added Icons
 import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Explore.css';
@@ -12,10 +12,29 @@ function Explore() {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
+  const [filters, setFilters] = useState({
+    category: '',
+    meal_type: '',
+    temperature: ''
+  });
+  const [openFilter, setOpenFilter] = useState(null);
+  const filterRef = useRef(null);
+
   // Backend data
   const [allIngredients, setAllIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setOpenFilter(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Fetch Data from API
   useEffect(() => {
     // 1. Get Ingredients
@@ -32,7 +51,7 @@ function Explore() {
     const fetchRecipes = async () => {
       setLoading(true);
       try {
-        let url = 'http://127.0.0.1:8000/api/recipes';
+        let url = new URL('http://127.0.0.1:8000/api/recipes');
         let options = {
           method: 'GET',
           headers: {
@@ -41,24 +60,28 @@ function Explore() {
           }
         };
 
-        // If user selected ingredients, switch to SEARCH endpoint
-        if (selectedTags.length > 0) {
-          // Convert array ["egg", "milk"] -> string "egg,milk"
-          const ingredientsString = selectedTags.join(',');
-          
-          // Append ingredients to the URL query string
-          url = `http://127.0.0.1:8000/api/recipes/search?ingredients=${ingredientsString}`;
-          
-          // options remain GET, no body needed
+        const hasFilters = filters.category || filters.meal_type || filters.temperature;
+
+        if (selectedTags.length > 0 || hasFilters) {
+
+          url = new URL('http://127.0.0.1:8000/api/recipes/search');
+
+          if (selectedTags.length > 0) {
+            url.searchParams.append('ingredients', selectedTags.join(','));
+          }
+
+          if (filters.category) url.searchParams.append('category', filters.category);
+          if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
+          if (filters.temperature) url.searchParams.append('temperature', filters.temperature);
         }
 
         const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const result = await response.json();
-
-        // Check if response is successful
         const rawData = result.data || [];
-
-        // --- FIX: Format recipes to ensure ingredients are Strings ---
         const formattedRecipes = rawData.map(recipe => formatRecipe(recipe));
 
         setRecipes(formattedRecipes);
@@ -72,7 +95,7 @@ function Explore() {
 
     fetchRecipes();
 
-  }, [selectedTags]); // Re-run whenever selectedTags changes
+  }, [selectedTags, filters]);
 
 
   const handleInputChange = (e) => {
@@ -102,6 +125,41 @@ function Explore() {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
   };
 
+  // --- Filter Logic ---
+  const toggleFilter = (filterName) => {
+    setOpenFilter(openFilter === filterName ? null : filterName);
+  };
+
+  const selectFilterOption = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setOpenFilter(null);
+  };
+
+  const resetFilters = () => {
+    setFilters({ category: '', meal_type: '', temperature: '' });
+    setOpenFilter(null);
+  };
+
+  const filterOptions = {
+    category: [
+      { label: 'All Categories', value: '' },
+      { label: 'Meal', value: 'meal' },
+      { label: 'Drink', value: 'drink' },
+      { label: 'Snack', value: 'snack' }
+    ],
+    meal_type: [
+      { label: 'All Types', value: '' },
+      { label: 'Breakfast', value: 'breakfast' },
+      { label: 'Lunch', value: 'lunch' },
+      { label: 'Dinner', value: 'dinner' }
+    ],
+    temperature: [
+      { label: 'Any Temp', value: '' },
+      { label: 'Hot', value: 'hot' },
+      { label: 'Cold', value: 'cold' }
+    ]
+  };
+
 
   return (
     <>
@@ -109,7 +167,7 @@ function Explore() {
 
       <div className="explore-container">
         <div className="explore-header">
-          <h1>Find recipes by ingredients</h1>
+          <p className='find-p'>Find recipes by ingredients & filters</p>
 
           {/* Multi-select Search Component */}
           <div className="search-wrapper">
@@ -123,8 +181,6 @@ function Explore() {
                   </span>
                 </div>
               ))}
-
-
               <input
                 type="text"
                 className="search-input-transparent"
@@ -132,11 +188,8 @@ function Explore() {
                 value={inputValue}
                 onChange={handleInputChange}
               />
-
-
               <Search className='search-icon-fixed ' color="var(--gray)" size={20} />
             </div>
-
 
             {suggestions.length > 0 && (
               <div className="suggestions-dropdown">
@@ -152,14 +205,112 @@ function Explore() {
               </div>
             )}
           </div>
+
+          {/* --- Custom Filters Section --- */}
+          <div className="filters-container" ref={filterRef}>
+            <div className="filter-group">
+              <Filter size={18} className="filter-icon" />
+
+              {/* 1. Category Dropdown */}
+              <div className="custom-select-wrapper">
+                <button
+                  className={`filter-chip ${filters.category ? 'active' : ''}`}
+                  onClick={() => toggleFilter('category')}
+                >
+                  {filters.category ?
+                    filterOptions.category.find(o => o.value === filters.category)?.label
+                    : "Category"}
+                  <ChevronDown size={14} />
+                </button>
+
+                {openFilter === 'category' && (
+                  <div className="custom-dropdown-menu">
+                    {filterOptions.category.map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={`custom-option ${filters.category === opt.value ? 'selected' : ''}`}
+                        onClick={() => selectFilterOption('category', opt.value)}
+                      >
+                        {opt.label}
+                        {filters.category === opt.value && <Check size={14} />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Meal Type Dropdown */}
+              <div className="custom-select-wrapper">
+                <button
+                  className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
+                  onClick={() => toggleFilter('meal_type')}
+                >
+                  {filters.meal_type ?
+                    filterOptions.meal_type.find(o => o.value === filters.meal_type)?.label
+                    : "Meal Type"}
+                  <ChevronDown size={14} />
+                </button>
+
+                {openFilter === 'meal_type' && (
+                  <div className="custom-dropdown-menu">
+                    {filterOptions.meal_type.map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={`custom-option ${filters.meal_type === opt.value ? 'selected' : ''}`}
+                        onClick={() => selectFilterOption('meal_type', opt.value)}
+                      >
+                        {opt.label}
+                        {filters.meal_type === opt.value && <Check size={14} />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Temperature Dropdown */}
+              <div className="custom-select-wrapper">
+                <button
+                  className={`filter-chip ${filters.temperature ? 'active' : ''}`}
+                  onClick={() => toggleFilter('temperature')}
+                >
+                  {filters.temperature ?
+                    filterOptions.temperature.find(o => o.value === filters.temperature)?.label
+                    : "Temperature"}
+                  <ChevronDown size={14} />
+                </button>
+
+                {openFilter === 'temperature' && (
+                  <div className="custom-dropdown-menu">
+                    {filterOptions.temperature.map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={`custom-option ${filters.temperature === opt.value ? 'selected' : ''}`}
+                        onClick={() => selectFilterOption('temperature', opt.value)}
+                      >
+                        {opt.label}
+                        {filters.temperature === opt.value && <Check size={14} />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {(filters.category || filters.meal_type || filters.temperature) && (
+              <button className="reset-filters-btn" onClick={resetFilters}>
+                Reset
+              </button>
+            )}
+          </div>
         </div>
 
 
         <div>
           <div className="results-info">
             {loading ? "Loading recipes..." :
-              selectedTags.length > 0
-                ? `Found ${recipes.length} recipes with your ingredients.`
+              (selectedTags.length > 0 || filters.category || filters.meal_type || filters.temperature)
+                ? `Found ${recipes.length} matching recipes.`
                 : "Showing all recipes."
             }
           </div>
@@ -177,7 +328,7 @@ function Explore() {
               <div className="no-results">
                 <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
                 <h3>No matching recipes</h3>
-                <p>Try adding some ingredients to see more results.</p>
+                <p>Try adjusting your ingredients or filters.</p>
               </div>
             )}
           </div>
