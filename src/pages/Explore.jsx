@@ -43,17 +43,13 @@ function Explore() {
 
         // If user selected ingredients, switch to SEARCH endpoint
         if (selectedTags.length > 0) {
-          url = 'http://127.0.0.1:8000/api/recipes/search';
-          options = {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-              ingredients: selectedTags
-            })
-          };
+          // Convert array ["egg", "milk"] -> string "egg,milk"
+          const ingredientsString = selectedTags.join(',');
+          
+          // Append ingredients to the URL query string
+          url = `http://127.0.0.1:8000/api/recipes/search?ingredients=${ingredientsString}`;
+          
+          // options remain GET, no body needed
         }
 
         const response = await fetch(url, options);
