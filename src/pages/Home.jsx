@@ -55,7 +55,7 @@ function Home() {
               className="btn-primary btn-large"
               onClick={() => navigate('/cook-now')} // <--- Change this line
             >
-              Cook with what you have
+              Cook with what I have
             </button>
             <button
               className="btn-secondary btn-large"
