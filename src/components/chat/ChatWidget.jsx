@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import '../../styles/ChatWidget.css';
 
 function ChatWidget() {
@@ -9,6 +10,9 @@ function ChatWidget() {
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Hook to get the token
+  const { token } = useAuth();
 
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
@@ -49,13 +53,14 @@ function ChatWidget() {
 
     try {
       // 2. Send to Backend
-      const response = await fetch('http://127.0.0.1:8000/api/chat', {
+      const response = await fetch('http://127.0.0.1:8000/api/ask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ message: userText })
+        body: JSON.stringify({ prompt: userText })
       });
 
       if (!response.ok) {
@@ -64,10 +69,20 @@ function ChatWidget() {
 
       const data = await response.json();
 
-      // 3. Add Bot Response (using data.message from JSON structure)
+      // 3. Extract Bot Response from Gemini Structure
+      let botText = "I couldn't process the recipe at the moment.";
+      
+      // Check if the response follows the Gemini Candidate structure
+      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        botText = data.candidates[0].content.parts[0].text;
+      } else if (data.message) {
+        // Fallback if backend returns simple message
+        botText = data.message;
+      }
+
       const botMsg = {
         id: Date.now() + 1,
-        text: data.message,
+        text: botText,
         sender: 'bot'
       };
       setMessages(prev => [...prev, botMsg]);
@@ -112,7 +127,12 @@ function ChatWidget() {
           {/* Messages */}
           <div className="chat-messages">
             {messages.map((msg) => (
-              <div key={msg.id} className={`message ${msg.sender}`}>
+              <div 
+                key={msg.id} 
+                className={`message ${msg.sender}`}
+                // Added style to handle new lines (\n) correctly
+                style={{ whiteSpace: 'pre-wrap' }} 
+              >
                 {msg.text}
               </div>
             ))}
