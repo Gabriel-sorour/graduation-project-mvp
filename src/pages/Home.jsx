@@ -20,7 +20,7 @@ function Home() {
 
 
         // Show only first 3 recipes
-        setRecipes(formattedRecipes.slice(0, 3));
+        setRecipes(formattedRecipes.slice(13, 16));
         setLoading(false);
       })
       .catch(error => {
@@ -46,10 +46,16 @@ function Home() {
           </p>
           <div className="hero-buttons">
             <button
-              className="btn-primary btn-large"
+              className="btn-secondary btn-large"
               onClick={() => navigate('/explore')}
             >
               Explore Recipes
+            </button>
+            <button
+              className="btn-primary btn-large"
+              onClick={() => navigate('/cook-now')} // <--- Change this line
+            >
+              Cook with what you have
             </button>
             <button
               className="btn-secondary btn-large"

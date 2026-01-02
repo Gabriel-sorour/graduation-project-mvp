@@ -8,7 +8,7 @@
   background: var(--primary);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+  /* box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); */
   cursor: pointer;
   z-index: 1001;
   display: flex;

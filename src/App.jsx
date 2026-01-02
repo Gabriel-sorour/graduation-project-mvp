@@ -14,6 +14,7 @@ import PageTransition from './components/common/PageTransition';
 import Profile from './pages/auth/Profile';
 import ProtectedRoute from './pages/auth/ProtectedRoute';
 import NotFound from './pages/NotFound';
+import CookWithPantry from './pages/CookWithPantry';
 
 function App() {
   const location = useLocation();
@@ -51,6 +52,15 @@ function App() {
                 <Dashboard />
               </PageTransition>
             </ProtectedRoute>
+          } />
+
+          <Route path="/cook-now" element={
+            <ProtectedRoute>
+              <PageTransition>
+                <CookWithPantry />
+              </PageTransition>
+            </ProtectedRoute>
+
           } />
 
           <Route path="/login" element={

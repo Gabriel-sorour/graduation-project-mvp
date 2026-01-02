@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame, Heart, Plus, Check } from 'lucide-react';
+import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle } from 'lucide-react';
 import { formatRecipe } from '../utils/recipeUtils';
 import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
 import { addItem } from '../utils/shoppingService';
@@ -12,6 +12,10 @@ function RecipeDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+
+  // 1. Get Pantry State if available
+  const missingIngredients = location.state?.missingIngredients || [];
+  const isPantryMode = location.state?.isPantryMode || false;
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +89,20 @@ function RecipeDetail() {
     }
   };
 
+  // Helper to check ingredient status
+  const checkIngredientStatus = (ingredientName) => {
+    if (!isPantryMode) return 'neutral';
+    
+    const nameStr = typeof ingredientName === 'object' ? ingredientName.name : ingredientName;
+    const cleanName = nameStr.toLowerCase().trim();
+    
+    const isMissing = missingIngredients.some(missing => 
+      cleanName.includes(missing.toLowerCase()) || missing.toLowerCase().includes(cleanName)
+    );
+
+    return isMissing ? 'missing' : 'available';
+  };
+
   if (loading)
     return (
       <div className="container status-container">
@@ -146,20 +164,39 @@ function RecipeDetail() {
           <div>
             <h3 className="section-heading">Ingredients</h3>
             <ul className="ingredient-list">
-              {recipe.ingredients && recipe.ingredients.map((ing, idx) => (
-                <li key={idx} className="ingredient-item">
-                  <span>{ing}</span>
-                  
-                  {/* Shopping List Button */}
-                  <button 
-                    className={`add-ing-btn ${addedIngredients[ing] ? 'added' : ''}`}
-                    onClick={() => handleAddToShopping(ing)}
-                    title={addedIngredients[ing] ? "Added to list" : "Add to Shopping List"}
-                  >
-                    {addedIngredients[ing] ? <Check size={16} /> : <Plus size={16} />}
-                  </button>
-                </li>
-              ))}
+              {recipe.ingredients && recipe.ingredients.map((ing, idx) => {
+                
+                const ingName = typeof ing === 'object' ? ing.name : ing;
+                const status = checkIngredientStatus(ingName);
+                
+                let itemStyle = {};
+                if (status === 'missing') {
+                    itemStyle = { backgroundColor: '#fff5eaff', color: '#f34510ff', border: '1px solid #fca5a5' };
+                } else if (status === 'available') {
+                    itemStyle = { backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #86efac' };
+                }
+
+                return (
+                    <li key={idx} className="ingredient-item" style={itemStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {status === 'missing' && <AlertCircle size={16} />}
+                        {status === 'available' && <Check size={16} />}
+                        <span>{ingName}</span>
+                    </div>
+                    
+                    {/* Only show Add button if ingredient is NOT available */}
+                    {status !== 'available' && (
+                        <button 
+                            className={`add-ing-btn ${addedIngredients[ingName] ? 'added' : ''}`}
+                            onClick={() => handleAddToShopping(ingName)}
+                            title={addedIngredients[ingName] ? "Added to list" : "Add to Shopping List"}
+                        >
+                            {addedIngredients[ingName] ? <Check size={16} /> : <Plus size={16} />}
+                        </button>
+                    )}
+                    </li>
+                );
+              })}
             </ul>
           </div>
 
