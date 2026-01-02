@@ -160,7 +160,7 @@ function ChatWidget() {
               className="chat-send-btn"
               disabled={isLoading || !inputValue.trim()}
             >
-              {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+              {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={23} />}
             </button>
           </form>
         </div>
