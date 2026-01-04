@@ -1,16 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Sparkles, Loader2, Maximize2 } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Loader2, Maximize2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useChat } from '../../context/ChatContext'; // Import Chat Context
+import { useChat } from '../../context/ChatContext';
 import '../../styles/ChatWidget.css';
 
 function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-
-  // Use Global Chat State
-  const { messages, isLoading, sendMessage } = useChat();
+  
+  const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -38,10 +37,14 @@ function ChatWidget() {
   const handleSendClick = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
-
-    // Call the global function
     await sendMessage(inputValue, token);
     setInputValue("");
+  };
+
+  const handleClear = () => {
+    if (window.confirm("Are you sure you want to clear the chat history?")) {
+      clearChat();
+    }
   };
 
   return (
@@ -52,30 +55,47 @@ function ChatWidget() {
 
       {isOpen && (
         <div className="chat-interface widget-mode">
+          
+          {/* Header */}
           <div className="chat-header">
             <h3><Sparkles size={18} /> Chef Sage</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              
+              <button onClick={handleClear} className="icon-btn" title="Clear Chat">
+                <Trash2 size={18} />
+              </button>
+
               <button onClick={() => navigate('/chat')} className="icon-btn maximize-btn" title="Full Screen">
                 <Maximize2 size={18} />
               </button>
+
               <button onClick={() => setIsOpen(false)} className="icon-btn" title="Close">
                 <X size={20} />
               </button>
             </div>
           </div>
 
+          {/* Messages */}
           <div className="chat-messages">
             {messages.map((msg) => (
               <div key={msg.id} className={`message ${msg.sender}`}>
                 {msg.text}
               </div>
             ))}
+            
             {isLoading && (
-              <div className="message bot"><span className="typing-indicator">Thinking...</span></div>
+              <div className="message bot">
+                <div className="typing-indicator">
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Input */}
           <form onSubmit={handleSendClick} className="chat-input-area">
             <input
               type="search"
@@ -85,6 +105,7 @@ function ChatWidget() {
               onChange={(e) => setInputValue(e.target.value)}
               disabled={isLoading}
             />
+
             <button type="submit" className="chat-send-btn" disabled={isLoading || !inputValue.trim()}>
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={23} />}
             </button>

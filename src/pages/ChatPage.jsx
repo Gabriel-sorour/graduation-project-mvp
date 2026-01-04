@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, Loader2, ArrowLeft } from 'lucide-react';
+import { Send, Sparkles, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
@@ -7,7 +7,8 @@ import '../styles/ChatWidget.css';
 
 function ChatPage() {
   const [inputValue, setInputValue] = useState("");
-  const { messages, isLoading, sendMessage } = useChat();
+
+  const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { token } = useAuth();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -27,6 +28,12 @@ function ChatPage() {
     setInputValue("");
   };
 
+  const handleClear = () => {
+    if (window.confirm("Are you sure you want to clear the chat history?")) {
+      clearChat();
+    }
+  };
+
   return (
     <div className="chat-page-container container">
       
@@ -39,6 +46,10 @@ function ChatPage() {
             </button>
             <h3><Sparkles size={20} /> Chef Sage</h3>
           </div>
+
+          <button onClick={handleClear} className="icon-btn" title="Clear Chat">
+            <Trash2 size={20} />
+          </button>
         </div>
 
         {/* Messages */}
@@ -48,9 +59,14 @@ function ChatPage() {
               {msg.text}
             </div>
           ))}
+
           {isLoading && (
             <div className="message bot">
-              <span className="typing-indicator">Thinking...</span>
+              <div className="typing-indicator">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
