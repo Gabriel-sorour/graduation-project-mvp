@@ -15,9 +15,11 @@ import Profile from './pages/auth/Profile';
 import ProtectedRoute from './pages/auth/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import CookWithPantry from './pages/CookWithPantry';
+import ChatPage from './pages/ChatPage';
 
 function App() {
   const location = useLocation();
+  const showChatWidget = !['/chat'].includes(location.pathname);
 
   return (
     <>
@@ -83,6 +85,15 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <PageTransition>
+                <ChatPage />
+              </PageTransition>
+            </ProtectedRoute>
+          } />
+
+
           <Route path="*" element={
             <PageTransition>
               <NotFound />
@@ -92,7 +103,7 @@ function App() {
         </Routes>
       </AnimatePresence>
 
-      <ChatWidget />
+      {showChatWidget && <ChatWidget />}
       <MobileNav />
     </>
   )
