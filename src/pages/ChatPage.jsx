@@ -75,7 +75,7 @@ function ChatPage() {
         {/* Input */}
         <form onSubmit={handleSendClick} className="chat-input-area">
           <input
-            type="text"
+            type="search"
             className="chat-input"
             placeholder="Ask Chef Sage..."
             value={inputValue}

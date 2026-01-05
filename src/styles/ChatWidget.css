@@ -196,13 +196,16 @@
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100vw !important;
+
     height: 100vh !important;
+    height: 100dvh !important;
+
     z-index: 2000;
     padding: 0 !important;
     margin: 0 !important;
     background: white;
-    display: block;
+    display: flex;
+    flex-direction: column;
   }
 
   .chat-interface.full-page-mode {
@@ -211,14 +214,28 @@
     border: none;
     border-radius: 0;
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
   }
 
   .full-page-mode .chat-header {
     border-radius: 0;
+    flex-shrink: 0;
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .message {
     font-size: 1rem;
+  }
+
+  .chat-input-area {
+    flex-shrink: 0;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   .chat-input {
