@@ -4,11 +4,12 @@
   --primary: #962205;
   --primary-hover: #047857;
   --primary-light: #ecfdf5;
+  --primary-light: #fdecef;
 
   /* Neutral Colors */
   --dark: #111827;
   --gray: #6b7280;
-  --light-gray: #bea9a0;
+  --light-gray: #f3f4f6;
   --white: #ffffff;
 
   /* Spacing & Layout */
