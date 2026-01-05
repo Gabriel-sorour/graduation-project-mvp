@@ -1,6 +1,7 @@
 :root {
   /* Brand Colors */
   --primary: #059669;
+  --primary: #962205;
   --primary-hover: #047857;
   --primary-light: #ecfdf5;
 
@@ -50,4 +51,15 @@ button {
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+input:focus, 
+button:focus, 
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.chat-input:focus {
+  border-color: var(--primary) !important;
 }
