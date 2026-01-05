@@ -8,5 +8,6 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: ["austere-craniometrically-florencia.ngrok-free.dev"],
-  }
+  },
+  base: "/graduation-project-mvp/",
 })
