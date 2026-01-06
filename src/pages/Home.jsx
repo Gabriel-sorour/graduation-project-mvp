@@ -5,16 +5,18 @@ import '../styles/Home.css';
 import { formatRecipe } from '../utils/recipeUtils';
 import { useAuth } from '../context/AuthContext';
 import { Sparkles } from 'lucide-react';
+import { useAlert } from '../context/AlertContext';
 
 
 function Home() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
-  
+
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [surpriseLoading, setSurpriseLoading] = useState(false); 
+
+  const [surpriseLoading, setSurpriseLoading] = useState(false);
+
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/recipes')
@@ -34,6 +36,7 @@ function Home() {
     navigate(`/recipe/${id}`);
   };
 
+  const { showAlert } = useAlert();
   const handleSurpriseMe = async () => {
     if (!user) {
       navigate('/login');
@@ -53,7 +56,7 @@ function Home() {
 
       const responseData = await response.json();
       if (responseData.status === 'fail') {
-        alert(responseData.message);
+        showAlert("Note", responseData.message);
         return;
       }
 
@@ -64,20 +67,20 @@ function Home() {
       const surpriseRecipe = responseData.data;
 
       if (surpriseRecipe && surpriseRecipe.id) {
-        navigate(`/recipe/${surpriseRecipe.id}`, { 
-          state: { 
-            missingIngredients: surpriseRecipe.missing_ingredients || [], 
-            isPantryMode: true ,
+        navigate(`/recipe/${surpriseRecipe.id}`, {
+          state: {
+            missingIngredients: surpriseRecipe.missing_ingredients || [],
+            isPantryMode: true,
             isSurprise: true
-          } 
+          }
         });
       } else {
-        alert("No recipes found!");
+        showAlert("No recipes found!");
       }
 
     } catch (error) {
       console.error("Surprise Me Error:", error);
-      alert("Something went wrong. Please try again.");
+      showAlert("Something went wrong. Please try again.");
     } finally {
       setSurpriseLoading(false);
     }
@@ -111,7 +114,7 @@ function Home() {
               className="btn-secondary btn-large surprise-btn"
               onClick={handleSurpriseMe}
               disabled={surpriseLoading}
-              style={{ minWidth: '160px'}}
+              style={{ minWidth: '160px' }}
             >
               {surpriseLoading ? 'Cooking...' : 'Surprise Me'}
               <Sparkles size={16} />

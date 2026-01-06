@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Sparkles, Loader2, Maximize2, Trash2 } from 'lu
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
+import { useAlert } from '../../context/AlertContext';
 import '../../styles/ChatWidget.css';
 
 function ChatWidget() {
@@ -15,6 +16,8 @@ function ChatWidget() {
 
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
+
+  const { showConfirm } = useAlert();
 
   const suggestions = [
     "What can I cook with eggs?",
@@ -29,7 +32,11 @@ function ChatWidget() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (isOpen && widgetRef.current && !widgetRef.current.contains(event.target)) {
+      if (!isOpen) return;
+
+      if (event.target.closest('.alert-overlay')) return;
+
+      if (widgetRef.current && !widgetRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     }
@@ -53,9 +60,13 @@ function ChatWidget() {
   };
 
   const handleClear = () => {
-    if (window.confirm("Are you sure you want to clear the chat history?")) {
-      clearChat();
-    }
+    showConfirm(
+      "Clear Chat History?",
+      "Are you sure you want to delete all messages? This cannot be undone.",
+      () => {
+        clearChat();
+      }
+    );
   };
 
   return (
@@ -72,7 +83,17 @@ function ChatWidget() {
             <h3><Sparkles size={18} /> Chef Sage</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
 
-              <button onClick={handleClear} className="icon-btn" title="Clear Chat">
+              <button
+                onClick={handleClear}
+                className="icon-btn"
+                title="Clear Chat"
+                disabled={messages.length <= 1}
+                style={{
+                  opacity: messages.length <= 1 ? 0.3 : 1,
+                  cursor: messages.length <= 1 ? 'default' : 'pointer',
+                  transition: 'opacity 0.2s'
+                }}
+              >
                 <Trash2 size={18} />
               </button>
 

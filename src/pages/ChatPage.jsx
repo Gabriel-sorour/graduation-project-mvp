@@ -3,7 +3,8 @@ import { Send, Sparkles, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
-import '../styles/ChatWidget.css'; 
+import { useAlert } from '../context/AlertContext';
+import '../styles/ChatWidget.css';
 
 function ChatPage() {
   const [inputValue, setInputValue] = useState("");
@@ -39,15 +40,20 @@ function ChatPage() {
     setInputValue("");
   };
 
+  const { showConfirm } = useAlert();
   const handleClear = () => {
-    if (window.confirm("Are you sure you want to clear the chat history?")) {
-      clearChat();
-    }
+    showConfirm(
+      "Clear Chat History?",
+      "Are you sure you want to delete all messages? This cannot be undone.",
+      () => {
+        clearChat();
+      }
+    );
   };
 
   return (
     <div className="chat-page-container container">
-      
+
       <div className="chat-interface full-page-mode">
         {/* Header */}
         <div className="chat-header">
@@ -58,7 +64,17 @@ function ChatPage() {
             <h3><Sparkles size={20} /> Chef Sage</h3>
           </div>
 
-          <button onClick={handleClear} className="icon-btn" title="Clear Chat">
+          <button
+            onClick={handleClear}
+            className="icon-btn"
+            title="Clear Chat"
+            disabled={messages.length <= 1}
+            style={{
+              opacity: messages.length <= 1 ? 0.3 : 1,
+              cursor: messages.length <= 1 ? 'default' : 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+          >
             <Trash2 size={20} />
           </button>
         </div>
@@ -74,8 +90,8 @@ function ChatPage() {
           {!isLoading && messages.length === 1 && (
             <div className="suggestions-container">
               {suggestions.map((text, index) => (
-                <button 
-                  key={index} 
+                <button
+                  key={index}
                   className="suggestion-chip"
                   onClick={() => handleSuggestionClick(text)}
                 >
