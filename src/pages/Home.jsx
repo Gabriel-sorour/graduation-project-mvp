@@ -17,6 +17,7 @@ function Home() {
 
   const [surpriseLoading, setSurpriseLoading] = useState(false);
 
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/recipes')
@@ -31,6 +32,17 @@ function Home() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (recipes.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % recipes.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [recipes.length]);
+
 
   const handleRecipeClick = (id) => {
     navigate(`/recipe/${id}`);
@@ -122,7 +134,6 @@ function Home() {
           </div>
         </section>
 
-        {/* Featured Recipes Grid */}
         <section className="home-content">
           <div className="container">
 
@@ -135,14 +146,30 @@ function Home() {
                 Loading recipes...
               </p>
             ) : (
-              <div className="recipe-grid">
-                {recipes.map(recipe => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    onClick={handleRecipeClick}
-                  />
-                ))}
+              <div className="slider-wrapper">
+                <div 
+                  className="recipe-grid slider-track"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {recipes.map(recipe => (
+                    <div key={recipe.id} className="slide-item">
+                      <RecipeCard
+                        recipe={recipe}
+                        onClick={handleRecipeClick}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="slider-dots">
+                  {recipes.map((_, idx) => (
+                    <span 
+                      key={idx} 
+                      className={`dot ${currentSlide === idx ? 'active' : ''}`}
+                      onClick={() => setCurrentSlide(idx)}
+                    ></span>
+                  ))}
+                </div>
               </div>
             )}
           </div>

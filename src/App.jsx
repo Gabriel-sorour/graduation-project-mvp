@@ -16,6 +16,7 @@ import ProtectedRoute from './pages/auth/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import CookWithPantry from './pages/CookWithPantry';
 import ChatPage from './pages/ChatPage';
+import Footer from './components/layout/Footer';
 
 function App() {
   const location = useLocation();
@@ -102,6 +103,8 @@ function App() {
 
         </Routes>
       </AnimatePresence>
+
+      {location.pathname === '/' && <Footer />}
 
       {showChatWidget && <ChatWidget />}
       <MobileNav />
