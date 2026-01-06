@@ -142,9 +142,10 @@ function Home() {
             </h2>
 
             {loading ? (
-              <p style={{ textAlign: 'center', padding: '2rem' }}>
-                Loading recipes...
-              </p>
+              <div className="loading-placeholder">
+                <div className="spinner"></div>
+                <p>Curating best recipes for you...</p>
+              </div>
             ) : (
               <div className="slider-wrapper">
                 <div 
