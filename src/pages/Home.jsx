@@ -4,7 +4,7 @@ import RecipeCard from '../components/common/RecipeCard';
 import '../styles/Home.css';
 import { formatRecipe } from '../utils/recipeUtils';
 import { useAuth } from '../context/AuthContext';
-import {Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 
 function Home() {
@@ -51,11 +51,16 @@ function Home() {
         }
       });
 
+      const responseData = await response.json();
+      if (responseData.status === 'fail') {
+        alert(responseData.message);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch surprise recipe');
       }
 
-      const responseData = await response.json();
       const surpriseRecipe = responseData.data;
 
       if (surpriseRecipe && surpriseRecipe.id) {
