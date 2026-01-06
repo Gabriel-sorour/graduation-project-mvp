@@ -10,6 +10,8 @@ function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
+  const [showButton, setShowButton] = useState(true);
+
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -18,6 +20,9 @@ function ChatWidget() {
   const widgetRef = useRef(null);
 
   const { showConfirm } = useAlert();
+  
+
+  const lastScrollY = useRef(0);
 
   const suggestions = [
     "What can I cook with eggs?",
@@ -30,6 +35,35 @@ function ChatWidget() {
     await sendMessage(text, token);
   };
 
+  // 2. useEffect لمراقبة السكرول (الذكاء الحركي)
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        // لو الشات مفتوح، دايماً خلي الزرار ظاهر (عشان زرار الإغلاق)
+        if (isOpen) {
+          setShowButton(true);
+          return;
+        }
+
+        const currentScrollY = window.scrollY;
+        
+        // لو بننزل تحت (أكتر من 100px) -> اخفي الزرار (طبق كلاس الشفافية)
+        if (currentScrollY > lastScrollY.current && currentScrollY > 100) { 
+          setShowButton(false);
+        } else { 
+          // لو بنطلع لفوق -> اظهر الزرار
+          setShowButton(true);  
+        }
+
+        lastScrollY.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+    return () => window.removeEventListener('scroll', controlNavbar);
+  }, [isOpen]); 
+
+  // إغلاق الشات عند الضغط خارجه (مع تجاهل الـ Alert)
   useEffect(() => {
     function handleClickOutside(event) {
       if (!isOpen) return;
@@ -71,7 +105,10 @@ function ChatWidget() {
 
   return (
     <div ref={widgetRef} className="chat-widget-container">
-      <button className="chat-toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+      <button 
+        className={`chat-toggle-btn ${!showButton ? 'scroll-hide' : ''}`} 
+        onClick={() => setIsOpen(!isOpen)}
+      >
         {isOpen ? <X size={24} /> : <MessageCircle size={28} />}
       </button>
 
