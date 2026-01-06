@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle, Sparkles } from 'lucide-react'; // ضفت Sparkles
 import { formatRecipe } from '../utils/recipeUtils';
 import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
 import { addItem } from '../utils/shoppingService';
@@ -16,6 +16,7 @@ function RecipeDetail() {
   // 1. Get Pantry State if available
   const missingIngredients = location.state?.missingIngredients || [];
   const isPantryMode = location.state?.isPantryMode || false;
+  const isSurprise = location.state?.isSurprise || false;
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -134,18 +135,14 @@ function RecipeDetail() {
         {/* Left: Visuals */}
         <div className="recipe-visuals" style={{ position: 'relative' }}>
           
-          <img src={`http://127.0.0.1:8000/${recipe.image}`} alt={recipe.title} className="detail-image" />
+          <img 
+            src={`http://127.0.0.1:8000/${recipe.image}`} 
+            alt={recipe.title} 
+            className={`detail-image ${isSurprise ? 'surprise-glow' : ''}`} 
+          />
           
-          {/* Detail Like Button */}
-          <button 
-            className="detail-like-btn"
-            onClick={handleToggleLike}
-          >
-             <Heart 
-                size={24} 
-                fill={isLiked ? "#ef4444" : "none"} 
-                color={isLiked ? "#ef4444" : "#6b7280"} 
-              />
+          <button className="detail-like-btn" onClick={handleToggleLike}>
+             <Heart size={24} fill={isLiked ? "#ef4444" : "none"} color={isLiked ? "#ef4444" : "#6b7280"} />
           </button>
 
           <div className="recipe-meta">
@@ -159,6 +156,15 @@ function RecipeDetail() {
 
         {/* Right: Instructions */}
         <div className="recipe-info">
+          
+          {/* --- التعديل هنا: الـ Badge المميز --- */}
+          {isSurprise && (
+            <div className="surprise-badge">
+              <Sparkles size={16} fill="white" />
+              Chef's Surprise Pick
+            </div>
+          )}
+
           <h1 className="recipe-title">{recipe.title}</h1>
 
           <div>
