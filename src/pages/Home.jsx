@@ -4,6 +4,8 @@ import RecipeCard from '../components/common/RecipeCard';
 import '../styles/Home.css';
 import { formatRecipe } from '../utils/recipeUtils';
 import { useAuth } from '../context/AuthContext';
+import {Sparkles } from 'lucide-react';
+
 
 function Home() {
   const navigate = useNavigate();
@@ -12,16 +14,13 @@ function Home() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // حالة تحميل خاصة لزرار Surprise Me
   const [surpriseLoading, setSurpriseLoading] = useState(false); 
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/recipes')
       .then(response => response.json())
       .then(data => {
-        // تنسيق الوصفات للتأكد من أن المكونات Strings
         const formattedRecipes = data.data.map(recipe => formatRecipe(recipe));
-        // عرض أول 3 وصفات فقط
         setRecipes(formattedRecipes.slice(13, 16));
         setLoading(false);
       })
@@ -104,12 +103,13 @@ function Home() {
               Cook with what I have
             </button>
             <button
-              className="btn-secondary btn-large"
+              className="btn-secondary btn-large surprise-btn"
               onClick={handleSurpriseMe}
               disabled={surpriseLoading}
-              style={{ minWidth: '160px' }}
+              style={{ minWidth: '160px'}}
             >
               {surpriseLoading ? 'Cooking...' : 'Surprise Me'}
+              <Sparkles size={16} />
             </button>
           </div>
         </section>

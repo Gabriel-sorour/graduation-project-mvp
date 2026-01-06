@@ -239,7 +239,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%); /* برتقالي متدرج */
+  background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 2rem;
