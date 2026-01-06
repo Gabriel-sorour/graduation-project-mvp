@@ -1,11 +1,11 @@
 :root {
   /* Brand Colors */
   --primary: #059669;
-  --primary: #962205;
+  /* --primary: #962205; */
   --primary-hover: #047857;
-  --primary-hover: #740329;
+  /* --primary-hover: #740329; */
   --primary-light: #ecfdf5;
-  --primary-light: #fdecef;
+  /* --primary-light: #fdecef; */
 
   /* Neutral Colors */
   --dark: #111827;

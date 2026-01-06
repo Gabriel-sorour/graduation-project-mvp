@@ -8,13 +8,24 @@ import '../../styles/ChatWidget.css';
 function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  
+
   const { messages, isLoading, sendMessage, clearChat } = useChat();
   const { token } = useAuth();
   const navigate = useNavigate();
 
   const messagesEndRef = useRef(null);
   const widgetRef = useRef(null);
+
+  const suggestions = [
+    "What can I cook with eggs?",
+    "Healthy dinner under 30 mins",
+    "I have chicken and rice",
+    "Suggest a dessert recipe"
+  ];
+
+  const handleSuggestionClick = async (text) => {
+    await sendMessage(text, token);
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -55,12 +66,12 @@ function ChatWidget() {
 
       {isOpen && (
         <div className="chat-interface widget-mode">
-          
+
           {/* Header */}
           <div className="chat-header">
             <h3><Sparkles size={18} /> Chef Sage</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
               <button onClick={handleClear} className="icon-btn" title="Clear Chat">
                 <Trash2 size={18} />
               </button>
@@ -82,7 +93,22 @@ function ChatWidget() {
                 {msg.text}
               </div>
             ))}
-            
+
+
+            {!isLoading && messages.length === 1 && (
+              <div className="suggestions-container">
+                {suggestions.map((text, index) => (
+                  <button
+                    key={index}
+                    className="suggestion-chip"
+                    onClick={() => handleSuggestionClick(text)}
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {isLoading && (
               <div className="message bot">
                 <div className="typing-indicator">

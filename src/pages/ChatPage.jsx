@@ -13,6 +13,17 @@ function ChatPage() {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
 
+  const suggestions = [
+    "What can I cook with eggs?",
+    "Healthy dinner under 30 mins",
+    "I have chicken and rice",
+    "Suggest a dessert recipe"
+  ];
+
+  const handleSuggestionClick = async (text) => {
+    await sendMessage(text, token);
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -59,6 +70,20 @@ function ChatPage() {
               {msg.text}
             </div>
           ))}
+
+          {!isLoading && messages.length === 1 && (
+            <div className="suggestions-container">
+              {suggestions.map((text, index) => (
+                <button 
+                  key={index} 
+                  className="suggestion-chip"
+                  onClick={() => handleSuggestionClick(text)}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          )}
 
           {isLoading && (
             <div className="message bot">
