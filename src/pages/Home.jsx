@@ -7,16 +7,13 @@ import { useAuth } from '../context/AuthContext';
 import { Sparkles } from 'lucide-react';
 import { useAlert } from '../context/AlertContext';
 
-
 function Home() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [surpriseLoading, setSurpriseLoading] = useState(false);
-
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -41,7 +38,7 @@ function Home() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [recipes.length]);
+  }, [recipes.length, currentSlide]); 
 
 
   const handleRecipeClick = (id) => {

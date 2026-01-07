@@ -363,3 +363,8 @@ body.dark-mode .suggestions-dropdown,
 body.dark-mode .custom-dropdown-menu {
   scrollbar-color: #4b5563 #1e1e1e;
 }
+
+body.dark-mode .reset-filters-btn {
+  background-color: rgba(239, 68, 68, 0.2); 
+  color: #fca5a5; 
+}
