@@ -92,3 +92,10 @@ body.dark-mode textarea {
   background-color: var(--bg-input);
   color: var(--dark);
 }
+
+/* --- Custom Scrollbar --- */
+
+html {
+  /* scrollbar-width: thin; */
+  scrollbar-color: #b8b193 transparent;
+}
