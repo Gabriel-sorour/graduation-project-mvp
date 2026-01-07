@@ -114,7 +114,7 @@ function Home() {
               Explore Recipes
             </button>
             <button
-              className="btn-primary btn-large"
+              className="btn-large cook-btn"
               onClick={() => navigate('/cook-now')}
             >
               Cook with what I have

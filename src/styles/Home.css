@@ -48,6 +48,21 @@
   transition: all 0.2s;
 }
 
+.cook-btn {
+  background-color: var(--primary);
+  border: 1px solid var(--border-color);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 2rem;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: var(--primary-hover);
+  }
+}
+
+
 .btn-secondary:hover {
   border-color: var(--primary);
   color: var(--primary);
@@ -87,12 +102,13 @@
   justify-content: center;
   background: linear-gradient(135deg, #ffc663 0%, #ffa238 100%);
   color: white;
+  transition: all .5s ease;
 }
 
 .surprise-btn:hover {
-  color: white;
-  border: 1px solid var(--border-color);
-  opacity: 0.9;
+  color: #ff9419;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #ffc6633a 0%, #ffa2381e 100%);
 }
 
 .slider-wrapper {
