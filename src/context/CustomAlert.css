@@ -14,7 +14,7 @@
 }
 
 .alert-box {
-  background: white;
+  background: var(--white);
   width: 90%;
   max-width: 400px;
   padding: 1.5rem;
@@ -23,13 +23,19 @@
   text-align: center;
   transform: scale(0.9);
   animation: scaleUp 0.2s ease-out forwards;
+
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease;
 }
 
 .alert-icon-wrapper {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #f3f4f6;
+
+  background: var(--light-gray);
+  color: var(--dark);
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,12 +45,12 @@
 .alert-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--dark, #1f2937);
+  color: var(--dark);
   margin-bottom: 0.5rem;
 }
 
 .alert-message {
-  color: #6b7280;
+  color: var(--gray);
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
@@ -66,35 +72,66 @@
 }
 
 .alert-btn.cancel {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--light-gray);
+  color: var(--dark);
 }
 
 .alert-btn.cancel:hover {
-  background: #e5e7eb;
+  background: var(--border-color);
 }
 
 .alert-btn.confirm {
-  background: var(--primary, #f97316);
+  background: var(--primary);
   color: white;
 }
 
 .alert-btn.confirm:hover {
+  background-color: var(--primary-hover);
   opacity: 0.9;
 }
 
 .alert-btn.ok {
-  background: var(--primary, #f97316);
+  background: var(--primary);
   color: white;
   width: 100%;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleUp {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* --- Dark Mode Overrides (Custom Alert) --- */
+
+body.dark-mode .alert-btn.cancel {
+  background: var(--bg-input);
+  color: var(--dark);
+  border: 1px solid var(--border-color);
+}
+
+body.dark-mode .alert-btn.cancel:hover {
+  background: var(--border-color);
+}
+
+body.dark-mode .alert-icon-wrapper {
+  background: var(--bg-input);
+  color: var(--primary);
+  border: 1px solid var(--border-color);
 }

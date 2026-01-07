@@ -1,11 +1,13 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+// import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Mail } from 'lucide-react';
+import { User, LogOut, Mail, Moon, Sun } from 'lucide-react';
 import '../../styles/Profile.css';
 
 const Profile = () => {
   const { user, logout } = useAuth();
+  // const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -44,6 +46,27 @@ const Profile = () => {
             <span className="profile-email">{user.email}</span>
           </div>
         </div>
+
+        <hr className="divider" />
+        
+{/*        
+        <div className="profile-settings">
+          <div className="setting-item">
+            <div className="setting-label">
+              {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
+              <span>Dark Mode</span>
+            </div>
+            
+            <label className="theme-switch">
+              <input 
+                type="checkbox" 
+                checked={isDarkMode} 
+                onChange={toggleTheme} 
+              />
+              <span className="slider round"></span>
+            </label>
+          </div>
+        </div> */}
 
         {/* Actions */}
         <div className="profile-actions">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle, Sparkles } from 'lucide-react'; // ضفت Sparkles
+import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { formatRecipe } from '../utils/recipeUtils';
 import { checkIsFavorite, toggleFavorite } from '../utils/favoritesService';
 import { addItem } from '../utils/shoppingService';
@@ -13,7 +13,6 @@ function RecipeDetail() {
   const location = useLocation();
   const { user } = useAuth();
 
-  // 1. Get Pantry State if available
   const missingIngredients = location.state?.missingIngredients || [];
   const isPantryMode = location.state?.isPantryMode || false;
   const isSurprise = location.state?.isSurprise || false;
@@ -52,30 +51,23 @@ function RecipeDetail() {
       });
   }, [id]);
 
-  // Handle Click (Like)
   const handleToggleLike = async () => {
-
     if (!user) {
       navigate('/login', { state: { from: location } });
       return;
     }
-
     if (recipe) {
       const newStatus = await toggleFavorite(recipe.id, isLiked);
       setIsLiked(newStatus);
     }
   };
 
-  // Handle Add to Shopping List
   const handleAddToShopping = async (ingredient) => {
-
     if (!user) {
         navigate('/login', { state: { from: location } });
         return;
     }
-
     if (addedIngredients[ingredient]) return;
-
     const result = await addItem(ingredient);
     if (result) {
       setAddedIngredients(prev => ({ ...prev, [ingredient]: true }));
@@ -90,7 +82,6 @@ function RecipeDetail() {
     }
   };
 
-  // Helper to check ingredient status
   const checkIngredientStatus = (ingredientName) => {
     if (!isPantryMode) return 'neutral';
     
@@ -132,7 +123,6 @@ function RecipeDetail() {
       </div>
 
       <div className="recipe-content">
-        {/* Left: Visuals */}
         <div className="recipe-visuals" style={{ position: 'relative' }}>
           
           <img 
@@ -154,7 +144,6 @@ function RecipeDetail() {
           </div>
         </div>
 
-        {/* Right: Instructions */}
         <div className="recipe-info">
           
           {isSurprise && (
@@ -174,22 +163,16 @@ function RecipeDetail() {
                 const ingName = typeof ing === 'object' ? ing.name : ing;
                 const status = checkIngredientStatus(ingName);
                 
-                let itemStyle = {};
-                if (status === 'missing') {
-                    itemStyle = { backgroundColor: '#fff5eaff', color: '#f34510ff', border: '1px solid #fca5a5' };
-                } else if (status === 'available') {
-                    itemStyle = { backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #86efac' };
-                }
+                const statusClass = status === 'missing' ? 'status-missing' : status === 'available' ? 'status-available' : '';
 
                 return (
-                    <li key={idx} className="ingredient-item" style={itemStyle}>
+                    <li key={idx} className={`ingredient-item ${statusClass}`}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {status === 'missing' && <AlertCircle size={16} />}
                         {status === 'available' && <Check size={16} />}
                         <span>{ingName}</span>
                     </div>
                     
-                    {/* Only show Add button if ingredient is NOT available */}
                     {status !== 'available' && (
                         <button 
                             className={`add-ing-btn ${addedIngredients[ingName] ? 'added' : ''}`}

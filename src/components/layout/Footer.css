@@ -1,14 +1,16 @@
 .site-footer {
-  background-color: #1f2937;
-  color: #f3f4f6;
+  background-color: var(--white);
+  color: var(--gray);
+  
   padding: 3rem 0 1rem;
   margin-top: 3rem;
   font-family: inherit;
-  border-top: 1px solid #374151;
+  border-top: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1.5rem;
   display: grid;
@@ -19,14 +21,14 @@
 .footer-brand h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  color: var(--primary, #f97316);
+  color: var(--primary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .footer-brand p {
-  color: #9ca3af;
+  color: var(--gray);
   line-height: 1.6;
   font-size: 0.95rem;
 }
@@ -34,7 +36,7 @@
 .footer-links h4 {
   font-size: 1.1rem;
   margin-bottom: 1.2rem;
-  color: white;
+  color: var(--dark);
   position: relative;
   display: inline-block;
 }
@@ -46,7 +48,7 @@
   bottom: -5px;
   width: 40px;
   height: 2px;
-  background-color: var(--primary, #f97316);
+  background-color: var(--primary);
 }
 
 .footer-links ul {
@@ -59,7 +61,7 @@
 }
 
 .footer-links a {
-  color: #9ca3af;
+  color: var(--gray);
   text-decoration: none;
   transition: color 0.2s;
   display: flex;
@@ -68,7 +70,7 @@
 }
 
 .footer-links a:hover {
-  color: white;
+  color: var(--primary);
   transform: translateX(5px);
 }
 
@@ -79,18 +81,22 @@
 }
 
 .social-icon {
-  background: #374151;
+  background: var(--light-gray);
+  color: var(--dark);
+  
   padding: 8px;
   border-radius: 50%;
-  color: white;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--border-color);
 }
 
 .social-icon:hover {
-  background: var(--primary, #f97316);
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
   transform: translateY(-3px);
 }
 
@@ -98,8 +104,8 @@
   text-align: center;
   margin-top: 3rem;
   padding-top: 1.5rem;
-  border-top: 1px solid #374151;
-  color: #6b7280;
+  border-top: 1px solid var(--border-color);
+  color: var(--gray);
   font-size: 0.9rem;
 }
 
@@ -124,13 +130,25 @@
   }
 
   .footer-bottom {
-    text-align: center;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     padding-right: 10px;
     font-size: .8rem;
-    
   }
+}
 
+/* --- Dark Mode Overrides (Specific Fixes) --- */
+
+body.dark-mode .site-footer {
+  background-color: var(--white);
+  border-top-color: var(--border-color);
+}
+
+body.dark-mode .social-icon {
+  background-color: var(--bg-input);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .social-icon:hover {
+  background-color: var(--primary);
+  border-color: var(--primary);
 }

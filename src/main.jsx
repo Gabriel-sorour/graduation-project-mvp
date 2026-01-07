@@ -4,6 +4,7 @@ import { HashRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
 import { AlertProvider } from './context/AlertContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 import App from './App.jsx'
 import './styles/global.css';
@@ -13,9 +14,11 @@ createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <ChatProvider>
         <AlertProvider>
-          <Router>
-            <App />
-          </Router>
+          <ThemeProvider>
+            <Router>
+              <App />
+            </Router>
+          </ThemeProvider>
         </AlertProvider>
       </ChatProvider>
     </AuthProvider>

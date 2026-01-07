@@ -18,12 +18,12 @@
   gap: 0.5rem;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #1f2937;
+  color: var(--dark);
   margin: 0;
 }
 
 .shopping-subtitle {
-  color: #6b7280;
+  color: var(--gray);
   margin-top: 0.5rem;
 }
 
@@ -36,19 +36,19 @@
 .search-input-group {
   display: flex;
   align-items: center;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
-  background-color: white;
+  background-color: var(--white);
   padding: 0.5rem 1rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   gap: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-/* --- Fix for Mobile Input Issue --- */
 .search-icon {
   flex-shrink: 0;
   min-width: 20px;
-  color: #9ca3af;
+  color: var(--gray);
 }
 
 .search-input {
@@ -57,22 +57,13 @@
   border: none;
   outline: none;
   font-size: 1rem;
-  color: #374151;
+  color: var(--dark);
   height: 100%;
   background: transparent;
-
+  padding: 0.5rem 0;
   -webkit-appearance: none;
   appearance: none;
 }
-
-.search-input::-webkit-search-decoration,
-.search-input::-webkit-search-cancel-button,
-.search-input::-webkit-search-results-button,
-.search-input::-webkit-search-results-decoration {
-  display: none;
-}
-
-/* ---------------------------------- */
 
 /* Suggestions Dropdown */
 .suggestions-dropdown {
@@ -80,8 +71,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  background-color: white;
-  border: 1px solid #e5e7eb;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   margin-top: 0.5rem;
   max-height: 200px;
@@ -93,9 +84,9 @@
 .suggestion-item {
   padding: 0.75rem 1rem;
   cursor: pointer;
-  color: #374151;
+  color: var(--dark);
   transition: background-color 0.2s;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .suggestion-item:last-child {
@@ -103,7 +94,7 @@
 }
 
 .suggestion-item:hover {
-  background-color: #f9fafb;
+  background-color: var(--light-gray);
 }
 
 /* Items List */
@@ -116,7 +107,7 @@
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: #9ca3af;
+  color: var(--gray);
 }
 
 .list-item {
@@ -124,10 +115,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background-color: white;
-  border: 1px solid #e5e7eb;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   transition: all 0.2s;
+}
+
+.list-item:hover {
+  border-color: var(--primary);
 }
 
 .list-item.checked {
@@ -139,7 +134,6 @@
   align-items: center;
   gap: 1rem;
   flex: 1;
-  /* Ensure text doesn't overflow horizontally inside the item */
   min-width: 0;
 }
 
@@ -148,9 +142,8 @@
   width: 24px;
   height: 24px;
   min-width: 24px;
-  /* Fix size */
   border-radius: 50%;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--gray);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,13 +159,13 @@
 
 .item-name {
   font-size: 1rem;
-  color: #1f2937;
+  color: var(--dark);
   word-break: break-word;
 }
 
 .item-name.checked {
   text-decoration: line-through;
-  color: #6b7280;
+  color: var(--gray);
 }
 
 .btn-delete {
@@ -189,3 +182,26 @@
 .btn-delete:hover {
   color: #dc2626;
 }
+
+/* --- Dark Mode Overrides for Shopping List --- */
+
+body.dark-mode .search-input-group {
+  background-color: var(--bg-input);
+  border-color: var(--border-color);
+   box-shadow: none;
+}
+
+body.dark-mode .list-item {
+  background-color: var(--light-gray);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .list-item:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+body.dark-mode .list-item:hover .item-name {
+  color: var(--primary);
+}
+

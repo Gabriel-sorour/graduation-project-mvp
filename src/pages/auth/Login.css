@@ -6,28 +6,27 @@
   padding: 1rem;
 }
 
-/* body{
-  background-color: #f3f4f6 !important; 
-} */
-
 .auth-card {
-  background: white;
+  background: var(--white);
   padding: 2.5rem;
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
   text-align: center;
+
+  border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .auth-header h2 {
   font-size: 1.8rem;
-  color: #1f2937;
+  color: var(--dark);
   margin-bottom: 0.5rem;
 }
 
 .auth-header p {
-  color: #6b7280;
+  color: var(--gray);
   margin-bottom: 2rem;
 }
 
@@ -46,27 +45,30 @@
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--dark);
 }
 
 .form-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
+
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--dark);
+
   border-radius: 0.5rem;
   font-size: 1rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background-color 0.3s;
 }
 
 .form-input:focus {
-  border-color: #f59e0b;
-  /* Primary Color */
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .btn-auth {
-  background-color: #f59e0b;
+  background-color: var(--primary);
   color: white;
   padding: 0.8rem;
   border: none;
@@ -79,17 +81,17 @@
 }
 
 .btn-auth:hover {
-  background-color: #d97706;
+  background-color: var(--primary-hover);
 }
 
 .auth-footer {
   margin-top: 1.5rem;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--gray);
 }
 
 .auth-link {
-  color: #f59e0b;
+  color: var(--primary);
   text-decoration: none;
   font-weight: 500;
   margin-left: 0.5rem;
@@ -98,8 +100,6 @@
 .auth-link:hover {
   text-decoration: underline;
 }
-
-
 
 .auth-error {
   background-color: #fee2e2;
@@ -113,6 +113,23 @@
 }
 
 .btn-auth:disabled {
-  background-color: #9ca3af;
+  background-color: var(--gray);
   cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- Dark Mode Overrides (Auth Page) --- */
+body.dark-mode .form-input {
+  background-color: var(--bg-input);
+}
+
+body.dark-mode .form-input:focus {
+  border-color: var(--primary);
+  background-color: var(--bg-input);
+}
+
+body.dark-mode .auth-error {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }

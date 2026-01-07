@@ -1,17 +1,17 @@
 :root {
   /* Brand Colors */
   --primary: #059669;
-  /* --primary: #962205; */
   --primary-hover: #047857;
-  /* --primary-hover: #740329; */
   --primary-light: #ecfdf5;
-  /* --primary-light: #fdecef; */
 
   /* Neutral Colors */
   --dark: #111827;
   --gray: #6b7280;
   --light-gray: #f3f4f6;
   --white: #ffffff;
+  --bg-body: #f8fafc;
+  --nav-bg-mobile: rgba(255, 255, 255, 0.95);
+  --border-color: #e5e7eb;
 
   /* Spacing & Layout */
   --radius: 1rem;
@@ -23,13 +23,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #f8fafc;
+  background-color: var(--bg-body);
   color: var(--dark);
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -43,20 +45,14 @@ button {
   font-family: inherit;
 }
 
-/* Class for Container */
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
-
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-input:focus, 
-button:focus, 
+input:focus,
+button:focus,
 textarea:focus {
   outline: none !important;
   box-shadow: none !important;
@@ -64,4 +60,35 @@ textarea:focus {
 
 .chat-input:focus {
   border-color: var(--primary) !important;
+}
+
+/* --- Dark Mode Configuration --- */
+
+body.dark-mode {
+  --bg-body: #121212;
+  --white: #1e1e1e;
+  --light-gray: #2d2d2d;
+  --dark: #e5e7eb;
+  --gray: #9ca3af;
+  --nav-bg-mobile: rgba(30, 30, 30, 0.95);
+  --border-color: #333333;
+  --bg-input: #2d2d2d;
+
+  /* brand color change */
+  /* --primary: #ffc663; */
+  --primary-light: rgb(29, 51, 44);
+}
+
+body.dark-mode .recipe-card,
+body.dark-mode .chat-interface,
+body.dark-mode .profile-card {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  color: var(--dark);
+}
+
+body.dark-mode input,
+body.dark-mode textarea {
+  background-color: var(--bg-input);
+  color: var(--dark);
 }
