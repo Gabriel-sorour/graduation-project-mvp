@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import { useAlert } from '../../context/AlertContext';
+import SmartMessageContent from './SmartMessageContent';
 import '../../styles/ChatWidget.css';
 
 function ChatWidget() {
@@ -35,11 +36,9 @@ function ChatWidget() {
     await sendMessage(text, token);
   };
 
-  // 2. useEffect لمراقبة السكرول (الذكاء الحركي)
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        // لو الشات مفتوح، دايماً خلي الزرار ظاهر (عشان زرار الإغلاق)
         if (isOpen) {
           setShowButton(true);
           return;
@@ -47,11 +46,9 @@ function ChatWidget() {
 
         const currentScrollY = window.scrollY;
         
-        // لو بننزل تحت (أكتر من 100px) -> اخفي الزرار (طبق كلاس الشفافية)
         if (currentScrollY > lastScrollY.current && currentScrollY > 100) { 
           setShowButton(false);
         } else { 
-          // لو بنطلع لفوق -> اظهر الزرار
           setShowButton(true);  
         }
 
@@ -63,7 +60,6 @@ function ChatWidget() {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [isOpen]); 
 
-  // إغلاق الشات عند الضغط خارجه (مع تجاهل الـ Alert)
   useEffect(() => {
     function handleClickOutside(event) {
       if (!isOpen) return;
@@ -144,11 +140,17 @@ function ChatWidget() {
             </div>
           </div>
 
-          {/* Messages */}
+          {/* Messages Loop */}
           <div className="chat-messages">
             {messages.map((msg) => (
               <div key={msg.id} className={`message ${msg.sender}`}>
-                {msg.text}
+                
+                <div className="msg-text">{msg.text}</div>
+
+                {msg.sender === 'bot' && msg.apiResponse && (
+                  <SmartMessageContent data={msg.apiResponse} />
+                )}
+
               </div>
             ))}
 

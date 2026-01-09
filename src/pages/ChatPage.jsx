@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { useAlert } from '../context/AlertContext';
+import SmartMessageContent from '../components/chat/SmartMessageContent';
 import '../styles/ChatWidget.css';
 
 function ChatPage() {
@@ -83,7 +84,13 @@ function ChatPage() {
         <div className="chat-messages">
           {messages.map((msg) => (
             <div key={msg.id} className={`message ${msg.sender}`}>
-              {msg.text}
+              
+              {msg.text && <div className="msg-text">{msg.text}</div>}
+
+              {msg.sender === 'bot' && msg.apiResponse && (
+                <SmartMessageContent data={msg.apiResponse} />
+              )}
+
             </div>
           ))}
 

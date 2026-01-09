@@ -8,7 +8,7 @@ export function useChat() {
 }
 
 export function ChatProvider({ children }) {
-  // 1. Initialize from LocalStorage or use default
+  // 1. Initialize from LocalStorage
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('chef_sage_history');
     return saved ? JSON.parse(saved) : [
@@ -18,12 +18,12 @@ export function ChatProvider({ children }) {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. Save to LocalStorage whenever messages change
+  // 2. Save to LocalStorage
   useEffect(() => {
     localStorage.setItem('chef_sage_history', JSON.stringify(messages));
   }, [messages]);
 
-  // 3. Clear Chat Function (Optional, helpful for testing)
+  // 3. Clear Chat
   const clearChat = () => {
     const initialMsg = [{ id: 1, text: "Hi there! I'm Sage. What can I cook for you today?", sender: 'bot' }];
     setMessages(initialMsg);
@@ -40,7 +40,7 @@ export function ChatProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/ask', {
+      const response = await fetch('http://127.0.0.1:8000/api/smart-assistant', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,14 +54,20 @@ export function ChatProvider({ children }) {
 
       const data = await response.json();
 
-      let botText = "I couldn't process that.";
-      if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        botText = data.candidates[0].content.parts[0].text;
-      } else if (data.message) {
+      let botText = "Thinking...";
+      if (data.message) {
         botText = data.message;
+      } else if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        botText = data.candidates[0].content.parts[0].text;
       }
 
-      const botMsg = { id: Date.now() + 1, text: botText, sender: 'bot' };
+      const botMsg = { 
+        id: Date.now() + 1, 
+        text: botText, 
+        sender: 'bot',
+        apiResponse: data
+      };
+      
       setMessages(prev => [...prev, botMsg]);
 
     } catch (error) {
