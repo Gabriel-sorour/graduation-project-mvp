@@ -21,7 +21,7 @@ function Home() {
       .then(response => response.json())
       .then(data => {
         const formattedRecipes = data.data.map(recipe => formatRecipe(recipe));
-        setRecipes(formattedRecipes.slice(13, 16));
+        setRecipes(formattedRecipes.slice(3,6 ));
         setLoading(false);
       })
       .catch(error => {

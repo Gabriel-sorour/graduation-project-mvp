@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChefHat, AlertCircle, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChefHat, AlertCircle, ArrowLeft, Filter, ChevronDown, Check } from 'lucide-react';
 import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,25 @@ function CookWithPantry() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // --- Filter States ---
+  const [filters, setFilters] = useState({
+    category: '',
+    meal_type: '',
+    temperature: ''
+  });
+  const [openFilter, setOpenFilter] = useState(null);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setOpenFilter(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -23,8 +42,17 @@ function CookWithPantry() {
 
     const fetchMatches = async () => {
       setLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/recipes/match-pantry?allow_missing_one=true', {
+        const url = new URL('http://127.0.0.1:8000/api/recipes/match-pantry');
+        url.searchParams.append('allow_missing_one', 'true');
+
+        if (filters.category) url.searchParams.append('category', filters.category);
+        if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
+        if (filters.temperature) url.searchParams.append('temperature', filters.temperature);
+
+        const response = await fetch(url.toString(), {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -52,12 +80,48 @@ function CookWithPantry() {
 
     fetchMatches();
 
-  }, [token, navigate]);
+  }, [token, navigate, filters]);
+
+  // --- Filter Helpers ---
+  const toggleFilter = (filterName) => {
+    setOpenFilter(openFilter === filterName ? null : filterName);
+  };
+
+  const selectFilterOption = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setOpenFilter(null);
+  };
+
+  const resetFilters = () => {
+    setFilters({ category: '', meal_type: '', temperature: '' });
+    setOpenFilter(null);
+  };
+
+  const filterOptions = {
+    category: [
+      { label: 'All Categories', value: '' },
+      { label: 'Meal', value: 'meal' },
+      { label: 'Drink', value: 'drink' },
+      { label: 'Snack', value: 'snack' }
+    ],
+    meal_type: [
+      { label: 'All Types', value: '' },
+      { label: 'Breakfast', value: 'breakfast' },
+      { label: 'Lunch', value: 'lunch' },
+      { label: 'Dinner', value: 'dinner' }
+    ],
+    temperature: [
+      { label: 'Any Temp', value: '' },
+      { label: 'Hot', value: 'hot' },
+      { label: 'Cold', value: 'cold' }
+    ]
+  };
 
 
   return (
     <div className="explore-container">
-      {/* Header with Back Button */}
+      
+      {/* 1. Header Section (Independant) */}
       <div className="explore-header" style={{ position: 'relative' }}>
         <button 
           onClick={() => navigate('/')} 
@@ -72,6 +136,108 @@ function CookWithPantry() {
         </p>
       </div>
 
+      {/* 2. Filters Section (Separated Container) */}
+      <div 
+        className="filters-container" 
+        ref={filterRef} 
+        style={{ marginTop: '10px', marginBottom: '20px', padding: 0, boxShadow: 'none', background: 'transparent' }}
+      >
+        <div className="filter-group">
+          <Filter size={18} className="filter-icon" />
+
+          {/* Category */}
+          <div className="custom-select-wrapper">
+            <button
+              className={`filter-chip ${filters.category ? 'active' : ''}`}
+              onClick={() => toggleFilter('category')}
+            >
+              {filters.category ?
+                filterOptions.category.find(o => o.value === filters.category)?.label
+                : "Category"}
+              <ChevronDown size={14} />
+            </button>
+
+            {openFilter === 'category' && (
+              <div className="custom-dropdown-menu">
+                {filterOptions.category.map((opt) => (
+                  <div
+                    key={opt.value}
+                    className={`custom-option ${filters.category === opt.value ? 'selected' : ''}`}
+                    onClick={() => selectFilterOption('category', opt.value)}
+                  >
+                    {opt.label}
+                    {filters.category === opt.value && <Check size={14} />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Meal Type */}
+          <div className="custom-select-wrapper">
+            <button
+              className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
+              onClick={() => toggleFilter('meal_type')}
+            >
+              {filters.meal_type ?
+                filterOptions.meal_type.find(o => o.value === filters.meal_type)?.label
+                : "Meal Type"}
+              <ChevronDown size={14} />
+            </button>
+
+            {openFilter === 'meal_type' && (
+              <div className="custom-dropdown-menu">
+                {filterOptions.meal_type.map((opt) => (
+                  <div
+                    key={opt.value}
+                    className={`custom-option ${filters.meal_type === opt.value ? 'selected' : ''}`}
+                    onClick={() => selectFilterOption('meal_type', opt.value)}
+                  >
+                    {opt.label}
+                    {filters.meal_type === opt.value && <Check size={14} />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Temperature */}
+          <div className="custom-select-wrapper">
+            <button
+              className={`filter-chip ${filters.temperature ? 'active' : ''}`}
+              onClick={() => toggleFilter('temperature')}
+            >
+              {filters.temperature ?
+                filterOptions.temperature.find(o => o.value === filters.temperature)?.label
+                : "Temperature"}
+              <ChevronDown size={14} />
+            </button>
+
+            {openFilter === 'temperature' && (
+              <div className="custom-dropdown-menu">
+                {filterOptions.temperature.map((opt) => (
+                  <div
+                    key={opt.value}
+                    className={`custom-option ${filters.temperature === opt.value ? 'selected' : ''}`}
+                    onClick={() => selectFilterOption('temperature', opt.value)}
+                  >
+                    {opt.label}
+                    {filters.temperature === opt.value && <Check size={14} />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {(filters.category || filters.meal_type || filters.temperature) && (
+          <button className="reset-filters-btn" onClick={resetFilters}>
+            Reset
+          </button>
+        )}
+      </div>
+
+      {/* 3. Results Section */}
       <div>
         <div className="results-info">
           {loading ? "Checking your pantry..." : 
@@ -95,7 +261,6 @@ function CookWithPantry() {
               return (
                 <div 
                   key={recipe.id} 
-                  // Dynamic Class Name based on match type
                   className={`cook-card-wrapper ${isPerfectMatch ? 'match-perfect' : 'match-missing'}`}
                 >
                   
