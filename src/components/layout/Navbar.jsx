@@ -10,7 +10,6 @@ function Navbar() {
   const { user } = useAuth();
   const { language, toggleLanguage } = useLanguage();
 
-  // --- Dark Mode Logic ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
@@ -28,19 +27,24 @@ function Navbar() {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
   };
-  // -----------------------
 
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="nav-container">
         {/* Logo */}
         <Link to="/" className="logo">
           <div className="logo-icon">
             <ChefHat size={24} />
           </div>
-          Sage<span>Kitchen</span>
+          <span className="logo-text">
+            {language === 'ar' ? (
+               <>ساج <span>كتشن</span></>
+            ) : (
+               <>Sage<span>Kitchen</span></>
+            )}
+          </span>
         </Link>
 
         {/* Links */}
@@ -56,33 +60,38 @@ function Navbar() {
           </Link>
         </div>
 
-        {/* Auth / Profile / Toggles */}
+        {/* Auth & Settings */}
         <div className="nav-auth">
-          
-          {/* Language Toggle Button */}
-          <button 
-            className="theme-toggle-btn" 
-            onClick={toggleLanguage}
-            title={language === 'ar' ? "Switch to English" : "تغيير للعربية"}
-          >
-            <Globe size={20} />
-            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', marginLeft: '4px' }}>
-                {language === 'ar' ? 'EN' : 'عربي'}
-            </span>
-          </button>
+          <div className="settings-pill">
+            <button 
+              className="pill-btn lang-toggle" 
+              onClick={toggleLanguage}
+              title={language === 'ar' ? "Switch to English" : "تغيير للعربية"}
+            >
+              <Globe size={15} />
+              <span className= {language === 'ar' ? "lang-text" : "lang-text-ar"}>
+                  {language === 'ar' ? 'EN' : 'ع'}
+              </span>
+            </button>
 
-          {/* Dark Mode Button */}
-          <button 
-            className="theme-toggle-btn" 
-            onClick={toggleTheme}
-            aria-label="Toggle Dark Mode"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+            <div className="pill-divider"></div>
+
+            <button 
+              className="pill-btn theme-toggle" 
+              onClick={toggleTheme}
+              title={isDarkMode ? "Light Mode" : "Dark Mode"}
+            >
+              {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
+            </button>
+          </div>
 
           {user ? (
             <Link to="/profile" className={`nav-avatar ${isActive('/profile')}`} title={user.name}>
-              <User size={20} />
+              {user.avatar ? (
+                 <img src={user.avatar} alt="Avatar" />
+              ) : (
+                 <User size={20} />
+              )}
             </Link>
           ) : (
             <Link to="/login" className="btn-primary">
