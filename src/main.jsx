@@ -5,22 +5,25 @@ import { AuthProvider } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
 import { AlertProvider } from './context/AlertContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 import App from './App.jsx'
 import './styles/global.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <ChatProvider>
-        <AlertProvider>
-          <ThemeProvider>
-            <Router>
-              <App />
-            </Router>
-          </ThemeProvider>
-        </AlertProvider>
-      </ChatProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <ChatProvider>
+          <AlertProvider>
+            <ThemeProvider>
+              <Router>
+                <App />
+              </Router>
+            </ThemeProvider>
+          </AlertProvider>
+        </ChatProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </StrictMode>,
 )

@@ -281,3 +281,16 @@ body.dark-mode .btn-remove:hover {
 body.dark-mode .suggestions-list::-webkit-scrollbar-thumb {
   background-color: #4b5563;
 }
+
+/* --- RTL Support for Dashboard --- */
+.dashboard-rtl {
+  direction: rtl;
+}
+
+.dashboard-rtl .sidebar-btn {
+  text-align: right;
+  flex-direction: row;
+}
+.dashboard-rtl .section-header h2 {
+  text-align: right;
+}

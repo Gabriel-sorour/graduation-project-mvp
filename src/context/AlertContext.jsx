@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
-import { X, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
+import { useLanguage } from './LanguageContext';
 import './CustomAlert.css';
 
 const AlertContext = createContext();
@@ -8,6 +9,8 @@ const AlertContext = createContext();
 export const useAlert = () => useContext(AlertContext);
 
 export const AlertProvider = ({ children }) => {
+  const { language } = useLanguage();
+
   const [alertState, setAlertState] = useState({
     isOpen: false,
     type: 'alert', // 'alert' or 'confirm'
@@ -47,13 +50,23 @@ export const AlertProvider = ({ children }) => {
     closeAlert();
   };
 
+  const t = {
+    cancel: language === 'ar' ? 'إلغاء' : 'Cancel',
+    confirm: language === 'ar' ? 'نعم، تأكيد' : 'Yes, Confirm',
+    ok: language === 'ar' ? 'حسناً' : 'Okay'
+  };
+
   return (
     <AlertContext.Provider value={{ showAlert, showConfirm }}>
       {children}
       
       {alertState.isOpen && (
         <div className="alert-overlay" onClick={closeAlert}>
-          <div className="alert-box" onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="alert-box" 
+            onClick={(e) => e.stopPropagation()}
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
+          >
             
             <div className="alert-icon-wrapper">
               {alertState.type === 'confirm' ? (
@@ -70,15 +83,15 @@ export const AlertProvider = ({ children }) => {
               {alertState.type === 'confirm' ? (
                 <>
                   <button className="alert-btn cancel" onClick={closeAlert}>
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button className="alert-btn confirm" onClick={handleConfirm}>
-                    Yes, Confirm
+                    {t.confirm}
                   </button>
                 </>
               ) : (
                 <button className="alert-btn ok" onClick={closeAlert}>
-                  Okay
+                  {t.ok}
                 </button>
               )}
             </div>

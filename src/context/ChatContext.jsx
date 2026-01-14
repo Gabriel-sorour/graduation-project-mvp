@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLanguage } from './LanguageContext'; // 1. استدعاء هوك اللغة
 
 const ChatContext = createContext();
 
@@ -8,29 +9,48 @@ export function useChat() {
 }
 
 export function ChatProvider({ children }) {
+  const { language } = useLanguage();
+
+  // نصوص الترحيب
+  const welcomeTextEn = "Hi there! I'm Sage. What can I cook for you today?";
+  const welcomeTextAr = "أهلاً بك! أنا ساج. ماذا تحب أن نطبخ اليوم؟";
+
   // 1. Initialize from LocalStorage
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('chef_sage_history');
     return saved ? JSON.parse(saved) : [
-      { id: 1, text: "Hi there! I'm Sage. What can I cook for you today?", sender: 'bot' }
+      { id: 1, text: welcomeTextEn, sender: 'bot' } // الافتراضي إنجليزي مؤقتاً
     ];
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. Save to LocalStorage
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].sender === 'bot') {
+        const currentText = messages[0].text;
+        const targetText = language === 'ar' ? welcomeTextAr : welcomeTextEn;
+        if (currentText !== targetText) {
+            const updatedMessages = [{ ...messages[0], text: targetText }];
+            setMessages(updatedMessages);
+            localStorage.setItem('chef_sage_history', JSON.stringify(updatedMessages));
+        }
+    }
+  }, [language, messages]);
+
   useEffect(() => {
     localStorage.setItem('chef_sage_history', JSON.stringify(messages));
   }, [messages]);
 
-  // 3. Clear Chat
+  // 4. Clear Chat
   const clearChat = () => {
-    const initialMsg = [{ id: 1, text: "Hi there! I'm Sage. What can I cook for you today?", sender: 'bot' }];
+    const greeting = language === 'ar' ? welcomeTextAr : welcomeTextEn;
+
+    const initialMsg = [{ id: 1, text: greeting, sender: 'bot' }];
     setMessages(initialMsg);
     localStorage.setItem('chef_sage_history', JSON.stringify(initialMsg));
   };
 
-  // 4. The Shared Send Logic
+  // 5. The Shared Send Logic
   const sendMessage = async (userText, token) => {
     if (!userText.trim()) return;
 
@@ -45,7 +65,8 @@ export function ChatProvider({ children }) {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept-Language': language
         },
         body: JSON.stringify({ prompt: userText })
       });
@@ -54,7 +75,8 @@ export function ChatProvider({ children }) {
 
       const data = await response.json();
 
-      let botText = "Thinking...";
+      let botText = language === 'ar' ? "جاري التفكير..." : "Thinking...";
+      
       if (data.message) {
         botText = data.message;
       } else if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
@@ -72,9 +94,14 @@ export function ChatProvider({ children }) {
 
     } catch (error) {
       console.error("Error:", error);
+      
+      const errorMsg = language === 'ar' 
+        ? "عذراً، أواجه مشكلة في الاتصال بخادم المطبخ حالياً."
+        : "Sorry, I'm having trouble connecting to the kitchen server right now.";
+
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
-        text: "Sorry, I'm having trouble connecting to the kitchen server right now.", 
+        text: errorMsg, 
         sender: 'bot' 
       }]);
     } finally {

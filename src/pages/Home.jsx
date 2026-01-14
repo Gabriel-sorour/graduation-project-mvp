@@ -4,31 +4,45 @@ import RecipeCard from '../components/common/RecipeCard';
 import '../styles/Home.css';
 import { formatRecipe } from '../utils/recipeUtils';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Sparkles } from 'lucide-react';
 import { useAlert } from '../context/AlertContext';
 
 function Home() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
+  const { language } = useLanguage();
+  const { showAlert } = useAlert();
 
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [surpriseLoading, setSurpriseLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // --- Fetch Trending Recipes ---
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/recipes')
+    setLoading(true);
+    
+    fetch('http://127.0.0.1:8000/api/recipes', {
+      headers: {
+        'Accept-Language': language
+      }
+    })
       .then(response => response.json())
-      .then(data => {
-        const formattedRecipes = data.data.map(recipe => formatRecipe(recipe));
-        setRecipes(formattedRecipes.slice(3,6 ));
+      .then(result => {
+        const dataWrapper = result.data || {};
+        const rawRecipes = Array.isArray(dataWrapper) ? dataWrapper : (dataWrapper.data || []);
+        
+        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
+        
+        setRecipes(formattedRecipes.slice(0, 5)); 
         setLoading(false);
       })
       .catch(error => {
         console.error("Error fetching recipes:", error);
         setLoading(false);
       });
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (recipes.length === 0) return;
@@ -45,7 +59,7 @@ function Home() {
     navigate(`/recipe/${id}`);
   };
 
-  const { showAlert } = useAlert();
+  // --- Surprise Me Logic ---
   const handleSurpriseMe = async () => {
     if (!user) {
       navigate('/login');
@@ -59,13 +73,14 @@ function Home() {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept-Language': language 
         }
       });
 
       const responseData = await response.json();
       if (responseData.status === 'fail') {
-        showAlert("Note", responseData.message);
+        showAlert(language === 'ar' ? "تنبيه" : "Note", responseData.message);
         return;
       }
 
@@ -84,40 +99,52 @@ function Home() {
           }
         });
       } else {
-        showAlert("No recipes found!");
+        showAlert(language === 'ar' ? "لا توجد وصفات!" : "No recipes found!");
       }
 
     } catch (error) {
       console.error("Surprise Me Error:", error);
-      showAlert("Something went wrong. Please try again.");
+      showAlert(language === 'ar' ? "حدث خطأ ما." : "Something went wrong. Please try again.");
     } finally {
       setSurpriseLoading(false);
     }
+  };
+
+  // --- Translations Helper ---
+  const t = {
+    heroTitle: language === 'ar' ? <>اطبخ بالمتاح <br /> في <span>مطبخك.</span></> : <>Cook with what <br /> you <span>have.</span></>,
+    heroSub: language === 'ar' 
+      ? "اكتشف وصفات تناسب مكونات مطبخك. بدون تعقيد، فقط طعام لذيذ."
+      : "Minimalist recipe finder based on your pantry. No clutter, just good food.",
+    exploreBtn: language === 'ar' ? "تصفح الوصفات" : "Explore Recipes",
+    cookBtn: language === 'ar' ? "اطبخ بالموجود" : "Cook with what I have",
+    surpriseBtn: language === 'ar' ? (surpriseLoading ? 'جاري الطهي...' : 'فاجئني') : (surpriseLoading ? 'Cooking...' : 'Surprise Me'),
+    trending: language === 'ar' ? "الأكثر رواجاً الآن" : "Trending Now",
+    loading: language === 'ar' ? "نختار لك أفضل الوصفات..." : "Curating best recipes for you..."
   };
 
   return (
     <>
       <title>Home</title>
 
-      <div className="home-page">
+      <div className={`home-page ${language === 'ar' ? 'rtl-content' : ''}`}>
         {/* Hero Section  */}
         <section className="hero">
-          <h1>Cook with what <br /> you <span>have.</span></h1>
-          <p>
-            Minimalist recipe finder based on your pantry. No clutter, just good food.
-          </p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroSub}</p>
+          
           <div className="hero-buttons">
             <button
               className="btn-secondary btn-large"
               onClick={() => navigate('/explore')}
             >
-              Explore Recipes
+              {t.exploreBtn}
             </button>
             <button
               className="btn-large cook-btn"
               onClick={() => navigate('/cook-now')}
             >
-              Cook with what I have
+              {t.cookBtn}
             </button>
             <button
               className="btn-secondary btn-large surprise-btn"
@@ -125,7 +152,7 @@ function Home() {
               disabled={surpriseLoading}
               style={{ minWidth: '160px' }}
             >
-              {surpriseLoading ? 'Cooking...' : 'Surprise Me'}
+              {t.surpriseBtn}
               <Sparkles size={16} />
             </button>
           </div>
@@ -135,22 +162,26 @@ function Home() {
           <div className="container">
 
             <h2 style={{ color: 'var(--text-color)', textAlign: 'center', padding: '1rem' }}>
-              Trending Now
+              {t.trending}
             </h2>
 
             {loading ? (
               <div className="loading-placeholder">
                 <div className="spinner"></div>
-                <p>Curating best recipes for you...</p>
+                <p>{t.loading}</p>
               </div>
             ) : (
-              <div className="slider-wrapper">
+              <div className="slider-wrapper" dir="ltr">
                 <div 
                   className="recipe-grid slider-track"
                   style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                 >
                   {recipes.map(recipe => (
-                    <div key={recipe.id} className="slide-item">
+                    <div 
+                        key={recipe.id} 
+                        className="slide-item"
+                        dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    >
                       <RecipeCard
                         recipe={recipe}
                         onClick={handleRecipeClick}

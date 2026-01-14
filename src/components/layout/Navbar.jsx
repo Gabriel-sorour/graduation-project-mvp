@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, User, Sun, Moon } from 'lucide-react';
+import { ChefHat, User, Sun, Moon, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import '../../styles/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
   const { user } = useAuth();
+  const { language, toggleLanguage } = useLanguage();
 
   // --- Dark Mode Logic ---
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -43,13 +45,33 @@ function Navbar() {
 
         {/* Links */}
         <div className="nav-links">
-          <Link to="/" className={`nav-link ${isActive('/')}`}>Home</Link>
-          <Link to="/explore" className={`nav-link ${isActive('/explore')}`}>Explore</Link>
-          <Link to="/dashboard" className={`nav-link ${isActive('/dashboard')}`}>Dashboard</Link>
+          <Link to="/" className={`nav-link ${isActive('/')}`}>
+            {language === 'ar' ? 'الرئيسية' : 'Home'}
+          </Link>
+          <Link to="/explore" className={`nav-link ${isActive('/explore')}`}>
+            {language === 'ar' ? 'استكشف' : 'Explore'}
+          </Link>
+          <Link to="/dashboard" className={`nav-link ${isActive('/dashboard')}`}>
+            {language === 'ar' ? 'لوحتي' : 'Dashboard'}
+          </Link>
         </div>
 
-        {/* Auth / Profile */}
+        {/* Auth / Profile / Toggles */}
         <div className="nav-auth">
+          
+          {/* Language Toggle Button */}
+          <button 
+            className="theme-toggle-btn" 
+            onClick={toggleLanguage}
+            title={language === 'ar' ? "Switch to English" : "تغيير للعربية"}
+          >
+            <Globe size={20} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', marginLeft: '4px' }}>
+                {language === 'ar' ? 'EN' : 'عربي'}
+            </span>
+          </button>
+
+          {/* Dark Mode Button */}
           <button 
             className="theme-toggle-btn" 
             onClick={toggleTheme}
@@ -64,7 +86,7 @@ function Navbar() {
             </Link>
           ) : (
             <Link to="/login" className="btn-primary">
-              Sign In
+              {language === 'ar' ? 'دخول' : 'Sign In'}
             </Link>
           )}
         </div>

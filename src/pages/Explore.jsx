@@ -4,11 +4,13 @@ import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Explore.css';
 import { formatRecipe } from '../utils/recipeUtils';
+import { useLanguage } from '../context/LanguageContext';
 
 function Explore() {
   const navigate = useNavigate();
 
-  // --- Search & Filter States ---
+  const { language: lang } = useLanguage();
+
   const [selectedTags, setSelectedTags] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -21,12 +23,9 @@ function Explore() {
   const [openFilter, setOpenFilter] = useState(null);
   const filterRef = useRef(null);
 
-  // --- Data & Pagination States ---
   const [allIngredients, setAllIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // New States for Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
@@ -41,38 +40,35 @@ function Explore() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 1. Fetch Ingredients (Once)
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/ingredients')
+    fetch('http://127.0.0.1:8000/api/ingredients', {
+      headers: {
+        'Accept-Language': lang
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setAllIngredients(data);
       })
       .catch(err => console.error("Error fetching ingredients:", err));
-  }, []);
+  }, [lang]);
 
-  // 2. Fetch Recipes (Triggered by Filters, Tags, or Page Change)
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
       try {
         let url = new URL('http://127.0.0.1:8000/api/recipes');
-        
+
         const hasFilters = filters.category || filters.meal_type || filters.temperature;
 
-        // تحديد الـ Endpoint (بحث ولا عرض عادي)
         if (selectedTags.length > 0 || hasFilters) {
           url = new URL('http://127.0.0.1:8000/api/recipes/search');
-          
-          if (selectedTags.length > 0) {
-            url.searchParams.append('ingredients', selectedTags.join(','));
-          }
+          if (selectedTags.length > 0) url.searchParams.append('ingredients', selectedTags.join(','));
           if (filters.category) url.searchParams.append('category', filters.category);
           if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
           if (filters.temperature) url.searchParams.append('temperature', filters.temperature);
         }
 
-        // إضافة رقم الصفحة للريكويست
         url.searchParams.append('page', currentPage);
 
         const response = await fetch(url.toString(), {
@@ -80,6 +76,7 @@ function Explore() {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'Accept-Language': lang
           }
         });
 
@@ -88,13 +85,11 @@ function Explore() {
         }
 
         const result = await response.json();
-        
-        // --- تصحيح قراءة البيانات بناءً على الـ JSON المرسل ---
-        // result هو الأوبجيكت الرئيسي اللي فيه current_page و data (Array)
-        
-        const rawRecipes = result.data || []; // المصفوفة موجودة مباشرة في result.data
-        const lastPageNum = result.last_page || 1; // رقم آخر صفحة موجود مباشرة في result.last_page
-        
+
+        const paginationMeta = result.data?.data ? result.data : result;
+        const rawRecipes = paginationMeta.data || [];
+        const lastPageNum = paginationMeta.last_page || 1;
+
         const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
 
         setRecipes(formattedRecipes);
@@ -110,11 +105,10 @@ function Explore() {
 
     fetchRecipes();
 
-  }, [selectedTags, filters, currentPage]);
+  }, [selectedTags, filters, currentPage, lang]);
 
 
   // --- Event Handlers ---
-
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
@@ -134,15 +128,14 @@ function Explore() {
     setSelectedTags([...selectedTags, ingredient]);
     setInputValue('');
     setSuggestions([]);
-    setCurrentPage(1); // Reset page on new search
+    setCurrentPage(1);
   };
 
   const removeTag = (tagToRemove) => {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
-    setCurrentPage(1); // Reset page on change
+    setCurrentPage(1);
   };
 
-  // --- Filter Logic ---
   const toggleFilter = (filterName) => {
     setOpenFilter(openFilter === filterName ? null : filterName);
   };
@@ -150,40 +143,40 @@ function Explore() {
   const selectFilterOption = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setOpenFilter(null);
-    setCurrentPage(1); // Reset page on filter change
+    setCurrentPage(1);
   };
 
   const resetFilters = () => {
     setFilters({ category: '', meal_type: '', temperature: '' });
     setOpenFilter(null);
-    setCurrentPage(1); // Reset page on reset
+    setCurrentPage(1);
   };
 
-  // --- Pagination Logic ---
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= lastPage) {
-        setCurrentPage(newPage);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
+  // --- Filter Options Translations ---
   const filterOptions = {
     category: [
-      { label: 'All Categories', value: '' },
-      { label: 'Meal', value: 'meal' },
-      { label: 'Drink', value: 'drink' },
-      { label: 'Snack', value: 'snack' }
+      { label: lang === 'ar' ? 'كل التصنيفات' : 'All Categories', value: '' },
+      { label: lang === 'ar' ? 'وجبة' : 'Meal', value: 'meal' },
+      { label: lang === 'ar' ? 'مشروب' : 'Drink', value: 'drink' },
+      { label: lang === 'ar' ? 'سناك' : 'Snack', value: 'snack' }
     ],
     meal_type: [
-      { label: 'All Types', value: '' },
-      { label: 'Breakfast', value: 'breakfast' },
-      { label: 'Lunch', value: 'lunch' },
-      { label: 'Dinner', value: 'dinner' }
+      { label: lang === 'ar' ? 'كل الأنواع' : 'All Types', value: '' },
+      { label: lang === 'ar' ? 'فطور' : 'Breakfast', value: 'breakfast' },
+      { label: lang === 'ar' ? 'غداء' : 'Lunch', value: 'lunch' },
+      { label: lang === 'ar' ? 'عشاء' : 'Dinner', value: 'dinner' }
     ],
     temperature: [
-      { label: 'Any Temp', value: '' },
-      { label: 'Hot', value: 'hot' },
-      { label: 'Cold', value: 'cold' }
+      { label: lang === 'ar' ? 'أي حرارة' : 'Any Temp', value: '' },
+      { label: lang === 'ar' ? 'ساخن' : 'Hot', value: 'hot' },
+      { label: lang === 'ar' ? 'بارد' : 'Cold', value: 'cold' }
     ]
   };
 
@@ -191,11 +184,17 @@ function Explore() {
     <>
       <title>Explore</title>
 
-      <div className="explore-container">
-        <div className="explore-header">
-          <p className='find-p'>Find recipes by ingredients & filters</p>
+      <div className={`explore-container ${lang === 'ar' ? 'rtl-layout' : ''}`}>
 
-          {/* Multi-select Search Component */}
+        <div className="explore-header">
+          {/* Header Top Row: Just Title (Button Removed) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <p className='find-p' style={{ margin: 0 }}>
+              {lang === 'ar' ? 'ابحث عن وصفات بالمكونات والفلاتر' : 'Find recipes by ingredients & filters'}
+            </p>
+          </div>
+
+          {/* Search Wrapper */}
           <div className="search-wrapper">
             <div className="search-box-container">
               {selectedTags.map((tag, index) => (
@@ -209,11 +208,16 @@ function Explore() {
               <input
                 type="text"
                 className="search-input-transparent"
-                placeholder={selectedTags.length === 0 ? "Type an ingredient (e.g. Tomato)..." : ""}
+                placeholder={
+                  selectedTags.length === 0
+                    ? (lang === 'ar' ? "اكتب اسم مكون (مثل: طماطم)..." : "Type an ingredient (e.g. Tomato)...")
+                    : ""
+                }
                 value={inputValue}
                 onChange={handleInputChange}
+                dir={lang === 'ar' ? 'rtl' : 'ltr'}
               />
-              <Search className='search-icon-fixed ' color="var(--gray)" size={20} />
+              <Search className={`search-icon-fixed ${lang === 'ar' ? 'search-icon-rtl' : ''}`} color="var(--gray)" size={20} />
             </div>
 
             {suggestions.length > 0 && (
@@ -231,12 +235,12 @@ function Explore() {
             )}
           </div>
 
-          {/* --- Custom Filters Section --- */}
+          {/* Filters Container */}
           <div className="filters-container" ref={filterRef}>
             <div className="filter-group">
               <Filter size={18} className="filter-icon" />
 
-              {/* Category Dropdown */}
+              {/* Category */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.category ? 'active' : ''}`}
@@ -244,7 +248,7 @@ function Explore() {
                 >
                   {filters.category ?
                     filterOptions.category.find(o => o.value === filters.category)?.label
-                    : "Category"}
+                    : (lang === 'ar' ? 'تصنيف' : 'Category')}
                   <ChevronDown size={14} />
                 </button>
                 {openFilter === 'category' && (
@@ -263,7 +267,7 @@ function Explore() {
                 )}
               </div>
 
-              {/* Meal Type Dropdown */}
+              {/* Meal Type */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
@@ -271,7 +275,7 @@ function Explore() {
                 >
                   {filters.meal_type ?
                     filterOptions.meal_type.find(o => o.value === filters.meal_type)?.label
-                    : "Meal Type"}
+                    : (lang === 'ar' ? 'نوع الوجبة' : 'Meal Type')}
                   <ChevronDown size={14} />
                 </button>
                 {openFilter === 'meal_type' && (
@@ -290,7 +294,7 @@ function Explore() {
                 )}
               </div>
 
-              {/* Temperature Dropdown */}
+              {/* Temperature */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.temperature ? 'active' : ''}`}
@@ -298,7 +302,7 @@ function Explore() {
                 >
                   {filters.temperature ?
                     filterOptions.temperature.find(o => o.value === filters.temperature)?.label
-                    : "Temperature"}
+                    : (lang === 'ar' ? 'حرارة' : 'Temperature')}
                   <ChevronDown size={14} />
                 </button>
                 {openFilter === 'temperature' && (
@@ -320,7 +324,7 @@ function Explore() {
 
             {(filters.category || filters.meal_type || filters.temperature) && (
               <button className="reset-filters-btn" onClick={resetFilters}>
-                Reset
+                {lang === 'ar' ? 'إعادة ضبط' : 'Reset'}
               </button>
             )}
           </div>
@@ -329,10 +333,14 @@ function Explore() {
 
         <div>
           <div className="results-info">
-            {loading ? "Loading recipes..." :
+            {loading ? (lang === 'ar' ? "جاري التحميل..." : "Loading recipes...") :
               (selectedTags.length > 0 || filters.category || filters.meal_type || filters.temperature)
-                ? `Showing page ${currentPage} of ${lastPage}`
-                : `Showing all recipes (Page ${currentPage})`
+                ? (lang === 'ar'
+                  ? `عرض الصفحة ${currentPage} من ${lastPage}`
+                  : `Showing page ${currentPage} of ${lastPage}`)
+                : (lang === 'ar'
+                  ? `عرض كل الوصفات (صفحة ${currentPage})`
+                  : `Showing all recipes (Page ${currentPage})`)
             }
           </div>
 
@@ -348,48 +356,45 @@ function Explore() {
             ) : !loading && (
               <div className="no-results">
                 <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-                <h3>No matching recipes</h3>
-                <p>Try adjusting your ingredients or filters.</p>
+                <h3>{lang === 'ar' ? 'لا توجد وصفات مطابقة' : 'No matching recipes'}</h3>
+                <p>{lang === 'ar' ? 'حاول تغيير المكونات أو الفلاتر.' : 'Try adjusting your ingredients or filters.'}</p>
               </div>
             )}
           </div>
 
-          {/* --- Numbered Pagination Controls --- */}
+          {/* Pagination Controls */}
           {!loading && recipes.length > 0 && lastPage > 1 && (
-              <div className="pagination-container">
-                  {/* Previous Button */}
-                  <button 
-                    className="page-nav-btn" 
-                    onClick={() => handlePageChange(currentPage - 1)} 
-                    disabled={currentPage === 1}
-                    title="Previous Page"
-                  >
-                      <ChevronLeft size={20} />
-                  </button>
-                  
-                  {/* Page Numbers */}
-                  <div className="page-numbers">
-                    {Array.from({ length: lastPage }, (_, i) => i + 1).map((pageNum) => (
-                        <button
-                            key={pageNum}
-                            className={`page-num-btn ${currentPage === pageNum ? 'active' : ''}`}
-                            onClick={() => handlePageChange(pageNum)}
-                        >
-                            {pageNum}
-                        </button>
-                    ))}
-                  </div>
+            <div className="pagination-container" style={{ flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
+              {/* Prev Button */}
+              <button
+                className="page-nav-btn"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft size={20} className={lang === 'ar' ? 'rotate-180' : ''} />
+              </button>
 
-                  {/* Next Button */}
-                  <button 
-                    className="page-nav-btn" 
-                    onClick={() => handlePageChange(currentPage + 1)} 
-                    disabled={currentPage === lastPage}
-                    title="Next Page"
+              <div className="page-numbers">
+                {Array.from({ length: lastPage }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    className={`page-num-btn ${currentPage === pageNum ? 'active' : ''}`}
+                    onClick={() => handlePageChange(pageNum)}
                   >
-                      <ChevronRight size={20} />
+                    {pageNum}
                   </button>
+                ))}
               </div>
+
+              {/* Next Button */}
+              <button
+                className="page-nav-btn"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === lastPage}
+              >
+                <ChevronRight size={20} className={lang === 'ar' ? 'rotate-180' : ''} />
+              </button>
+            </div>
           )}
         </div>
       </div>

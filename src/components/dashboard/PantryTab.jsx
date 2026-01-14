@@ -2,24 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react'; 
 import { getPantryItems, addPantryItem, deletePantryItem } from '../../utils/pantryService';
 import { getAllIngredients } from '../../utils/shoppingService'; 
+import { useLanguage } from '../../context/LanguageContext'; // 1. استدعاء الكونتكست
 
 function PantryTab() {
+  const { language } = useLanguage();
+
   const [items, setItems] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [allIngredients, setAllIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load Data on Mount
+  // Load Data on Mount & When Language Changes
   useEffect(() => {
     const loadData = async () => {
       try {
-        // 1. Get Pantry Items
-        const pantryData = await getPantryItems();
+        setLoading(true);
+        const pantryData = await getPantryItems(language);
         setItems(Array.isArray(pantryData) ? pantryData : []);
 
-        // 2. Get All Ingredients (for Autocomplete)
-        const ingredientsData = await getAllIngredients();
+        const ingredientsData = await getAllIngredients(language);
         setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
       } catch (error) {
         console.error("Error loading pantry data:", error);
@@ -28,7 +30,7 @@ function PantryTab() {
       }
     };
     loadData();
-  }, []);
+  }, [language]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -36,9 +38,7 @@ function PantryTab() {
 
     if (value.length > 0) {
       const filtered = allIngredients.filter(ingredient => 
-        // Match string
         ingredient.toLowerCase().includes(value.toLowerCase()) && 
-        // Prevent duplicates in Pantry
         !items.some(item => item.item_name.toLowerCase() === ingredient.toLowerCase())
       );
       setSuggestions(filtered);
@@ -48,16 +48,13 @@ function PantryTab() {
   };
 
   const handleSelectSuggestion = async (suggestion) => {
-    // Clear UI immediately
     setInputValue("");
     setSuggestions([]);
 
     try {
-      // API Call via Service
-      const newItem = await addPantryItem(suggestion);
+      const newItem = await addPantryItem(suggestion, language);
       
       if (newItem) {
-        // Update State locally (No need to re-fetch entire list)
         setItems(prev => [...prev, newItem]);
       }
     } catch (error) {
@@ -66,52 +63,56 @@ function PantryTab() {
   };
 
   const handleRemoveItem = async (id) => {
-    // Store old state for rollback
     const originalItems = [...items];
-    
-    // Optimistic Update (Remove from UI immediately)
     setItems(prev => prev.filter(item => item.id !== id));
 
-    // API Call via Service
     const success = await deletePantryItem(id);
     
-    // Rollback if failed
     if (!success) {
       setItems(originalItems);
     }
   };
 
-  if (loading) {
+  const t = {
+    loading: language === 'ar' ? 'جاري تحميل المخزن...' : 'Loading pantry...',
+    title: language === 'ar' ? 'مخزني' : 'My Pantry',
+    itemsCount: language === 'ar' ? 'عنصر' : 'items',
+    placeholder: language === 'ar' ? 'ابحث عن مكون لإضافته...' : 'Type to search ingredients...',
+    empty: language === 'ar' ? 'مخزنك فارغ. ابدأ بإضافة المكونات!' : 'Your pantry is empty. Start adding ingredients!'
+  };
+
+  if (loading && items.length === 0) {
     return (
       <div style={{ padding: '3rem', textAlign: 'center', color: '#6b7280' }}>
-        Loading pantry...
+        {t.loading}
       </div>
     );
   }
 
   return (
-    <div>
+    <div className={language === 'ar' ? 'rtl-content' : ''}>
       <div className="section-header">
-        <h2>My Pantry</h2>
-        <span className="text-gray-400 text-sm">{items.length} items</span>
+        <h2>{t.title}</h2>
+        <span className="text-gray-400 text-sm">{items.length} {t.itemsCount}</span>
       </div>
 
       <div className="pantry-input-group">
         <div className="input-wrapper">
 
-          <Search className="search-icon" size={18} />
+          <Search className={`search-icon ${language === 'ar' ? 'search-icon-rtl' : ''}`} size={18} />
           
           <input 
             type="text" 
             className="pantry-input"
-            placeholder="Type to search ingredients..." 
+            placeholder={t.placeholder}
             value={inputValue}
             onChange={handleInputChange}
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
           />
           
           {/* Show suggestions */}
           {suggestions.length > 0 && (
-            <div className="suggestions-list">
+            <div className="suggestions-list" style={{textAlign: language === 'ar' ? 'right' : 'left'}}>
               {suggestions.map((suggestion, index) => (
                 <div 
                   key={index} 
@@ -124,21 +125,24 @@ function PantryTab() {
             </div>
           )}
         </div>
-        
       </div>
 
       <div className="pantry-grid">
         {items.map((item, index) => (
           <div key={item.id || index} className="pantry-item">
             <span>{item.item_name}</span>
-            <button className="btn-remove" onClick={() => handleRemoveItem(item.id)}>
+            <button 
+              className="btn-remove" 
+              onClick={() => handleRemoveItem(item.id)}
+              style={{ marginLeft: language === 'ar' ? 0 : 'auto', marginRight: language === 'ar' ? 'auto' : 0 }}
+            >
               <X size={12} />
             </button>
           </div>
         ))}
-        {items.length === 0 && (
+        {items.length === 0 && !loading && (
           <p style={{ color: 'var(--gray)', fontStyle: 'italic', width: '100%', textAlign: 'center' }}>
-            Your pantry is empty. Start adding ingredients!
+            {t.empty}
           </p>
         )}
       </div>

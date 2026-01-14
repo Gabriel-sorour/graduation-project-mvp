@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Flame, ChefHat, CheckSquare, List, Heart, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 // --- 1. RecipeCard Component ---
 const RecipeCard = ({ recipe, missingItems }) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -21,11 +23,16 @@ const RecipeCard = ({ recipe, missingItems }) => {
     }
   };
 
+  const t = {
+    missing: language === 'ar' ? 'ينقصك: ' : 'Missing: '
+  };
+
   return (
     <div
       className="smart-card recipe-card hover:shadow-md cursor-pointer transition-transform hover:-translate-y-1"
       onClick={handleClick}
-      title="View Recipe Details"
+      title={language === 'ar' ? "عرض التفاصيل" : "View Recipe Details"}
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <img
         src={recipe.image ? `http://127.0.0.1:8000/${recipe.image}` : '/placeholder-food.jpg'}
@@ -36,13 +43,12 @@ const RecipeCard = ({ recipe, missingItems }) => {
         <h4>{recipe.title}</h4>
         <div className="recipe-meta">
           <span><Clock size={14} /> {recipe.time}</span>
-          <span><Flame size={14} /> {recipe.calories} kcal</span>
+          <span><Flame size={14} /> {recipe.calories}</span>
         </div>
 
-        {/* عرض التنبيه فقط إذا كانت هناك عناصر ناقصة فعلياً */}
         {Array.isArray(missingItems) && missingItems.length > 0 && (
           <div className="missing-alert">
-            Missing: {missingItems.join(', ')}
+            {t.missing} {missingItems.join('، ')}
           </div>
         )}
       </div>
@@ -51,43 +57,55 @@ const RecipeCard = ({ recipe, missingItems }) => {
 };
 
 // --- 2. StepsList Component ---
-const StepsList = ({ steps }) => (
-  <div className="smart-card steps-card">
-    <div className="card-header"><List size={16} /> Steps</div>
-    <ol>
-      {Array.isArray(steps) ? steps.map((step, idx) => (
-        <li key={idx}>{step}</li>
-      )) : <li>{steps}</li>}
-    </ol>
-  </div>
-);
+const StepsList = ({ steps }) => {
+  const { language } = useLanguage();
+
+  return (
+    <div className="smart-card steps-card" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      <div className="card-header">
+        <List size={16} /> {language === 'ar' ? 'الخطوات' : 'Steps'}
+      </div>
+      <ol style={{ paddingRight: language === 'ar' ? '1.5rem' : '0', paddingLeft: language === 'ar' ? '0' : '1.5rem' }}>
+        {Array.isArray(steps) ? steps.map((step, idx) => (
+          <li key={idx}>{step}</li>
+        )) : <li>{steps}</li>}
+      </ol>
+    </div>
+  );
+};
 
 // --- 3. ItemsList Component (Pantry & Shopping) ---
 const ItemsList = ({ title, items, type }) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   const handleCardClick = () => {
     const tabName = type === 'shopping' ? 'shopping' : 'pantry';
     navigate(`/dashboard?tab=${tabName}`);
   };
 
+  const t = {
+    more: language === 'ar' ? 'المزيد' : 'more'
+  };
+
   return (
     <div
       className={`smart-card list-card ${type} cursor-pointer hover:shadow-md transition-all`}
       onClick={handleCardClick}
-      title={`Go to ${title}`}
+      title={title} // Title is passed translated from parent
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <div className="card-header flex justify-between">
         <div className="flex items-center gap-2">
           {type === 'shopping' ? <CheckSquare size={16} /> : <ChefHat size={16} />}
           {title}
         </div>
-        <ArrowRight size={14} className="text-gray-400" />
+        <ArrowRight size={14} className={`text-gray-400 ${language === 'ar' ? 'rotate-180' : ''}`} />
       </div>
 
       <div className="tags-container">
         {items && items.slice(0, 8).map((item, idx) => {
-          const name = typeof item === 'object' ? item.item_name : item;
+          const name = typeof item === 'object' ? (item.item_name || item.name) : item;
           const checked = typeof item === 'object' ? item.is_checked : false;
           return (
             <span key={idx} className={`tag ${checked ? 'checked' : ''}`}>
@@ -95,7 +113,9 @@ const ItemsList = ({ title, items, type }) => {
             </span>
           );
         })}
-        {items && items.length > 8 && <span className="tag more">+{items.length - 8} more</span>}
+        {items && items.length > 8 && (
+          <span className="tag more">+{items.length - 8} {t.more}</span>
+        )}
       </div>
     </div>
   );
@@ -104,7 +124,22 @@ const ItemsList = ({ title, items, type }) => {
 // --- Main Component (Dispatcher) ---
 const SmartMessageContent = ({ data }) => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+
   if (!data || !data.response_type) return null;
+
+  const t = {
+    pantryItems: language === 'ar' ? 'عناصر المخزن' : 'Pantry Items',
+    shoppingList: language === 'ar' ? 'قائمة التسوق' : 'Shopping List',
+    pantry: language === 'ar' ? 'المخزن' : 'Pantry',
+    shopping: language === 'ar' ? 'التسوق' : 'Shopping',
+    suggested: language === 'ar' ? 'وصفات مقترحة' : 'Suggested Recipes',
+    favorites: language === 'ar' ? 'مفضلاتك' : 'Your Favorites',
+    found: language === 'ar' ? 'وصفة' : 'found',
+    noRecipes: language === 'ar' ? 'لا توجد وصفات.' : 'No recipes found.',
+    noFavs: language === 'ar' ? 'لا توجد مفضلات.' : 'No favorites yet.',
+    viewAllFav: language === 'ar' ? 'عرض كل المفضلة' : 'View all favorites'
+  };
 
   switch (data.response_type) {
     case 'recipe_card':
@@ -114,30 +149,30 @@ const SmartMessageContent = ({ data }) => {
       return <StepsList steps={data.steps} />;
 
     case 'pantry_list':
-      return <ItemsList title="Pantry Items" items={data.pantry_items || data.pantry?.items || []} type="pantry" />;
+      return <ItemsList title={t.pantryItems} items={data.pantry_items || data.pantry?.items || []} type="pantry" />;
 
     case 'shopping_list':
-      return <ItemsList title="Shopping List" items={data.items || data.shopping?.items || []} type="shopping" />;
+      return <ItemsList title={t.shoppingList} items={data.items || data.shopping?.items || []} type="shopping" />;
 
     case 'full_inventory':
       return (
-        <div className="inventory-grid">
-          <ItemsList title="Pantry" items={data.pantry?.items || []} type="pantry" />
-          <ItemsList title="Shopping" items={data.shopping?.items || []} type="shopping" />
+        <div className="inventory-grid" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          <ItemsList title={t.pantry} items={data.pantry?.items || []} type="pantry" />
+          <ItemsList title={t.shopping} items={data.shopping?.items || []} type="shopping" />
         </div>
       );
 
     case 'recipes_list': {
       const recipes = data.recipes || [];
       return (
-        <div className="smart-card">
+        <div className="smart-card" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <div className="card-header flex justify-between">
             <div className="flex items-center gap-2 text-green-700">
-              <ChefHat size={16} /> Suggested Recipes
+              <ChefHat size={16} /> {t.suggested}
             </div>
             {data.count && (
               <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
-                {data.count} found
+                {data.count} {t.found}
               </span>
             )}
           </div>
@@ -150,7 +185,7 @@ const SmartMessageContent = ({ data }) => {
                 </div>
               ))
             ) : (
-              <p className="p-2 text-sm text-gray-500">No recipes found.</p>
+              <p className="p-2 text-sm text-gray-500">{t.noRecipes}</p>
             )}
           </div>
         </div>
@@ -161,16 +196,16 @@ const SmartMessageContent = ({ data }) => {
       const recipesList = data.favorites?.recipes || data.recipes || [];
 
       return (
-        <div className="smart-card favorites-card">
+        <div className="smart-card favorites-card" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <div
             className="card-header"
             onClick={() => navigate('/dashboard?tab=favorites')}
-            title="View all favorites"
+            title={t.viewAllFav}
           >
             <div className="flex items-center gap-2 text-red-600">
-              <Heart size={16} fill="currentColor" /> Your Favorites
+              <Heart size={16} fill="currentColor" /> {t.favorites}
             </div>
-            <ArrowRight size={14} className="text-red-400" />
+            <ArrowRight size={14} className={`text-red-400 ${language === 'ar' ? 'rotate-180' : ''}`} />
           </div>
 
           <div className="favorites-scroll p-2">
@@ -181,7 +216,7 @@ const SmartMessageContent = ({ data }) => {
                 </div>
               ))
             ) : (
-              <p className="p-2 text-sm text-gray-500">No favorites yet.</p>
+              <p className="p-2 text-sm text-gray-500">{t.noFavs}</p>
             )}
           </div>
         </div>

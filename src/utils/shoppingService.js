@@ -1,14 +1,17 @@
 import api from './api';
 
 // 1. Get All Items
-export const getShoppingList = async () => {
+export const getShoppingList = async (lang = 'en') => {
 
-  // Check if there is token or not
   const token = localStorage.getItem('token');
   if (!token) return [];
 
   try {
-    const response = await api.get('/shopping-list');
+    const response = await api.get('/shopping-list', {
+      headers: {
+        'Accept-Language': lang
+      }
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching shopping list:", error);
@@ -17,10 +20,14 @@ export const getShoppingList = async () => {
 };
 
 // 2. Add New Item
-export const addItem = async (itemName) => {
+export const addItem = async (itemName, lang = 'en') => {
   try {
     const response = await api.post('/shopping-list', {
       item_name: itemName
+    }, {
+      headers: {
+        'Accept-Language': lang
+      }
     });
 
     return response.data.data;
@@ -31,10 +38,14 @@ export const addItem = async (itemName) => {
 };
 
 // 3. Update Status (Check/Uncheck)
-export const updateItemStatus = async (id, isChecked) => {
+export const updateItemStatus = async (id, isChecked, lang = 'en') => {
   try {
     await api.patch(`/shopping-list/${id}`, {
       is_checked: isChecked
+    }, {
+      headers: {
+        'Accept-Language': lang
+      }
     });
     return true;
   } catch (error) {
@@ -44,9 +55,13 @@ export const updateItemStatus = async (id, isChecked) => {
 };
 
 // 4. Delete Item
-export const deleteItem = async (id) => {
+export const deleteItem = async (id, lang = 'en') => {
   try {
-    await api.delete(`/shopping-list/${id}`);
+    await api.delete(`/shopping-list/${id}`, {
+      headers: {
+        'Accept-Language': lang
+      }
+    });
     return true;
   } catch (error) {
     console.error("Error deleting item:", error);
@@ -54,11 +69,15 @@ export const deleteItem = async (id) => {
   }
 };
 
-// Get All Ingredients for Autocomplete
-export const getAllIngredients = async () => {
+// 5. Get All Ingredients for Autocomplete
+export const getAllIngredients = async (lang = 'en') => {
   try {
-    const response = await api.get('/ingredients');
-    // Axios returns the data directly in response.data
+    const response = await api.get('/ingredients', {
+      headers: {
+        'Accept-Language': lang
+      }
+    });
+    
     const data = response.data;
     if (Array.isArray(data)) {
       return data.map(item => item.name || item);

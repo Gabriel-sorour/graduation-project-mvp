@@ -4,12 +4,14 @@ import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatRecipe } from '../utils/recipeUtils';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/Explore.css';
 import '../styles/CookWithPantry.css';
 
 function CookWithPantry() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
+  const { language } = useLanguage();
 
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,8 @@ function CookWithPantry() {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept-Language': language
           }
         });
 
@@ -72,7 +75,7 @@ function CookWithPantry() {
 
       } catch (err) {
         console.error("Error fetching matches:", err);
-        setError("Could not load your pantry matches.");
+        setError(language === 'ar' ? "تعذر تحميل وصفات المخزن." : "Could not load your pantry matches.");
       } finally {
         setLoading(false);
       }
@@ -80,7 +83,7 @@ function CookWithPantry() {
 
     fetchMatches();
 
-  }, [token, navigate, filters]);
+  }, [token, navigate, filters, language]);
 
   // --- Filter Helpers ---
   const toggleFilter = (filterName) => {
@@ -99,44 +102,62 @@ function CookWithPantry() {
 
   const filterOptions = {
     category: [
-      { label: 'All Categories', value: '' },
-      { label: 'Meal', value: 'meal' },
-      { label: 'Drink', value: 'drink' },
-      { label: 'Snack', value: 'snack' }
+      { label: language === 'ar' ? 'كل التصنيفات' : 'All Categories', value: '' },
+      { label: language === 'ar' ? 'وجبة' : 'Meal', value: 'meal' },
+      { label: language === 'ar' ? 'مشروب' : 'Drink', value: 'drink' },
+      { label: language === 'ar' ? 'سناك' : 'Snack', value: 'snack' }
     ],
     meal_type: [
-      { label: 'All Types', value: '' },
-      { label: 'Breakfast', value: 'breakfast' },
-      { label: 'Lunch', value: 'lunch' },
-      { label: 'Dinner', value: 'dinner' }
+      { label: language === 'ar' ? 'كل الأنواع' : 'All Types', value: '' },
+      { label: language === 'ar' ? 'فطور' : 'Breakfast', value: 'breakfast' },
+      { label: language === 'ar' ? 'غداء' : 'Lunch', value: 'lunch' },
+      { label: language === 'ar' ? 'عشاء' : 'Dinner', value: 'dinner' }
     ],
     temperature: [
-      { label: 'Any Temp', value: '' },
-      { label: 'Hot', value: 'hot' },
-      { label: 'Cold', value: 'cold' }
+      { label: language === 'ar' ? 'أي حرارة' : 'Any Temp', value: '' },
+      { label: language === 'ar' ? 'ساخن' : 'Hot', value: 'hot' },
+      { label: language === 'ar' ? 'بارد' : 'Cold', value: 'cold' }
     ]
   };
 
+  const t = {
+    title: language === 'ar' ? 'ماذا يمكنك أن تطبخ الآن' : 'What you can cook now',
+    subtitle: language === 'ar' 
+        ? `بناءً على المكونات في مخزنك ${user?.name ? `، يا ${user.name}` : ''}` 
+        : `Based on ingredients in your pantry ${user?.name ? `${user.name}` : ''}`,
+    loading: language === 'ar' ? "نتحقق من مخزنك..." : "Checking your pantry...",
+    found: (count) => language === 'ar' ? `وجدنا ${count} وصفة تناسب مكوناتك.` : `Found ${count} recipes matching your ingredients.`,
+    noMatches: language === 'ar' ? "لم نجد وصفات مطابقة" : "No matches found",
+    tryAdding: language === 'ar' ? "جرب إضافة المزيد من المكونات لمخزنك!" : "Try adding more ingredients to your pantry!",
+    goToPantry: language === 'ar' ? "الذهاب للمخزن" : "Go to Pantry",
+    reset: language === 'ar' ? "إعادة ضبط" : "Reset",
+    category: language === 'ar' ? "تصنيف" : "Category",
+    mealType: language === 'ar' ? "نوع الوجبة" : "Meal Type",
+    temperature: language === 'ar' ? "حرارة" : "Temperature",
+    missing: language === 'ar' ? "ينقصك: " : "Missing: ",
+    ready: language === 'ar' ? "جاهزة للطبخ!" : "Ready to Cook!"
+  };
 
   return (
-    <div className="explore-container">
+    // 7. ضبط الاتجاه RTL
+    <div className={`explore-container ${language === 'ar' ? 'rtl-layout' : ''}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       
-      {/* 1. Header Section (Independant) */}
+      {/* 1. Header Section */}
       <div className="explore-header" style={{ position: 'relative' }}>
         <button 
           onClick={() => navigate('/')} 
           className="cook-header-btn"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={24} className={language === 'ar' ? 'rotate-180' : ''} />
         </button>
 
-        <h1>What you can cook now</h1>
+        <h1>{t.title}</h1>
         <p className="cook-header-sub">
-          Based on ingredients in your pantry {user?.name ? `${user.name}` : ''}
+          {t.subtitle}
         </p>
       </div>
 
-      {/* 2. Filters Section (Separated Container) */}
+      {/* 2. Filters Section */}
       <div 
         className="filters-container" 
         ref={filterRef} 
@@ -153,7 +174,7 @@ function CookWithPantry() {
             >
               {filters.category ?
                 filterOptions.category.find(o => o.value === filters.category)?.label
-                : "Category"}
+                : t.category}
               <ChevronDown size={14} />
             </button>
 
@@ -181,7 +202,7 @@ function CookWithPantry() {
             >
               {filters.meal_type ?
                 filterOptions.meal_type.find(o => o.value === filters.meal_type)?.label
-                : "Meal Type"}
+                : t.mealType}
               <ChevronDown size={14} />
             </button>
 
@@ -209,7 +230,7 @@ function CookWithPantry() {
             >
               {filters.temperature ?
                 filterOptions.temperature.find(o => o.value === filters.temperature)?.label
-                : "Temperature"}
+                : t.temperature}
               <ChevronDown size={14} />
             </button>
 
@@ -232,7 +253,7 @@ function CookWithPantry() {
 
         {(filters.category || filters.meal_type || filters.temperature) && (
           <button className="reset-filters-btn" onClick={resetFilters}>
-            Reset
+            {t.reset}
           </button>
         )}
       </div>
@@ -240,9 +261,7 @@ function CookWithPantry() {
       {/* 3. Results Section */}
       <div>
         <div className="results-info">
-          {loading ? "Checking your pantry..." : 
-             `Found ${recipes.length} recipes matching your ingredients.`
-          }
+          {loading ? t.loading : t.found(recipes.length)}
         </div>
 
         {/* Error State */}
@@ -280,14 +299,14 @@ function CookWithPantry() {
                   {!isPerfectMatch && recipe.missing_ingredients && (
                       <div className="cook-missing-alert">
                           <AlertCircle size={14} />
-                          Missing: {recipe.missing_ingredients.join(', ')}
+                          {t.missing} {recipe.missing_ingredients.join('، ')} 
                       </div>
                   )}
                   
                   {/* --- Perfect Match Badge --- */}
                   {isPerfectMatch && (
                      <div className="cook-ready-badge">
-                        Ready to Cook!
+                        {t.ready}
                      </div>
                   )}
 
@@ -297,13 +316,13 @@ function CookWithPantry() {
           ) : !loading && !error && (
             <div className="no-results">
               <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-              <h3>No matches found</h3>
-              <p>Try adding more ingredients to your pantry!</p>
+              <h3>{t.noMatches}</h3>
+              <p>{t.tryAdding}</p>
               <button 
                 onClick={() => navigate('/dashboard?tab=pantry')}
                 className="cook-pantry-btn"
               >
-                Go to Pantry
+                {t.goToPantry}
               </button>
             </div>
           )}

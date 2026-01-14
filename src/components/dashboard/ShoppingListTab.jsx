@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, ShoppingCart, Check, Search } from 'lucide-react';
 import { getShoppingList, addItem, updateItemStatus, deleteItem, getAllIngredients } from '../../utils/shoppingService';
+import { useLanguage } from '../../context/LanguageContext'; // 1. استدعاء الكونتكست
 
 import './ShoppingListTab.css';
 
 const ShoppingListTab = () => {
+  const { language } = useLanguage();
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
    
@@ -15,12 +18,14 @@ const ShoppingListTab = () => {
    
   const wrapperRef = useRef(null);
 
-  // Load Data
+  // Load Data on Mount & Language Change
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const listData = await getShoppingList();
-        const ingredientsData = await getAllIngredients();
+        setLoading(true);
+        const listData = await getShoppingList(language);
+        const ingredientsData = await getAllIngredients(language);
+        
         setItems(Array.isArray(listData) ? listData : []);
         setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
       } catch (error) {
@@ -38,8 +43,7 @@ const ShoppingListTab = () => {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
+  }, [language]);
   // Handle Input & Filter
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -70,12 +74,11 @@ const ShoppingListTab = () => {
       return;
     }
 
-    // Clear input immediately for better UX
     setInputValue("");
     setSuggestions([]);
 
     try {
-      const addedItem = await addItem(finalName);
+      const addedItem = await addItem(finalName, language);
       if (addedItem) {
         setItems(prev => [...prev, addedItem]);
       }
@@ -91,7 +94,6 @@ const ShoppingListTab = () => {
   // Toggle Status
   const handleToggle = async (id, currentStatus) => {
     const newStatus = !currentStatus;
-    // Optimistic Update
     setItems(prev => prev.map(item => item.id === id ? { ...item, is_checked: newStatus } : item));
     
     const success = await updateItemStatus(id, newStatus);
@@ -104,7 +106,6 @@ const ShoppingListTab = () => {
   // Delete Item
   const handleDelete = async (id) => {
     const originalItems = [...items];
-    // Optimistic Update
     setItems(prev => prev.filter(item => item.id !== id));
     
     const success = await deleteItem(id);
@@ -114,23 +115,32 @@ const ShoppingListTab = () => {
     }
   };
 
-  if (loading) return <div className="empty-state">Loading...</div>;
+  const t = {
+    loading: language === 'ar' ? 'جاري التحميل...' : 'Loading...',
+    title: language === 'ar' ? 'قائمة التسوق' : 'Shopping List',
+    subtitle: language === 'ar' ? 'أدر المكونات التي تحتاج لشرائها.' : 'Manage ingredients you need to buy.',
+    placeholder: language === 'ar' ? 'اكتب للبحث عن مكون...' : 'Type to search ingredients...',
+    empty: language === 'ar' ? 'القائمة فارغة. ابدأ بالكتابة لإضافة عناصر!' : 'Your list is empty. Start typing to add items!'
+  };
+
+  if (loading) return <div className="empty-state">{t.loading}</div>;
 
   return (
-    <div className="shopping-container">
+    <div className={`shopping-container ${language === 'ar' ? 'rtl-content' : ''}`}>
        
       {/* Header */}
       <div className="shopping-header">
         <h2 className="shopping-title">
-          <ShoppingCart size={24} /> Shopping List
+          <ShoppingCart size={24} /> {t.title}
         </h2>
-        <p className="shopping-subtitle">Manage ingredients you need to buy.</p>
+        <p className="shopping-subtitle">{t.subtitle}</p>
       </div>
 
       {/* Autocomplete Input */}
       <div ref={wrapperRef} className="search-wrapper">
         <div className="search-input-group">
-          <Search size={20} className="search-icon" />
+          
+          <Search size={20} className={`search-icon ${language === 'ar' ? 'search-icon-rtl' : ''}`} />
            
           <input
             type="search"
@@ -138,13 +148,14 @@ const ShoppingListTab = () => {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === 'Enter' && handleAddItem(inputValue)}
-            placeholder="Type to search ingredients..."
+            placeholder={t.placeholder}
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
           />
         </div>
 
         {/* Suggestions Dropdown */}
         {suggestions.length > 0 && (
-          <div className="suggestions-dropdown">
+          <div className="suggestions-dropdown" style={{textAlign: language === 'ar' ? 'right' : 'left'}}>
             {suggestions.map((suggestion, index) => (
               <div 
                 key={index}
@@ -162,7 +173,7 @@ const ShoppingListTab = () => {
       <div className="shopping-list">
         {items.length === 0 && !loading ? (
            <div className="empty-state">
-             Your list is empty. Start typing to add items!
+             {t.empty}
            </div>
         ) : (
           items.map(item => (

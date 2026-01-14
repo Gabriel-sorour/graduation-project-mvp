@@ -319,3 +319,7 @@ body.dark-mode .add-ing-btn:hover {
     transform: translateY(0);
   }
 }
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
