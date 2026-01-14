@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, ChefHat, Filter, ChevronDown, Check } from 'lucide-react'; // Added Icons
+import { Search, X, ChefHat, Filter, ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import RecipeCard from '../components/common/RecipeCard';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Explore.css';
@@ -8,6 +8,7 @@ import { formatRecipe } from '../utils/recipeUtils';
 function Explore() {
   const navigate = useNavigate();
 
+  // --- Search & Filter States ---
   const [selectedTags, setSelectedTags] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -20,11 +21,16 @@ function Explore() {
   const [openFilter, setOpenFilter] = useState(null);
   const filterRef = useRef(null);
 
-  // Backend data
+  // --- Data & Pagination States ---
   const [allIngredients, setAllIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // New States for Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
+  // Close filters on click outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
@@ -35,9 +41,8 @@ function Explore() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch Data from API
+  // 1. Fetch Ingredients (Once)
   useEffect(() => {
-    // 1. Get Ingredients
     fetch('http://127.0.0.1:8000/api/ingredients')
       .then(res => res.json())
       .then(data => {
@@ -46,48 +51,58 @@ function Explore() {
       .catch(err => console.error("Error fetching ingredients:", err));
   }, []);
 
-  // 2. Fetch Recipes 
+  // 2. Fetch Recipes (Triggered by Filters, Tags, or Page Change)
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
       try {
         let url = new URL('http://127.0.0.1:8000/api/recipes');
-        let options = {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          }
-        };
-
+        
         const hasFilters = filters.category || filters.meal_type || filters.temperature;
 
+        // تحديد الـ Endpoint (بحث ولا عرض عادي)
         if (selectedTags.length > 0 || hasFilters) {
-
           url = new URL('http://127.0.0.1:8000/api/recipes/search');
-
+          
           if (selectedTags.length > 0) {
             url.searchParams.append('ingredients', selectedTags.join(','));
           }
-
           if (filters.category) url.searchParams.append('category', filters.category);
           if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
           if (filters.temperature) url.searchParams.append('temperature', filters.temperature);
         }
 
-        const response = await fetch(url, options);
+        // إضافة رقم الصفحة للريكويست
+        url.searchParams.append('page', currentPage);
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const result = await response.json();
-        const rawData = result.data || [];
-        const formattedRecipes = rawData.map(recipe => formatRecipe(recipe));
+        
+        // --- تصحيح قراءة البيانات بناءً على الـ JSON المرسل ---
+        // result هو الأوبجيكت الرئيسي اللي فيه current_page و data (Array)
+        
+        const rawRecipes = result.data || []; // المصفوفة موجودة مباشرة في result.data
+        const lastPageNum = result.last_page || 1; // رقم آخر صفحة موجود مباشرة في result.last_page
+        
+        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
 
         setRecipes(formattedRecipes);
+        setLastPage(lastPageNum);
 
       } catch (err) {
         console.error("Error fetching recipes:", err);
+        setRecipes([]);
       } finally {
         setLoading(false);
       }
@@ -95,8 +110,10 @@ function Explore() {
 
     fetchRecipes();
 
-  }, [selectedTags, filters]);
+  }, [selectedTags, filters, currentPage]);
 
+
+  // --- Event Handlers ---
 
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -113,16 +130,16 @@ function Explore() {
     }
   };
 
-
   const addTag = (ingredient) => {
     setSelectedTags([...selectedTags, ingredient]);
     setInputValue('');
     setSuggestions([]);
+    setCurrentPage(1); // Reset page on new search
   };
-
 
   const removeTag = (tagToRemove) => {
     setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
+    setCurrentPage(1); // Reset page on change
   };
 
   // --- Filter Logic ---
@@ -133,11 +150,21 @@ function Explore() {
   const selectFilterOption = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setOpenFilter(null);
+    setCurrentPage(1); // Reset page on filter change
   };
 
   const resetFilters = () => {
     setFilters({ category: '', meal_type: '', temperature: '' });
     setOpenFilter(null);
+    setCurrentPage(1); // Reset page on reset
+  };
+
+  // --- Pagination Logic ---
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= lastPage) {
+        setCurrentPage(newPage);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const filterOptions = {
@@ -160,7 +187,6 @@ function Explore() {
     ]
   };
 
-
   return (
     <>
       <title>Explore</title>
@@ -172,7 +198,6 @@ function Explore() {
           {/* Multi-select Search Component */}
           <div className="search-wrapper">
             <div className="search-box-container">
-
               {selectedTags.map((tag, index) => (
                 <div key={index} className="search-tag">
                   {tag}
@@ -211,7 +236,7 @@ function Explore() {
             <div className="filter-group">
               <Filter size={18} className="filter-icon" />
 
-              {/* 1. Category Dropdown */}
+              {/* Category Dropdown */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.category ? 'active' : ''}`}
@@ -222,7 +247,6 @@ function Explore() {
                     : "Category"}
                   <ChevronDown size={14} />
                 </button>
-
                 {openFilter === 'category' && (
                   <div className="custom-dropdown-menu">
                     {filterOptions.category.map((opt) => (
@@ -239,7 +263,7 @@ function Explore() {
                 )}
               </div>
 
-              {/* 2. Meal Type Dropdown */}
+              {/* Meal Type Dropdown */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
@@ -250,7 +274,6 @@ function Explore() {
                     : "Meal Type"}
                   <ChevronDown size={14} />
                 </button>
-
                 {openFilter === 'meal_type' && (
                   <div className="custom-dropdown-menu">
                     {filterOptions.meal_type.map((opt) => (
@@ -267,7 +290,7 @@ function Explore() {
                 )}
               </div>
 
-              {/* 3. Temperature Dropdown */}
+              {/* Temperature Dropdown */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.temperature ? 'active' : ''}`}
@@ -278,7 +301,6 @@ function Explore() {
                     : "Temperature"}
                   <ChevronDown size={14} />
                 </button>
-
                 {openFilter === 'temperature' && (
                   <div className="custom-dropdown-menu">
                     {filterOptions.temperature.map((opt) => (
@@ -294,7 +316,6 @@ function Explore() {
                   </div>
                 )}
               </div>
-
             </div>
 
             {(filters.category || filters.meal_type || filters.temperature) && (
@@ -310,8 +331,8 @@ function Explore() {
           <div className="results-info">
             {loading ? "Loading recipes..." :
               (selectedTags.length > 0 || filters.category || filters.meal_type || filters.temperature)
-                ? `Found ${recipes.length} matching recipes.`
-                : "Showing all recipes."
+                ? `Showing page ${currentPage} of ${lastPage}`
+                : `Showing all recipes (Page ${currentPage})`
             }
           </div>
 
@@ -332,6 +353,44 @@ function Explore() {
               </div>
             )}
           </div>
+
+          {/* --- Numbered Pagination Controls --- */}
+          {!loading && recipes.length > 0 && lastPage > 1 && (
+              <div className="pagination-container">
+                  {/* Previous Button */}
+                  <button 
+                    className="page-nav-btn" 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    disabled={currentPage === 1}
+                    title="Previous Page"
+                  >
+                      <ChevronLeft size={20} />
+                  </button>
+                  
+                  {/* Page Numbers */}
+                  <div className="page-numbers">
+                    {Array.from({ length: lastPage }, (_, i) => i + 1).map((pageNum) => (
+                        <button
+                            key={pageNum}
+                            className={`page-num-btn ${currentPage === pageNum ? 'active' : ''}`}
+                            onClick={() => handlePageChange(pageNum)}
+                        >
+                            {pageNum}
+                        </button>
+                    ))}
+                  </div>
+
+                  {/* Next Button */}
+                  <button 
+                    className="page-nav-btn" 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    disabled={currentPage === lastPage}
+                    title="Next Page"
+                  >
+                      <ChevronRight size={20} />
+                  </button>
+              </div>
+          )}
         </div>
       </div>
     </>
