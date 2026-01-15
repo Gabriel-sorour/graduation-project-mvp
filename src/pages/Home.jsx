@@ -35,7 +35,7 @@ function Home() {
         
         const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
         
-        setRecipes(formattedRecipes.slice(0, 5)); 
+        setRecipes(formattedRecipes.slice(3, 6)); 
         setLoading(false);
       })
       .catch(error => {

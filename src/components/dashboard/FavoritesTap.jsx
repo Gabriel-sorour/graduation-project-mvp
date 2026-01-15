@@ -20,44 +20,8 @@ const FavoritesTap = () => {
 
         if (Array.isArray(data)) {
           const formattedRecipes = data.map(item => {
-            let recipe = item.recipe || item;
-
-            recipe.title = language === 'ar'
-              ? (recipe.title_ar || recipe.title_en || recipe.title)
-              : (recipe.title_en || recipe.title_ar || recipe.title);
-
-            recipe.description = language === 'ar'
-              ? (recipe.description_ar || recipe.description_en || recipe.description)
-              : (recipe.description_en || recipe.description_ar || recipe.description);
-
-            if (Array.isArray(recipe.ingredients)) {
-              recipe.ingredients = recipe.ingredients.map(ing => ({
-                ...ing,
-                name: language === 'ar'
-                  ? (ing.name_ar || ing.name_en || ing.name)
-                  : (ing.name_en || ing.name_ar || ing.name)
-              }));
-            } else if (typeof recipe.ingredients === 'string') {
-              try {
-                recipe.ingredients = JSON.parse(recipe.ingredients);
-              } catch (e) {
-                recipe.ingredients = [];
-                console.log(e);
-                
-              }
-            }
-
-            if (typeof recipe.steps === 'string') {
-              try {
-                recipe.steps = JSON.parse(recipe.steps);
-              } catch (e) {
-                recipe.steps = [];
-                console.log(e);
-              }
-            }
-
-            return formatRecipe(recipe);
-          }).filter(Boolean);
+            return formatRecipe(item, language);
+          });
 
           setFavorites(formattedRecipes);
         } else {
@@ -65,6 +29,7 @@ const FavoritesTap = () => {
         }
       } catch (error) {
         console.error("Error fetching favorites:", error);
+        setFavorites([]);
       } finally {
         setLoading(false);
       }
