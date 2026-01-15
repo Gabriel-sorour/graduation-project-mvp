@@ -13,7 +13,6 @@ function RecipeDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-
   const { language } = useLanguage();
 
   const missingIngredients = location.state?.missingIngredients || [];
@@ -26,28 +25,18 @@ function RecipeDetail() {
   const [addedIngredients, setAddedIngredients] = useState({});
 
   useEffect(() => {
-    // eslint-disable-next-line
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setLoading(true);
 
-    fetch(`http://127.0.0.1:8000/api/recipes/${id}`, {
+    fetch(`http://127.0.0.1:8000/api/recipes/${id}?lang=${language}`, {
       headers: {
         'Accept-Language': language
       }
     })
       .then(res => res.json())
       .then(async (data) => {
-        const rawRecipe = data.data || data;
-        let formattedRecipe = formatRecipe(rawRecipe);
-
-        if (typeof formattedRecipe.steps === 'string') {
-          try {
-            formattedRecipe.steps = JSON.parse(formattedRecipe.steps);
-          } catch (e) {
-            console.log("Error parsing steps", e);
-            formattedRecipe.steps = [];
-          }
-        }
-
+        const formattedRecipe = formatRecipe(data, language);
         setRecipe(formattedRecipe);
 
         const status = await checkIsFavorite(formattedRecipe.id, language);
@@ -56,8 +45,9 @@ function RecipeDetail() {
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
         setLoading(false);
+        console.log(err);
+
       });
   }, [id, language]);
 
@@ -72,22 +62,21 @@ function RecipeDetail() {
     }
   };
 
-  const handleAddToShopping = async (ingredient) => {
+  const handleAddToShopping = async (ingredientName) => {
     if (!user) {
       navigate('/login', { state: { from: location } });
       return;
     }
-    if (addedIngredients[ingredient]) return;
+    if (addedIngredients[ingredientName]) return;
 
-    const result = await addItem(ingredient, language);
+    const result = await addItem(ingredientName, language);
     if (result) {
-      setAddedIngredients(prev => ({ ...prev, [ingredient]: true }));
+      setAddedIngredients(prev => ({ ...prev, [ingredientName]: true }));
     }
   };
 
   const getDifficultyClass = (level) => {
     if (!level) return 'diff-easy';
-
     const lvl = level.toLowerCase();
     if (lvl.includes('medium') || lvl.includes('متوسط')) return 'diff-medium';
     if (lvl.includes('hard') || lvl.includes('صعب')) return 'diff-hard';
@@ -97,8 +86,7 @@ function RecipeDetail() {
   const checkIngredientStatus = (ingredientName) => {
     if (!isPantryMode) return 'neutral';
 
-    const nameStr = typeof ingredientName === 'object' ? ingredientName.name : ingredientName;
-    const cleanName = nameStr.toLowerCase().trim();
+    const cleanName = ingredientName.toLowerCase().trim();
 
     const isMissing = missingIngredients.some(missing =>
       cleanName.includes(missing.toLowerCase()) || missing.toLowerCase().includes(cleanName)
@@ -114,27 +102,18 @@ function RecipeDetail() {
     back: language === 'ar' ? 'رجوع' : 'Back',
     ingredients: language === 'ar' ? 'المكونات' : 'Ingredients',
     instructions: language === 'ar' ? 'طريقة التحضير' : 'Instructions',
-    step: language === 'ar' ? 'خطوة' : '',
     surpriseBadge: language === 'ar' ? 'مفاجأة الشيف' : "Chef's Surprise Pick",
     addToShopping: language === 'ar' ? 'أضف لقائمة التسوق' : 'Add to Shopping List',
     added: language === 'ar' ? 'تمت الإضافة' : 'Added to list'
   };
 
-  if (loading)
-    return (
-      <div className="container status-container">
-        {t.loading}
-      </div>
-    );
-
-  if (!recipe) {
-    return (
-      <div className="container status-container">
-        <h2>{t.notFound}</h2>
-        <button onClick={() => navigate('/')} className="btn-primary home-btn">{t.goHome}</button>
-      </div>
-    );
-  }
+  if (loading) return <div className="container status-container">{t.loading}</div>;
+  if (!recipe) return (
+    <div className="container status-container">
+      <h2>{t.notFound}</h2>
+      <button onClick={() => navigate('/')} className="btn-primary home-btn">{t.goHome}</button>
+    </div>
+  );
 
   return (
     <>
@@ -148,11 +127,11 @@ function RecipeDetail() {
 
         <div className="recipe-content">
           <div className="recipe-visuals" style={{ position: 'relative' }}>
-
             <img
               src={`http://127.0.0.1:8000/${recipe.image}`}
               alt={recipe.title}
               className={`detail-image ${isSurprise ? 'surprise-glow' : ''}`}
+              onError={(e) => { e.target.src = '/placeholder-recipe.jpg'; }}
             />
 
             <button className="detail-like-btn" onClick={handleToggleLike}>
@@ -166,10 +145,13 @@ function RecipeDetail() {
                 {recipe.difficulty}
               </span>
             </div>
+
+            {recipe.description && (
+              <p className="recipe-description-text">{recipe.description}</p>
+            )}
           </div>
 
           <div className="recipe-info">
-
             {isSurprise && (
               <div className="surprise-badge">
                 <Sparkles size={16} fill="white" />
@@ -182,18 +164,15 @@ function RecipeDetail() {
             <div>
               <h3 className="section-heading">{t.ingredients}</h3>
               <ul className="ingredient-list">
-                {recipe.ingredients && recipe.ingredients.map((ing, idx) => {
-
-                  const ingName = typeof ing === 'object' ? ing.name : ing;
+                {recipe.ingredients && recipe.ingredients.map((ingName, idx) => {
                   const status = checkIngredientStatus(ingName);
-
                   const statusClass = status === 'missing' ? 'status-missing' : status === 'available' ? 'status-available' : '';
 
                   return (
                     <li key={idx} className={`ingredient-item ${statusClass}`}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {status === 'missing' && <AlertCircle size={16} />}
-                        {status === 'available' && <Check size={16} />}
+                        {status === 'missing' && <AlertCircle size={16} className="text-red-500" />}
+                        {status === 'available' && <Check size={16} className="text-green-500" />}
                         <span>{ingName}</span>
                       </div>
 
@@ -215,12 +194,18 @@ function RecipeDetail() {
             <div className='instructions-div'>
               <h3 className="section-heading">{t.instructions}</h3>
               <div className="steps-list">
-                {recipe.steps && recipe.steps.map((step, idx) => (
-                  <div key={idx} className="step-item">
-                    <span className="step-number">{idx + 1}</span>
-                    <p className="step-text">{step}</p>
-                  </div>
-                ))}
+                {recipe.steps && recipe.steps.length > 0 ? (
+                  recipe.steps.map((step, idx) => (
+                    <div key={idx} className="step-item">
+                      <span className="step-number">{idx + 1}</span>
+                      <p className="step-text">{step}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ color: 'var(--gray)', fontStyle: 'italic' }}>
+                    {language === 'ar' ? 'لا توجد خطوات متاحة.' : 'No instructions available.'}
+                  </p>
+                )}
               </div>
             </div>
           </div>

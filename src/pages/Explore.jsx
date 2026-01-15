@@ -40,8 +40,10 @@ function Explore() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch Ingredients List
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/ingredients', {
+    // التعديل: إضافة lang كـ Query Parameter لأن الباك إند بيحتاجها كده
+    fetch(`http://127.0.0.1:8000/api/ingredients?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }
@@ -53,6 +55,7 @@ function Explore() {
       .catch(err => console.error("Error fetching ingredients:", err));
   }, [lang]);
 
+  // Fetch Recipes (Search or All)
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
@@ -70,6 +73,8 @@ function Explore() {
         }
 
         url.searchParams.append('page', currentPage);
+        // إضافة lang للبحث أيضاً لضمان دقة النتائج
+        url.searchParams.append('lang', lang);
 
         const response = await fetch(url.toString(), {
           method: 'GET',
@@ -90,7 +95,8 @@ function Explore() {
         const rawRecipes = paginationMeta.data || [];
         const lastPageNum = paginationMeta.last_page || 1;
 
-        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
+        // التعديل: تمرير اللغة لدالة التنسيق
+        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe, lang));
 
         setRecipes(formattedRecipes);
         setLastPage(lastPageNum);

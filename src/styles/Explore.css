@@ -36,10 +36,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-
   background: var(--white);
   border: 2px solid var(--border-color);
-
   border-radius: 1rem;
   position: relative;
   padding: 0.5rem 1rem;
@@ -54,10 +52,15 @@
 
 .search-icon-fixed {
   position: absolute;
-  right: 1rem;
+  inset-inline-end: 1rem;
   top: 30%;
   color: var(--gray);
   pointer-events: none;
+}
+
+[dir="rtl"] .search-box-container {
+  padding-right: 1rem;
+  padding-left: 3rem;
 }
 
 .search-tag {
@@ -91,11 +94,9 @@
   outline: none !important;
   font-size: 1rem;
   padding: 0.5rem 0;
-
   background-color: transparent !important;
   background: transparent !important;
   box-shadow: none !important;
-
   color: var(--dark) !important;
 }
 
@@ -107,14 +108,14 @@ body.dark-mode .search-input-transparent {
 .suggestions-dropdown {
   position: absolute;
   top: 110%;
-  left: 0;
-  right: 0;
+
+  inset-inline-start: 0;
+  inset-inline-end: 0;
 
   background: var(--white);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
   max-height: 250px;
   overflow-y: auto;
   z-index: 50;
@@ -167,11 +168,9 @@ body.dark-mode .search-input-transparent {
   gap: 6px;
   padding: 8px 16px;
   border-radius: 20px;
-
   border: 1px solid var(--border-color);
   background-color: var(--white);
   color: var(--dark);
-
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -192,12 +191,11 @@ body.dark-mode .search-input-transparent {
 .custom-dropdown-menu {
   position: absolute;
   top: 115%;
-  left: 0;
-  min-width: 180px;
+  inset-inline-start: 0;
 
+  min-width: 180px;
   background: var(--white);
   border: 1px solid var(--border-color);
-
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 100;
@@ -365,8 +363,8 @@ body.dark-mode .custom-dropdown-menu {
 }
 
 body.dark-mode .reset-filters-btn {
-  background-color: rgba(239, 68, 68, 0.2); 
-  color: #fca5a5; 
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
 }
 
 .pagination-container {

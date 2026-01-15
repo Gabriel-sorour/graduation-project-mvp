@@ -48,10 +48,12 @@
   border: 1px solid var(--border-color);
 }
 
+/* زر اللايك (محدث ليدعم RTL) */
 .detail-like-btn {
   position: absolute;
   top: 15px;
-  right: 15px;
+  /* inset-inline-end بدلاً من right عشان يتعكس لوحده في العربي */
+  inset-inline-end: 15px; 
   background: var(--white);
   color: var(--dark);
   border: none;
@@ -73,12 +75,24 @@
   font-size: 0.95rem;
   padding: 1rem 0;
   border-bottom: 1px solid var(--border-color);
+  justify-content: space-around; /* إضافة عشان التوزيع يكون أحسن */
 }
 
 .meta-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* --- تنسيق الوصف الجديد --- */
+.recipe-description-text {
+  font-size: 1rem;
+  color: var(--gray);
+  line-height: 1.6;
+  text-align: center;
+  margin-top: 1.5rem;
+  font-style: italic;
+  padding: 0 0.5rem;
 }
 
 .recipe-info {
@@ -145,13 +159,15 @@
   padding-bottom: 2rem;
 }
 
+/* --- تنسيق الخطوات (محدث ليدعم RTL) --- */
 .steps-list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  border-left: 2px solid var(--primary-light);
-  padding-left: 1.5rem;
-  margin-left: 0.8rem;
+  /* border-inline-start بدلاً من border-left عشان يبقى يمين في العربي */
+  border-inline-start: 2px solid var(--primary-light);
+  padding-inline-start: 1.5rem;
+  margin-inline-start: 0.8rem;
 }
 
 .step-item {
@@ -160,7 +176,8 @@
 
 .step-number {
   position: absolute;
-  left: calc(-1.5rem - 1px - 0.8rem);
+  /* inset-inline-start بدلاً من left */
+  inset-inline-start: calc(-1.5rem - 1px - 0.8rem);
   top: 0;
   background: var(--primary-light);
   color: var(--primary);
@@ -183,17 +200,9 @@
   font-weight: 600;
 }
 
-.diff-easy {
-  color: var(--primary);
-}
-
-.diff-medium {
-  color: #f97316;
-}
-
-.diff-hard {
-  color: #ef4444;
-}
+.diff-easy { color: var(--primary); }
+.diff-medium { color: #f97316; }
+.diff-hard { color: #ef4444; }
 
 .status-container {
   padding: 4rem !important;
@@ -225,9 +234,7 @@
   transition: all 0.3s ease;
 }
 
-
-/* --- Ingredient Status Colors (Cook With Pantry) --- */
-
+/* --- Ingredient Status Colors --- */
 .ingredient-item.status-missing {
   background-color: #fff7ed;
   color: #c2410c;
@@ -241,7 +248,6 @@
 }
 
 /* --- Dark Mode Overrides --- */
-
 body.dark-mode .ingredient-item.status-missing {
   background-color: rgba(234, 88, 12, 0.15);
   color: #fb923c;
@@ -254,20 +260,17 @@ body.dark-mode .ingredient-item.status-available {
   border-color: rgba(22, 163, 74, 0.3);
 }
 
+body.dark-mode .recipe-description-text {
+  color: #a1a1aa;
+}
+
 .ingredient-item svg {
   color: inherit;
 }
 
 @keyframes popIn {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 body.dark-mode .detail-like-btn {
@@ -294,8 +297,6 @@ body.dark-mode .add-ing-btn:hover {
   color: white;
 }
 
-
-
 @media (min-width: 768px) {
   .recipe-content {
     flex-direction: row;
@@ -309,15 +310,8 @@ body.dark-mode .add-ing-btn:hover {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .rotate-180 {

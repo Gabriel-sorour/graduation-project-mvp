@@ -1,25 +1,82 @@
-export const formatRecipe = (recipe) => {
+export const formatRecipe = (data, lang = 'en') => {
+  const recipe = data.data || data.recipe || data;
+
+  let title = recipe.title;
+  if (lang === 'ar') {
+    title = recipe.title_ar || recipe.title || recipe.name || "وصفة بدون عنوان";
+  } else {
+    title = recipe.title_en || recipe.title || recipe.name || "Untitled Recipe";
+  }
+
   let ingredients = recipe.ingredients;
 
-  // 1. If it's a JSON string, parse it
   if (typeof ingredients === 'string') {
     try {
       ingredients = JSON.parse(ingredients);
     } catch (e) {
-      console.error("JSON Parse Error:", e);
       ingredients = [];
+      console.log(e);
+      
     }
   }
 
-  // 2. If it's an array of Objects (from DB relation), extract names
   if (Array.isArray(ingredients)) {
-    ingredients = ingredients.map(ing =>
-      (typeof ing === 'object' && ing !== null && ing.name) ? ing.name : ing
-    );
+    ingredients = ingredients.map(ing => {
+      if (typeof ing === 'string') return ing;
+
+      if (typeof ing === 'object' && ing !== null) {
+        if (lang === 'ar') {
+          return ing.pivot?.ingredient_name_ar || ing.name_ar || ing.item_name || ing.name;
+        }
+        return ing.name_en || ing.name || ing.item_name;
+      }
+      return '';
+    });
+  } else {
+    ingredients = [];
+  }
+
+  let steps = recipe.steps;
+
+  if (typeof steps === 'string') {
+    try {
+      steps = JSON.parse(steps);
+    } catch (e) {
+      steps = [];
+      console.log(e);
+      
+    }
+  }
+
+  if (!Array.isArray(steps) && typeof steps === 'object' && steps !== null) {
+    if (lang === 'ar') {
+      steps = steps.ar || steps.en || [];
+    } else {
+      steps = steps.en || steps.ar || [];
+    }
+  }
+
+  if (!Array.isArray(steps)) {
+    steps = [];
+  }
+
+  let description = recipe.description;
+  if (lang === 'ar' && recipe.description_ar) {
+    description = recipe.description_ar;
+  } else if (lang === 'en' && recipe.description_en) {
+    description = recipe.description_en;
   }
 
   return {
-    ...recipe,
-    ingredients: ingredients
+    id: recipe.id,
+    title: title,
+    image: recipe.image,
+    time: recipe.time || recipe.cook_time || "N/A",
+    calories: recipe.calories || 0,
+    difficulty: recipe.difficulty || "Easy",
+    ingredients: ingredients,
+    steps: steps,
+    description: description,
+    missing_count: recipe.missing_ingredient_count || 0
   };
 };
