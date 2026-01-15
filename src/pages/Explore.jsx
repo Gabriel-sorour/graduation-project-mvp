@@ -29,7 +29,6 @@ function Explore() {
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
-  // Close filters on click outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
@@ -40,9 +39,7 @@ function Explore() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch Ingredients List
   useEffect(() => {
-    // التعديل: إضافة lang كـ Query Parameter لأن الباك إند بيحتاجها كده
     fetch(`http://127.0.0.1:8000/api/ingredients?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
@@ -55,7 +52,6 @@ function Explore() {
       .catch(err => console.error("Error fetching ingredients:", err));
   }, [lang]);
 
-  // Fetch Recipes (Search or All)
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
@@ -73,7 +69,6 @@ function Explore() {
         }
 
         url.searchParams.append('page', currentPage);
-        // إضافة lang للبحث أيضاً لضمان دقة النتائج
         url.searchParams.append('lang', lang);
 
         const response = await fetch(url.toString(), {
@@ -95,7 +90,6 @@ function Explore() {
         const rawRecipes = paginationMeta.data || [];
         const lastPageNum = paginationMeta.last_page || 1;
 
-        // التعديل: تمرير اللغة لدالة التنسيق
         const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe, lang));
 
         setRecipes(formattedRecipes);
@@ -113,15 +107,23 @@ function Explore() {
 
   }, [selectedTags, filters, currentPage, lang]);
 
+  const normalizeText = (text) => {
+    if (typeof text !== 'string') return "";
+    return text.toLowerCase()
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي');
+  };
 
-  // --- Event Handlers ---
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
 
     if (value.length > 0) {
+      const normalizedInput = normalizeText(value);
+      
       const filtered = allIngredients.filter(ing =>
-        ing.toLowerCase().includes(value.toLowerCase()) &&
+        normalizeText(ing).includes(normalizedInput) &&
         !selectedTags.includes(ing)
       );
       setSuggestions(filtered);
@@ -165,7 +167,6 @@ function Explore() {
     }
   };
 
-  // --- Filter Options Translations ---
   const filterOptions = {
     category: [
       { label: lang === 'ar' ? 'كل التصنيفات' : 'All Categories', value: '' },
@@ -193,14 +194,12 @@ function Explore() {
       <div className={`explore-container ${lang === 'ar' ? 'rtl-layout' : ''}`}>
 
         <div className="explore-header">
-          {/* Header Top Row: Just Title (Button Removed) */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <p className='find-p' style={{ margin: 0 }}>
               {lang === 'ar' ? 'ابحث عن وصفات بالمكونات والفلاتر' : 'Find recipes by ingredients & filters'}
             </p>
           </div>
 
-          {/* Search Wrapper */}
           <div className="search-wrapper">
             <div className="search-box-container">
               {selectedTags.map((tag, index) => (
@@ -241,12 +240,10 @@ function Explore() {
             )}
           </div>
 
-          {/* Filters Container */}
           <div className="filters-container" ref={filterRef}>
             <div className="filter-group">
               <Filter size={18} className="filter-icon" />
 
-              {/* Category */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.category ? 'active' : ''}`}
@@ -273,7 +270,6 @@ function Explore() {
                 )}
               </div>
 
-              {/* Meal Type */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
@@ -300,7 +296,6 @@ function Explore() {
                 )}
               </div>
 
-              {/* Temperature */}
               <div className="custom-select-wrapper">
                 <button
                   className={`filter-chip ${filters.temperature ? 'active' : ''}`}
@@ -368,10 +363,8 @@ function Explore() {
             )}
           </div>
 
-          {/* Pagination Controls */}
           {!loading && recipes.length > 0 && lastPage > 1 && (
             <div className="pagination-container" style={{ flexDirection: lang === 'ar' ? 'row-reverse' : 'row' }}>
-              {/* Prev Button */}
               <button
                 className="page-nav-btn"
                 onClick={() => handlePageChange(currentPage - 1)}
@@ -392,7 +385,6 @@ function Explore() {
                 ))}
               </div>
 
-              {/* Next Button */}
               <button
                 className="page-nav-btn"
                 onClick={() => handlePageChange(currentPage + 1)}

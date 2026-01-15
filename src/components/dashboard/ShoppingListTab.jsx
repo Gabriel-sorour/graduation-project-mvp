@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Trash2, ShoppingCart, Check, Search } from 'lucide-react';
 import { getShoppingList, addItem, updateItemStatus, deleteItem, getAllIngredients } from '../../utils/shoppingService';
-import { useLanguage } from '../../context/LanguageContext'; // 1. استدعاء الكونتكست
+import { useLanguage } from '../../context/LanguageContext';
 
 import './ShoppingListTab.css';
 
@@ -11,14 +11,12 @@ const ShoppingListTab = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
    
-  // Autocomplete States
   const [inputValue, setInputValue] = useState("");
   const [allIngredients, setAllIngredients] = useState([]); 
   const [suggestions, setSuggestions] = useState([]);
    
   const wrapperRef = useRef(null);
 
-  // Load Data on Mount & Language Change
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,30 +42,45 @@ const ShoppingListTab = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [language]);
-  // Handle Input & Filter
+
+  const normalizeText = (text) => {
+    if (typeof text !== 'string') return "";
+    return text.toLowerCase()
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي');
+  };
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
 
     if (value.length > 0) {
-      const filtered = allIngredients.filter(ingredient => 
-        ingredient.toLowerCase().includes(value.toLowerCase()) && 
-        !items.some(item => item.item_name.toLowerCase() === ingredient.toLowerCase())
-      );
+      const normalizedInput = normalizeText(value);
+
+      const filtered = allIngredients.filter(ingredient => {
+        const normalizedIngredient = normalizeText(ingredient);
+        const matchesSearch = normalizedIngredient.includes(normalizedInput);
+        
+        const isAlreadyAdded = items.some(item => 
+          normalizeText(item.item_name) === normalizedIngredient
+        );
+
+        return matchesSearch && !isAlreadyAdded;
+      });
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
     }
   };
 
-  // Add Item Logic
   const handleAddItem = async (nameToAdd) => {
     if (!nameToAdd || !nameToAdd.trim()) return;
      
     const finalName = nameToAdd.trim();
+    const normalizedName = normalizeText(finalName);
 
-    // Check Duplicates
-    const exists = items.some(item => item.item_name.toLowerCase() === finalName.toLowerCase());
+    const exists = items.some(item => normalizeText(item.item_name) === normalizedName);
     if (exists) {
       setInputValue(""); 
       setSuggestions([]);
@@ -91,7 +104,6 @@ const ShoppingListTab = () => {
     handleAddItem(suggestion);
   };
 
-  // Toggle Status
   const handleToggle = async (id, currentStatus) => {
     const newStatus = !currentStatus;
     setItems(prev => prev.map(item => item.id === id ? { ...item, is_checked: newStatus } : item));
@@ -103,7 +115,6 @@ const ShoppingListTab = () => {
     }
   };
 
-  // Delete Item
   const handleDelete = async (id) => {
     const originalItems = [...items];
     setItems(prev => prev.filter(item => item.id !== id));
@@ -128,7 +139,6 @@ const ShoppingListTab = () => {
   return (
     <div className={`shopping-container ${language === 'ar' ? 'rtl-content' : ''}`}>
        
-      {/* Header */}
       <div className="shopping-header">
         <h2 className="shopping-title">
           <ShoppingCart size={24} /> {t.title}
@@ -136,7 +146,6 @@ const ShoppingListTab = () => {
         <p className="shopping-subtitle">{t.subtitle}</p>
       </div>
 
-      {/* Autocomplete Input */}
       <div ref={wrapperRef} className="search-wrapper">
         <div className="search-input-group">
           
@@ -153,7 +162,6 @@ const ShoppingListTab = () => {
           />
         </div>
 
-        {/* Suggestions Dropdown */}
         {suggestions.length > 0 && (
           <div className="suggestions-dropdown" style={{textAlign: language === 'ar' ? 'right' : 'left'}}>
             {suggestions.map((suggestion, index) => (
@@ -169,7 +177,6 @@ const ShoppingListTab = () => {
         )}
       </div>
 
-      {/* List Items */}
       <div className="shopping-list">
         {items.length === 0 && !loading ? (
            <div className="empty-state">

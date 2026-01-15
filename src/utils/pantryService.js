@@ -1,14 +1,11 @@
 import api from './api';
 
-// 1. Get All Pantry Items
 export const getPantryItems = async (lang = 'en') => {
   try {
-
-    // Check if there is token or not
     const token = localStorage.getItem('token');
     if (!token) return [];
 
-    const response = await api.get('/pantry', {
+    const response = await api.get(`/pantry?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }
@@ -20,10 +17,8 @@ export const getPantryItems = async (lang = 'en') => {
   }
 };
 
-// 2. Add Item
 export const addPantryItem = async (itemName, lang = 'en') => {
   try {
-
     const response = await api.post('/pantry', {
       item_name: itemName
     }, {
@@ -38,10 +33,8 @@ export const addPantryItem = async (itemName, lang = 'en') => {
   }
 };
 
-// 3. Delete Item
 export const deletePantryItem = async (id, lang = 'en') => {
   try {
-
     await api.delete(`/pantry/${id}`, {
       headers: {
         'Accept-Language': lang

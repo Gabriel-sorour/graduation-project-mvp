@@ -1,13 +1,11 @@
 import api from './api';
 
-// 1. Get All Items
 export const getShoppingList = async (lang = 'en') => {
-
   const token = localStorage.getItem('token');
   if (!token) return [];
 
   try {
-    const response = await api.get('/shopping-list', {
+    const response = await api.get(`/shopping-list?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }
@@ -19,7 +17,6 @@ export const getShoppingList = async (lang = 'en') => {
   }
 };
 
-// 2. Add New Item
 export const addItem = async (itemName, lang = 'en') => {
   try {
     const response = await api.post('/shopping-list', {
@@ -37,7 +34,6 @@ export const addItem = async (itemName, lang = 'en') => {
   }
 };
 
-// 3. Update Status (Check/Uncheck)
 export const updateItemStatus = async (id, isChecked, lang = 'en') => {
   try {
     await api.patch(`/shopping-list/${id}`, {
@@ -54,7 +50,6 @@ export const updateItemStatus = async (id, isChecked, lang = 'en') => {
   }
 };
 
-// 4. Delete Item
 export const deleteItem = async (id, lang = 'en') => {
   try {
     await api.delete(`/shopping-list/${id}`, {
@@ -69,10 +64,9 @@ export const deleteItem = async (id, lang = 'en') => {
   }
 };
 
-// 5. Get All Ingredients for Autocomplete
 export const getAllIngredients = async (lang = 'en') => {
   try {
-    const response = await api.get('/ingredients', {
+    const response = await api.get(`/ingredients?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }

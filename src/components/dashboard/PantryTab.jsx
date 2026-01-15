@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react'; 
 import { getPantryItems, addPantryItem, deletePantryItem } from '../../utils/pantryService';
 import { getAllIngredients } from '../../utils/shoppingService'; 
-import { useLanguage } from '../../context/LanguageContext'; // 1. استدعاء الكونتكست
+import { useLanguage } from '../../context/LanguageContext';
 
 function PantryTab() {
   const { language } = useLanguage();
@@ -13,7 +13,6 @@ function PantryTab() {
   const [allIngredients, setAllIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load Data on Mount & When Language Changes
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -32,15 +31,31 @@ function PantryTab() {
     loadData();
   }, [language]);
 
+  const normalizeText = (text) => {
+    if (typeof text !== 'string') return "";
+    return text.toLowerCase()
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي');
+  };
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
 
     if (value.length > 0) {
-      const filtered = allIngredients.filter(ingredient => 
-        ingredient.toLowerCase().includes(value.toLowerCase()) && 
-        !items.some(item => item.item_name.toLowerCase() === ingredient.toLowerCase())
-      );
+      const normalizedInput = normalizeText(value);
+
+      const filtered = allIngredients.filter(ingredient => {
+        const normalizedIngredient = normalizeText(ingredient);
+        const matchesSearch = normalizedIngredient.includes(normalizedInput);
+        
+        const isAlreadyAdded = items.some(item => 
+          normalizeText(item.item_name) === normalizedIngredient
+        );
+
+        return matchesSearch && !isAlreadyAdded;
+      });
       setSuggestions(filtered);
     } else {
       setSuggestions([]);
@@ -110,7 +125,6 @@ function PantryTab() {
             dir={language === 'ar' ? 'rtl' : 'ltr'}
           />
           
-          {/* Show suggestions */}
           {suggestions.length > 0 && (
             <div className="suggestions-list" style={{textAlign: language === 'ar' ? 'right' : 'left'}}>
               {suggestions.map((suggestion, index) => (
