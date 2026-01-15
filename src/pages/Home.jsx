@@ -80,7 +80,13 @@ function Home() {
 
       const responseData = await response.json();
       if (responseData.status === 'fail') {
-        showAlert(language === 'ar' ? "تنبيه" : "Note", responseData.message);
+        let msg = responseData.message;
+
+        if (language === 'ar' && (msg.includes("No suitable recipe") || msg.includes("pantry"))) {
+           msg = "لا توجد وصفة مناسبة مع مكونات مطبخك الحالية.";
+        }
+
+        showAlert(language === 'ar' ? "تنبيه" : "Note", msg);
         return;
       }
 
