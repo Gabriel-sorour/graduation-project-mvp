@@ -48,6 +48,11 @@ function ChatWidget() {
   ];
 
   const handleSuggestionClick = async (text) => {
+    if (!token) {
+      setIsOpen(false);
+      navigate('/login');
+      return;
+    }
     await sendMessage(text, token, language);
   };
 
@@ -94,6 +99,13 @@ function ChatWidget() {
   const handleSendClick = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
+
+    if (!token) {
+      setIsOpen(false);
+      navigate('/login');
+      return;
+    }
+
     await sendMessage(inputValue, token, language);
     setInputValue("");
   };
@@ -121,7 +133,6 @@ function ChatWidget() {
       {isOpen && (
         <div className="chat-interface widget-mode">
 
-          {/* Header */}
           <div className="chat-header">
             <h3><Sparkles size={18} /> {t.title}</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -140,7 +151,14 @@ function ChatWidget() {
                 <Trash2 size={18} />
               </button>
 
-              <button onClick={() => navigate('/chat')} className="icon-btn maximize-btn" title={t.expandTooltip}>
+              <button onClick={() => {
+                 if (!token) {
+                    setIsOpen(false);
+                    navigate('/login');
+                 } else {
+                    navigate('/chat');
+                 }
+              }} className="icon-btn maximize-btn" title={t.expandTooltip}>
                 <Maximize2 size={18} />
               </button>
 
@@ -150,7 +168,6 @@ function ChatWidget() {
             </div>
           </div>
 
-          {/* Messages Loop */}
           <div className="chat-messages">
             {messages.map((msg) => (
               <div key={msg.id} className={`message ${msg.sender}`}>
@@ -191,7 +208,6 @@ function ChatWidget() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <form onSubmit={handleSendClick} className="chat-input-area">
             <input
               type="search"
