@@ -49,6 +49,8 @@ function CookWithPantry() {
       try {
         const url = new URL('http://127.0.0.1:8000/api/recipes/match-pantry');
         url.searchParams.append('allow_missing_one', 'true');
+        
+        url.searchParams.append('lang', language); 
 
         if (filters.category) url.searchParams.append('category', filters.category);
         if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
@@ -70,7 +72,17 @@ function CookWithPantry() {
 
         const result = await response.json();
         const rawData = result.data || [];
-        const formattedRecipes = rawData.map(recipe => formatRecipe(recipe));
+
+        const formattedRecipes = rawData.map(recipe => {
+            const formatted = formatRecipe(recipe);
+            return {
+                ...formatted,
+                missing_count: recipe.missing_count,
+                missing_ingredients: recipe.missing_ingredients,
+                match_count: recipe.match_count
+            };
+        });
+
         setRecipes(formattedRecipes);
 
       } catch (err) {
@@ -139,7 +151,6 @@ function CookWithPantry() {
   };
 
   return (
-    // 7. ضبط الاتجاه RTL
     <div className={`explore-container ${language === 'ar' ? 'rtl-layout' : ''}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* 1. Header Section */}

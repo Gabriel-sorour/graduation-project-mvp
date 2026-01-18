@@ -40,6 +40,10 @@ function Explore() {
   }, []);
 
   useEffect(() => {
+    setInputValue('');
+    setSelectedTags([]);
+    setSuggestions([]);
+
     fetch(`http://127.0.0.1:8000/api/ingredients?lang=${lang}`, {
       headers: {
         'Accept-Language': lang

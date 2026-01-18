@@ -5,7 +5,7 @@ export const getShoppingList = async (lang = 'en') => {
   if (!token) return [];
 
   try {
-    const response = await api.get(`/shopping-list?lang=${lang}`, {
+    const response = await api.get(`/shopping-list/lang?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }

@@ -5,7 +5,7 @@ export const getPantryItems = async (lang = 'en') => {
     const token = localStorage.getItem('token');
     if (!token) return [];
 
-    const response = await api.get(`/pantry?lang=${lang}`, {
+    const response = await api.get(`/pantry/lang?lang=${lang}`, {
       headers: {
         'Accept-Language': lang
       }
@@ -33,6 +33,7 @@ export const addPantryItem = async (itemName, lang = 'en') => {
   }
 };
 
+// الدالة القديمة (ممكن نسيبها احتياطي)
 export const deletePantryItem = async (id, lang = 'en') => {
   try {
     await api.delete(`/pantry/${id}`, {
@@ -43,6 +44,21 @@ export const deletePantryItem = async (id, lang = 'en') => {
     return true;
   } catch (error) {
     console.error("Error deleting pantry item:", error);
+    return false;
+  }
+};
+
+export const deleteAndSync = async (id, lang = 'en') => {
+  try {
+    await api.delete(`/pantry/${id}/sync`, {
+      headers: {
+        'Accept-Language': lang
+      }
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error syncing delete:", error);
     return false;
   }
 };

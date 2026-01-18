@@ -24,7 +24,14 @@ const ShoppingListTab = () => {
         const listData = await getShoppingList(language);
         const ingredientsData = await getAllIngredients(language);
         
-        setItems(Array.isArray(listData) ? listData : []);
+        let finalItems = [];
+        if (Array.isArray(listData)) {
+            finalItems = listData;
+        } else if (listData && Array.isArray(listData.data)) {
+            finalItems = listData.data;
+        }
+
+        setItems(finalItems);
         setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
       } catch (error) {
         console.error("Failed to load shopping data", error);
@@ -197,7 +204,7 @@ const ShoppingListTab = () => {
                 </div>
                  
                 <span className={`item-name ${item.is_checked ? 'checked' : ''}`}>
-                  {item.item_name}
+                  {item.display_name || item.item_name}
                 </span>
               </div>
 

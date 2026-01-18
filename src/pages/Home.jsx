@@ -5,7 +5,7 @@ import '../styles/Home.css';
 import { formatRecipe } from '../utils/recipeUtils';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Heart } from 'lucide-react';
 import { useAlert } from '../context/AlertContext';
 
 function Home() {
@@ -19,23 +19,20 @@ function Home() {
   const [surpriseLoading, setSurpriseLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // --- Fetch Trending Recipes ---
+  // --- Fetch Trending Recipes (Top Loved) ---
   useEffect(() => {
     setLoading(true);
     
-    fetch('http://127.0.0.1:8000/api/recipes', {
+    fetch(`http://127.0.0.1:8000/api/recipes/top-loved?lang=${language}`, {
       headers: {
         'Accept-Language': language
       }
     })
       .then(response => response.json())
       .then(result => {
-        const dataWrapper = result.data || {};
-        const rawRecipes = Array.isArray(dataWrapper) ? dataWrapper : (dataWrapper.data || []);
-        
-        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe));
-        
-        setRecipes(formattedRecipes.slice(3, 6)); 
+        const rawRecipes = result.data || [];
+        const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe, language));
+        setRecipes(formattedRecipes); 
         setLoading(false);
       })
       .catch(error => {
@@ -44,6 +41,7 @@ function Home() {
       });
   }, [language]);
 
+  // --- Slider Logic ---
   useEffect(() => {
     if (recipes.length === 0) return;
 
@@ -126,7 +124,10 @@ function Home() {
     cookBtn: language === 'ar' ? "اطبخ بالموجود" : "Cook with what I have",
     surpriseBtn: language === 'ar' ? (surpriseLoading ? 'جاري الطهي...' : 'فاجئني') : (surpriseLoading ? 'Cooking...' : 'Surprise Me'),
     trending: language === 'ar' ? "الأكثر رواجاً الآن" : "Trending Now",
-    loading: language === 'ar' ? "نختار لك أفضل الوصفات..." : "Curating best recipes for you..."
+    loading: language === 'ar' ? "نختار لك أفضل الوصفات..." : "Curating best recipes for you...",
+    noTrendingTitle: language === 'ar' ? "لا توجد وصفات رائجة بعد" : "No trending recipes yet",
+    noTrendingSub: language === 'ar' ? "كن أول من يضيف وصفة للمفضلة!" : "Be the first to add a recipe to favorites!",
+    startLiking: language === 'ar' ? "ابدأ التصفح" : "Start Exploring"
   };
 
   return (
@@ -164,6 +165,7 @@ function Home() {
           </div>
         </section>
 
+        {/* Trending Section */}
         <section className="home-content">
           <div className="container">
 
@@ -176,7 +178,7 @@ function Home() {
                 <div className="spinner"></div>
                 <p>{t.loading}</p>
               </div>
-            ) : (
+            ) : recipes.length > 0 ? (
               <div className="slider-wrapper" dir="ltr">
                 <div 
                   className="recipe-grid slider-track"
@@ -187,6 +189,10 @@ function Home() {
                         key={recipe.id} 
                         className="slide-item"
                         dir={language === 'ar' ? 'rtl' : 'ltr'}
+                        style={{ 
+                            textAlign: language === 'ar' ? 'right' : 'left',
+                            direction: language === 'ar' ? 'rtl' : 'ltr' 
+                        }}
                     >
                       <RecipeCard
                         recipe={recipe}
@@ -205,6 +211,20 @@ function Home() {
                     ></span>
                   ))}
                 </div>
+              </div>
+            ) : (
+              // Empty State
+              <div className="no-results" style={{ padding: '2rem', textAlign: 'center' }}>
+                <Heart size={48} style={{ margin: '0 auto 1rem', opacity: 0.3, color: '#ef4444' }} />
+                <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t.noTrendingTitle}</h3>
+                <p style={{ color: 'var(--gray)', marginBottom: '1.5rem' }}>{t.noTrendingSub}</p>
+                <button 
+                  className="btn-primary"
+                  onClick={() => navigate('/explore')}
+                  style={{ margin: '0 auto' }}
+                >
+                  {t.startLiking}
+                </button>
               </div>
             )}
           </div>

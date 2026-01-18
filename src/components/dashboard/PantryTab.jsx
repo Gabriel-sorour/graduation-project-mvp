@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, X } from 'lucide-react'; 
-import { getPantryItems, addPantryItem, deletePantryItem } from '../../utils/pantryService';
+import { getPantryItems, addPantryItem, deleteAndSync } from '../../utils/pantryService';
 import { getAllIngredients } from '../../utils/shoppingService'; 
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -18,7 +18,15 @@ function PantryTab() {
       try {
         setLoading(true);
         const pantryData = await getPantryItems(language);
-        setItems(Array.isArray(pantryData) ? pantryData : []);
+        
+        let finalItems = [];
+        if (Array.isArray(pantryData)) {
+            finalItems = pantryData;
+        } else if (pantryData && Array.isArray(pantryData.data)) {
+            finalItems = pantryData.data;
+        }
+        
+        setItems(finalItems);
 
         const ingredientsData = await getAllIngredients(language);
         setAllIngredients(Array.isArray(ingredientsData) ? ingredientsData : []);
@@ -81,9 +89,10 @@ function PantryTab() {
     const originalItems = [...items];
     setItems(prev => prev.filter(item => item.id !== id));
 
-    const success = await deletePantryItem(id);
+    const success = await deleteAndSync(id, language);
     
     if (!success) {
+      // لو حصل خطأ نرجع العنصر تاني
       setItems(originalItems);
     }
   };
@@ -144,7 +153,7 @@ function PantryTab() {
       <div className="pantry-grid">
         {items.map((item, index) => (
           <div key={item.id || index} className="pantry-item">
-            <span>{item.item_name}</span>
+            <span>{item.display_name || item.item_name}</span>
             <button 
               className="btn-remove" 
               onClick={() => handleRemoveItem(item.id)}
