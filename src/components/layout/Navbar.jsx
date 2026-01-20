@@ -1,32 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom'; // ✅ شلت useState و useEffect لأننا مش محتاجينهم هنا
 import { ChefHat, User, Sun, Moon, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext'; // ✅ استدعاء الكونتكست
 import '../../styles/Navbar.css';
 
 function Navbar() {
   const location = useLocation();
   const { user } = useAuth();
   const { language, toggleLanguage } = useLanguage();
-
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  
+  // ✅ هنا الربط السحري: بنستخدم نفس المتغيرات بتاعت الداشبورد
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const isActive = (path) => location.pathname === path ? 'active' : '';
 
@@ -76,6 +61,7 @@ function Navbar() {
 
             <div className="pill-divider"></div>
 
+            {/* ✅ الزرار ده دلوقتي بينادي على toggleTheme بتاعت الكونتكست */}
             <button 
               className="pill-btn theme-toggle" 
               onClick={toggleTheme}

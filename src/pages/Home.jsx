@@ -67,7 +67,7 @@ function Home() {
     setSurpriseLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/recipes/surprise-me', {
+      const response = await fetch(`http://127.0.0.1:8000/api/recipes/surprise-me?lang=${language}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

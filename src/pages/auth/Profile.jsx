@@ -1,15 +1,13 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-// import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Mail, Moon, Sun } from 'lucide-react';
+import { User, LogOut, Mail, LayoutDashboard } from 'lucide-react'; // ✅ ضفنا الأيقونة
 import '../../styles/Profile.css';
 
 const Profile = () => {
   const { user, logout } = useAuth();
   const { language } = useLanguage();
-  // const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -21,7 +19,8 @@ const Profile = () => {
 
   const t = {
     signOut: language === 'ar' ? 'تسجيل الخروج' : 'Sign Out',
-    darkMode: language === 'ar' ? 'الوضع الليلي' : 'Dark Mode' // جهزتها ليك لو قررت تفعلها
+    dashboard: language === 'ar' ? 'لوحة التحكم' : 'Admin Dashboard', // ✅ ترجمة الزرار
+    darkMode: language === 'ar' ? 'الوضع الليلي' : 'Dark Mode'
   };
 
   return (
@@ -55,29 +54,21 @@ const Profile = () => {
         </div>
 
         <hr className="divider" />
-        
-        {/* Settings Section (Commented Out - Prepared for future) */}
-        {/* <div className="profile-settings">
-          <div className="setting-item">
-            <div className="setting-label">
-              {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
-              <span>{t.darkMode}</span>
-            </div>
-            
-            <label className="theme-switch">
-              <input 
-                type="checkbox" 
-                checked={isDarkMode} 
-                onChange={toggleTheme} 
-              />
-              <span className="slider round"></span>
-            </label>
-          </div>
-        </div> 
-        */}
 
         {/* Actions */}
         <div className="profile-actions">
+          
+          {/* ✅ زر الداشبورد: يظهر فقط للأدمن */}
+          {user.role === 'admin' && (
+            <button 
+              onClick={() => navigate('/admin')} 
+              className="btn-dashboard"
+            >
+              <LayoutDashboard size={20} />
+              {t.dashboard}
+            </button>
+          )}
+
           <button onClick={handleLogout} className="btn-logout">
             <LogOut size={20} className={language === 'ar' ? 'rotate-180' : ''} />
             {t.signOut}

@@ -24,9 +24,8 @@ function RecipeDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const [addedIngredients, setAddedIngredients] = useState({});
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     setLoading(true);
 
     fetch(`http://127.0.0.1:8000/api/recipes/${id}?lang=${language}`, {
@@ -47,7 +46,6 @@ function RecipeDetail() {
       .catch(err => {
         setLoading(false);
         console.log(err);
-
       });
   }, [id, language]);
 
@@ -75,6 +73,29 @@ function RecipeDetail() {
     }
   };
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://placehold.co/600x400?text=No+Image';
+    if (imagePath.startsWith('http')) return imagePath;
+    if (imagePath.startsWith('asset/')) return `http://127.0.0.1:8000/${imagePath}`;
+    return `http://127.0.0.1:8000/storage/${imagePath}`;
+  };
+
+  const formatTime = (time) => {
+    if (!time) return '';
+    const num = parseInt(time);
+    if (isNaN(num)) return time;
+    return language === 'ar' ? `${num} دقيقة` : `${num} min`;
+  };
+
+  const translateDifficulty = (difficulty) => {
+    if (!difficulty) return '';
+    if (language === 'ar') {
+      const map = { 'Easy': 'سهل', 'Medium': 'متوسط', 'Hard': 'صعب' };
+      return map[difficulty] || difficulty;
+    }
+    return difficulty;
+  };
+
   const getDifficultyClass = (level) => {
     if (!level) return 'diff-easy';
     const lvl = level.toLowerCase();
@@ -83,14 +104,26 @@ function RecipeDetail() {
     return 'diff-easy';
   };
 
-  const checkIngredientStatus = (ingredientName) => {
+  // --- دالة الفحص الذكية للمكونات ---
+  const checkIngredientStatus = (ing) => {
     if (!isPantryMode) return 'neutral';
 
-    const cleanName = ingredientName.toLowerCase().trim();
+    // استخراج ID واسم المكون الحالي (القادم من الـ API)
+    const currentId = ing?.id;
+    const cleanName = (ing?.name || '').toLowerCase().trim();
 
-    const isMissing = missingIngredients.some(missing =>
-      cleanName.includes(missing.toLowerCase()) || missing.toLowerCase().includes(cleanName)
-    );
+    const isMissing = missingIngredients.some(missing => {
+      // 1. المقارنة بالـ ID (الحل الأقوى لتغير اللغة)
+      if (typeof missing === 'object' && missing !== null && missing.id) {
+        if (currentId && Number(currentId) === Number(missing.id)) return true;
+      }
+
+      // 2. المقارنة بالاسم (Fallback)
+      const missingName = typeof missing === 'string' ? missing : (missing.name || '');
+      const cleanMissing = missingName.toLowerCase().trim();
+      
+      return cleanName.includes(cleanMissing) || cleanMissing.includes(cleanName);
+    });
 
     return isMissing ? 'missing' : 'available';
   };
@@ -128,27 +161,23 @@ function RecipeDetail() {
         <div className="recipe-content">
           <div className="recipe-visuals" style={{ position: 'relative' }}>
             <img
-              src={`http://127.0.0.1:8000/${recipe.image}`}
+              src={getImageUrl(recipe.image)}
               alt={recipe.title}
               className={`detail-image ${isSurprise ? 'surprise-glow' : ''}`}
-              onError={(e) => { e.target.src = '/placeholder-recipe.jpg'; }}
+              onError={(e) => { 
+                e.target.onerror = null;
+                e.target.src = 'https://placehold.co/600x400?text=No+Image'; 
+              }}
             />
-
             <button className="detail-like-btn" onClick={handleToggleLike}>
               <Heart size={24} fill={isLiked ? "#ef4444" : "none"} color={isLiked ? "#ef4444" : "#6b7280"} />
             </button>
-
             <div className="recipe-meta">
-              <span className="meta-item"><Clock size={18} /> {recipe.time}</span>
+              <span className="meta-item"><Clock size={18} /> {formatTime(recipe.time)}</span>
               <span className="meta-item"><Flame size={18} /> {recipe.calories}</span>
-              <span className={`meta-item difficulty-text ${getDifficultyClass(recipe.difficulty)}`}>
-                {recipe.difficulty}
-              </span>
+              <span className={`meta-item difficulty-text ${getDifficultyClass(recipe.difficulty)}`}>{translateDifficulty(recipe.difficulty)}</span>
             </div>
-
-            {recipe.description && (
-              <p className="recipe-description-text">{recipe.description}</p>
-            )}
+            {recipe.description && <p className="recipe-description-text">{recipe.description}</p>}
           </div>
 
           <div className="recipe-info">
@@ -158,15 +187,14 @@ function RecipeDetail() {
                 {t.surpriseBadge}
               </div>
             )}
-
             <h1 className="recipe-title">{recipe.title}</h1>
-
             <div>
               <h3 className="section-heading">{t.ingredients}</h3>
               <ul className="ingredient-list">
-                {recipe.ingredients && recipe.ingredients.map((ingName, idx) => {
-                  const status = checkIngredientStatus(ingName);
+                {recipe.ingredients && recipe.ingredients.map((ing, idx) => {
+                  const status = checkIngredientStatus(ing);
                   const statusClass = status === 'missing' ? 'status-missing' : status === 'available' ? 'status-available' : '';
+                  const ingName = ing.name;
 
                   return (
                     <li key={idx} className={`ingredient-item ${statusClass}`}>
@@ -180,7 +208,6 @@ function RecipeDetail() {
                         <button
                           className={`add-ing-btn ${addedIngredients[ingName] ? 'added' : ''}`}
                           onClick={() => handleAddToShopping(ingName)}
-                          title={addedIngredients[ingName] ? t.added : t.addToShopping}
                         >
                           {addedIngredients[ingName] ? <Check size={16} /> : <Plus size={16} />}
                         </button>
@@ -190,7 +217,6 @@ function RecipeDetail() {
                 })}
               </ul>
             </div>
-
             <div className='instructions-div'>
               <h3 className="section-heading">{t.instructions}</h3>
               <div className="steps-list">
@@ -201,11 +227,7 @@ function RecipeDetail() {
                       <p className="step-text">{step}</p>
                     </div>
                   ))
-                ) : (
-                  <p style={{ color: 'var(--gray)', fontStyle: 'italic' }}>
-                    {language === 'ar' ? 'لا توجد خطوات متاحة.' : 'No instructions available.'}
-                  </p>
-                )}
+                ) : <p style={{ color: 'var(--gray)', fontStyle: 'italic' }}>{language === 'ar' ? 'لا توجد خطوات متاحة.' : 'No instructions available.'}</p>}
               </div>
             </div>
           </div>

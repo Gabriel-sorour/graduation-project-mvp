@@ -125,7 +125,7 @@ function Explore() {
 
     if (value.length > 0) {
       const normalizedInput = normalizeText(value);
-      
+
       const filtered = allIngredients.filter(ing =>
         normalizeText(ing).includes(normalizedInput) &&
         !selectedTags.includes(ing)
@@ -176,7 +176,8 @@ function Explore() {
       { label: lang === 'ar' ? 'كل التصنيفات' : 'All Categories', value: '' },
       { label: lang === 'ar' ? 'وجبة' : 'Meal', value: 'meal' },
       { label: lang === 'ar' ? 'مشروب' : 'Drink', value: 'drink' },
-      { label: lang === 'ar' ? 'سناك' : 'Snack', value: 'snack' }
+      { label: lang === 'ar' ? 'سناك' : 'Snack', value: 'snack' },
+      { label: lang === 'ar' ? 'حلويات' : 'Dessert', value: 'dessert' },
     ],
     meal_type: [
       { label: lang === 'ar' ? 'كل الأنواع' : 'All Types', value: '' },

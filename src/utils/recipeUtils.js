@@ -16,44 +16,43 @@ export const formatRecipe = (data, lang = 'en') => {
     } catch (e) {
       ingredients = [];
       console.log(e);
-      
     }
   }
 
   if (Array.isArray(ingredients)) {
     ingredients = ingredients.map(ing => {
-      if (typeof ing === 'string') return ing;
+      // لو كان نصاً بسيطاً، نحوله لكائن موحد
+      if (typeof ing === 'string') return { id: null, name: ing };
 
       if (typeof ing === 'object' && ing !== null) {
-        if (lang === 'ar') {
-          return ing.pivot?.ingredient_name_ar || ing.name_ar || ing.item_name || ing.name;
-        }
-        return ing.name_en || ing.name || ing.item_name;
+        const name = lang === 'ar' 
+          ? (ing.pivot?.ingredient_name_ar || ing.name_ar || ing.item_name || ing.name)
+          : (ing.name_en || ing.name || ing.item_name);
+        
+        // نرجع كائن يحتوي على الـ ID والاسم
+        return {
+          id: ing.id || (ing.pivot ? ing.pivot.ingredient_id : null),
+          name: name
+        };
       }
-      return '';
+      return { id: null, name: '' };
     });
   } else {
     ingredients = [];
   }
 
   let steps = recipe.steps;
-
   if (typeof steps === 'string') {
     try {
       steps = JSON.parse(steps);
     } catch (e) {
       steps = [];
       console.log(e);
-      
     }
   }
 
   if (!Array.isArray(steps) && typeof steps === 'object' && steps !== null) {
-    if (lang === 'ar') {
-      steps = steps.ar || steps.en || [];
-    } else {
-      steps = steps.en || steps.ar || [];
-    }
+    steps = lang === 'ar' ? (steps.ar || steps.en || []) : (steps.en || steps.ar || []);
   }
 
   if (!Array.isArray(steps)) {

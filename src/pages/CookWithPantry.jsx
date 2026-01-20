@@ -49,8 +49,8 @@ function CookWithPantry() {
       try {
         const url = new URL('http://127.0.0.1:8000/api/recipes/match-pantry');
         url.searchParams.append('allow_missing_one', 'true');
-        
-        url.searchParams.append('lang', language); 
+
+        url.searchParams.append('lang', language);
 
         if (filters.category) url.searchParams.append('category', filters.category);
         if (filters.meal_type) url.searchParams.append('meal_type', filters.meal_type);
@@ -67,20 +67,20 @@ function CookWithPantry() {
         });
 
         if (!response.ok) {
-           throw new Error('Failed to fetch matches');
+          throw new Error('Failed to fetch matches');
         }
 
         const result = await response.json();
         const rawData = result.data || [];
 
         const formattedRecipes = rawData.map(recipe => {
-            const formatted = formatRecipe(recipe);
-            return {
-                ...formatted,
-                missing_count: recipe.missing_count,
-                missing_ingredients: recipe.missing_ingredients,
-                match_count: recipe.match_count
-            };
+          const formatted = formatRecipe(recipe);
+          return {
+            ...formatted,
+            missing_count: recipe.missing_count,
+            missing_ingredients: recipe.missing_ingredients,
+            match_count: recipe.match_count
+          };
         });
 
         setRecipes(formattedRecipes);
@@ -115,28 +115,29 @@ function CookWithPantry() {
   const filterOptions = {
     category: [
       { label: language === 'ar' ? 'كل التصنيفات' : 'All Categories', value: '' },
-      { label: language === 'ar' ? 'وجبة' : 'Meal', value: 'meal' },
-      { label: language === 'ar' ? 'مشروب' : 'Drink', value: 'drink' },
-      { label: language === 'ar' ? 'سناك' : 'Snack', value: 'snack' }
+      { label: language === 'ar' ? 'وجبة' : 'Meal', value: 'Meal' },
+      { label: language === 'ar' ? 'حلويات' : 'Dessert', value: 'Dessert' },
+      { label: language === 'ar' ? 'مشروب' : 'Drink', value: 'Drink' },
+      { label: language === 'ar' ? 'سناك' : 'Snack', value: 'Snack' }
     ],
     meal_type: [
       { label: language === 'ar' ? 'كل الأنواع' : 'All Types', value: '' },
-      { label: language === 'ar' ? 'فطور' : 'Breakfast', value: 'breakfast' },
-      { label: language === 'ar' ? 'غداء' : 'Lunch', value: 'lunch' },
-      { label: language === 'ar' ? 'عشاء' : 'Dinner', value: 'dinner' }
+      { label: language === 'ar' ? 'فطور' : 'Breakfast', value: 'Breakfast' },
+      { label: language === 'ar' ? 'غداء' : 'Lunch', value: 'Lunch' },
+      { label: language === 'ar' ? 'عشاء' : 'Dinner', value: 'Dinner' }
     ],
     temperature: [
       { label: language === 'ar' ? 'أي حرارة' : 'Any Temp', value: '' },
-      { label: language === 'ar' ? 'ساخن' : 'Hot', value: 'hot' },
-      { label: language === 'ar' ? 'بارد' : 'Cold', value: 'cold' }
+      { label: language === 'ar' ? 'ساخن' : 'Hot', value: 'Hot' },
+      { label: language === 'ar' ? 'بارد' : 'Cold', value: 'Cold' }
     ]
   };
 
   const t = {
     title: language === 'ar' ? 'ماذا يمكنك أن تطبخ الآن' : 'What you can cook now',
-    subtitle: language === 'ar' 
-        ? `بناءً على المكونات في مخزنك ${user?.name ? `، يا ${user.name}` : ''}` 
-        : `Based on ingredients in your pantry ${user?.name ? `${user.name}` : ''}`,
+    subtitle: language === 'ar'
+      ? `بناءً على المكونات في مخزنك ${user?.name ? `، يا ${user.name}` : ''}`
+      : `Based on ingredients in your pantry ${user?.name ? `${user.name}` : ''}`,
     loading: language === 'ar' ? "نتحقق من مخزنك..." : "Checking your pantry...",
     found: (count) => language === 'ar' ? `وجدنا ${count} وصفة تناسب مكوناتك.` : `Found ${count} recipes matching your ingredients.`,
     noMatches: language === 'ar' ? "لم نجد وصفات مطابقة" : "No matches found",
@@ -152,11 +153,11 @@ function CookWithPantry() {
 
   return (
     <div className={`explore-container ${language === 'ar' ? 'rtl-layout' : ''}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      
+
       {/* 1. Header Section */}
       <div className="explore-header" style={{ position: 'relative' }}>
-        <button 
-          onClick={() => navigate('/')} 
+        <button
+          onClick={() => navigate('/')}
           className="cook-header-btn"
         >
           <ArrowLeft size={24} className={language === 'ar' ? 'rotate-180' : ''} />
@@ -169,9 +170,9 @@ function CookWithPantry() {
       </div>
 
       {/* 2. Filters Section */}
-      <div 
-        className="filters-container" 
-        ref={filterRef} 
+      <div
+        className="filters-container"
+        ref={filterRef}
         style={{ marginTop: '10px', marginBottom: '20px', padding: 0, boxShadow: 'none', background: 'transparent' }}
       >
         <div className="filter-group">
@@ -277,48 +278,48 @@ function CookWithPantry() {
 
         {/* Error State */}
         {error && (
-            <div className="no-results">
-                <p className="cook-error">{error}</p>
-            </div>
+          <div className="no-results">
+            <p className="cook-error">{error}</p>
+          </div>
         )}
 
         <div className="recipe-grid">
           {!loading && recipes.length > 0 ? (
             recipes.map(recipe => {
-              
+
               const isPerfectMatch = recipe.missing_count === 0;
 
               return (
-                <div 
-                  key={recipe.id} 
+                <div
+                  key={recipe.id}
                   className={`cook-card-wrapper ${isPerfectMatch ? 'match-perfect' : 'match-missing'}`}
                 >
-                  
+
                   <RecipeCard
                     recipe={recipe}
                     onClick={(id) => {
-                      navigate(`/recipe/${id}`, { 
-                        state: { 
+                      navigate(`/recipe/${id}`, {
+                        state: {
                           missingIngredients: recipe.missing_ingredients || [],
-                          isPantryMode: true 
-                        } 
+                          isPantryMode: true
+                        }
                       });
                     }}
                   />
 
                   {/* --- Missing Ingredient Alert --- */}
                   {!isPerfectMatch && recipe.missing_ingredients && (
-                      <div className="cook-missing-alert">
-                          <AlertCircle size={14} />
-                          {t.missing} {recipe.missing_ingredients.join('، ')} 
-                      </div>
+                    <div className="cook-missing-alert">
+                      <AlertCircle size={14} />
+                      {t.missing} {recipe.missing_ingredients.map(ing => typeof ing === 'object' ? ing.name : ing).join('، ')}
+                    </div>
                   )}
-                  
+
                   {/* --- Perfect Match Badge --- */}
                   {isPerfectMatch && (
-                     <div className="cook-ready-badge">
-                        {t.ready}
-                     </div>
+                    <div className="cook-ready-badge">
+                      {t.ready}
+                    </div>
                   )}
 
                 </div>
@@ -329,7 +330,7 @@ function CookWithPantry() {
               <ChefHat size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
               <h3>{t.noMatches}</h3>
               <p>{t.tryAdding}</p>
-              <button 
+              <button
                 onClick={() => navigate('/dashboard?tab=pantry')}
                 className="cook-pantry-btn"
               >

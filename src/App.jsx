@@ -1,36 +1,49 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
+// Layout & Components
 import Navbar from './components/layout/Navbar';
+import MobileNav from './components/layout/MobileNav';
+import Footer from './components/layout/Footer';
+import ChatWidget from './components/chat/ChatWidget';
+import PageTransition from './components/common/PageTransition';
+
+// Public & User Pages
 import Home from './pages/Home';
 import Explore from './pages/Explore';
 import RecipeDetail from './pages/RecipeDetail';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import MobileNav from './components/layout/MobileNav';
-import ChatWidget from './components/chat/ChatWidget';
-import PageTransition from './components/common/PageTransition';
 import Profile from './pages/auth/Profile';
 import ProtectedRoute from './pages/auth/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import CookWithPantry from './pages/CookWithPantry';
 import ChatPage from './pages/ChatPage';
-import Footer from './components/layout/Footer';
+
+// Admin Pages
+import AdminLayout from './admin/AdminLayout';
+import DashboardHome from './admin/DashboardHome';
+import IngredientsPage from './admin/IngredientsPage';
+import UsersPage from './admin/UsersPage';
+import RecipesPage from './admin/RecipesPage';
+import AddRecipePage from './admin/AddRecipePage';
+import EditRecipePage from './admin/EditRecipePage';
+import AdminProfilePage from './admin/AdminProfilePage';
 
 function App() {
   const location = useLocation();
-  const showChatWidget = !['/chat'].includes(location.pathname);
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const showChatWidget = !['/chat'].includes(location.pathname) && !isAdminRoute;
 
   return (
     <>
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
 
-      {/* Wrap with AnimatePresence */}
       <AnimatePresence mode="wait">
-        {/* dd location and key props to Routes */}
         <Routes location={location} key={location.pathname}>
 
+          {/* --- Public Routes --- */}
           <Route path="/" element={
             <PageTransition>
               <Home />
@@ -94,7 +107,30 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* --- Auth Routes --- */}
+          <Route path="/login" element={
+            <PageTransition>
+              <Login />
+            </PageTransition>
+          } />
 
+          <Route path="/register" element={
+            <PageTransition>
+              <Register />
+            </PageTransition>
+          } />
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="recipes" element={<RecipesPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="ingredients" element={<IngredientsPage />} />
+            <Route path="recipes/create" element={<AddRecipePage />} />
+            <Route path="/admin/recipes/edit/:id" element={<EditRecipePage />} />
+            <Route path="profile" element={<AdminProfilePage />} />
+          </Route>
+
+          {/* --- 404 --- */}
           <Route path="*" element={
             <PageTransition>
               <NotFound />
@@ -103,14 +139,11 @@ function App() {
 
         </Routes>
       </AnimatePresence>
-
-      {location.pathname === '/' && <Footer />}
-
+      {location.pathname === '/' && !isAdminRoute && <Footer />}
       {showChatWidget && <ChatWidget />}
-      <MobileNav />
+      {!isAdminRoute && <MobileNav />}
     </>
-  )
-
+  );
 }
 
 export default App;
