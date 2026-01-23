@@ -140,6 +140,8 @@ function RecipesPage() {
     deleteMsg: language === 'ar' ? 'هل أنت متأكد من الحذف؟' : 'Are you sure?',
     cancel: language === 'ar' ? 'إلغاء' : 'Cancel',
     confirm: language === 'ar' ? 'حذف' : 'Delete',
+    pageOf: language === 'ar' ? 'من' : 'of',
+    pageTitle: language === 'ar' ? 'صفحة' : 'Page'
   };
 
   return (
@@ -289,10 +291,27 @@ function RecipesPage() {
           </tbody>
         </table>
         
-        <div style={{ padding: '15px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-            <button disabled={currentPage===1} onClick={()=>setCurrentPage(p=>p-1)} style={pageBtnStyle}><ChevronLeft size={16}/></button>
-            <span style={{lineHeight:'30px', fontSize:'14px'}}>Page {currentPage} of {totalPages}</span>
-            <button disabled={currentPage===totalPages} onClick={()=>setCurrentPage(p=>p+1)} style={pageBtnStyle}><ChevronRight size={16}/></button>
+        {/* Pagination المطور والممركز */}
+        <div style={{ padding: '15px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+            <button 
+                disabled={currentPage === 1} 
+                onClick={() => setCurrentPage(p => p - 1)} 
+                style={{ ...pageBtnStyle, opacity: currentPage === 1 ? 0.4 : 1 }}
+            >
+                <ChevronLeft size={16}/>
+            </button>
+            
+            <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-main)' }}>
+                {t.pageTitle} {currentPage} {t.pageOf} {totalPages}
+            </span>
+            
+            <button 
+                disabled={currentPage === totalPages} 
+                onClick={() => setCurrentPage(p => p + 1)} 
+                style={{ ...pageBtnStyle, opacity: currentPage === totalPages ? 0.4 : 1 }}
+            >
+                <ChevronRight size={16}/>
+            </button>
         </div>
       </div>
 
@@ -321,8 +340,17 @@ const inputStyle = {
 };
 
 const pageBtnStyle = {
-    padding: '5px 10px', border: '1px solid var(--border-color)', 
-    borderRadius: '6px', background: 'var(--white)', cursor: 'pointer', display: 'flex', alignItems: 'center'
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    border: '1px solid var(--border-color, #cbd5e1)',
+    background: 'var(--card-bg, #ffffff)',
+    color: 'var(--text-main, #0f172a)',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
 };
 
 export default RecipesPage;

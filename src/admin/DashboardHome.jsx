@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext'; // ✅ استدعاء اللغة
-import { useNavigate } from 'react-router-dom'; // ✅ للتنقل
+import { useLanguage } from '../context/LanguageContext'; 
+import { useNavigate } from 'react-router-dom'; 
 import { Users, Utensils, Carrot, Loader } from 'lucide-react';
 
 function DashboardHome() {
   const { token, user } = useAuth();
-  const { language } = useLanguage(); // ✅ استخدام اللغة
+  const { language } = useLanguage(); 
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -35,7 +35,6 @@ function DashboardHome() {
     });
   }, [token]);
 
-  // ✅ قاموس الترجمة
   const t = {
     overview: language === 'ar' ? 'نظرة عامة' : 'Dashboard Overview',
     welcome: language === 'ar' ? `مرحباً بك، ${user?.name || 'أدمن'}!` : `Welcome back, ${user?.name || 'Admin'}!`,
@@ -66,11 +65,10 @@ function DashboardHome() {
         </div>
       </div>
 
-      {/* Stats Grid - بيستخدم الكلاسات من Admin.css */}
       <div className="stat-grid">
         
-        {/* Users Card */}
-        <div className="stat-card">
+        {/* Users Card - أصبح الآن قابلاً للضغط ✅ */}
+        <div className="stat-card" onClick={() => navigate('/admin/users')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
             <Users size={24} />
           </div>
@@ -80,7 +78,7 @@ function DashboardHome() {
           </div>
         </div>
 
-        {/* Recipes Card - قابل للضغط */}
+        {/* Recipes Card */}
         <div className="stat-card" onClick={() => navigate('/admin/recipes')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ background: '#dcfce7', color: '#16a34a' }}>
             <Utensils size={24} />
@@ -91,7 +89,7 @@ function DashboardHome() {
           </div>
         </div>
 
-        {/* Ingredients Card - قابل للضغط */}
+        {/* Ingredients Card */}
         <div className="stat-card" onClick={() => navigate('/admin/ingredients')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
             <Carrot size={24} />
@@ -103,7 +101,6 @@ function DashboardHome() {
         </div>
       </div>
 
-      {/* Recent Activity Table */}
       <div className="admin-table-container" style={{ marginTop: '2rem' }}>
         <h3 style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', color: 'var(--dark)' }}>
           {t.recent}

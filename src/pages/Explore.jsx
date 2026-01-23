@@ -149,11 +149,22 @@ function Explore() {
   };
 
   const toggleFilter = (filterName) => {
+    // منع فتح فلتر meal_type إذا لم يكن التصنيف "meal"
+    if (filterName === 'meal_type' && filters.category !== 'meal' && filters.category !== '') {
+      return;
+    }
     setOpenFilter(openFilter === filterName ? null : filterName);
   };
 
   const selectFilterOption = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const newFilters = { ...prev, [key]: value };
+      // إذا تم تغيير التصنيف لشيء غير "meal"، نقوم بتصفير الـ meal_type
+      if (key === 'category' && value !== 'meal' && value !== '') {
+        newFilters.meal_type = '';
+      }
+      return newFilters;
+    });
     setOpenFilter(null);
     setCurrentPage(1);
   };
@@ -279,6 +290,11 @@ function Explore() {
                 <button
                   className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
                   onClick={() => toggleFilter('meal_type')}
+                  style={{
+                    opacity: (filters.category !== 'meal' && filters.category !== '') ? 0.5 : 1,
+                    cursor: (filters.category !== 'meal' && filters.category !== '') ? 'not-allowed' : 'pointer',
+                    backgroundColor: (filters.category !== 'meal' && filters.category !== '') ? '#f1f5f9' : ''
+                  }}
                 >
                   {filters.meal_type ?
                     filterOptions.meal_type.find(o => o.value === filters.meal_type)?.label

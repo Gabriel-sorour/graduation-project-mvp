@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, User, Shield, Mail } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext'; 
+import { Trash2, User, Shield, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function UsersPage() {
-  const { token, user: currentUser } = useAuth(); // جبنا اليوزر الحالي عشان منمسحش نفسنا بالغلط
+  const { token, user: currentUser } = useAuth();
+  const { language } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [nextPageUrl, setNextPageUrl] = useState(null);
@@ -37,11 +38,13 @@ function UsersPage() {
   };
 
   useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchUsers(currentPage);
   }, [currentPage]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure? This user will be permanently deleted.")) return;
+    const confirmMsg = language === 'ar' ? "هل أنت متأكد؟ سيتم حذف المستخدم نهائياً." : "Are you sure? This user will be permanently deleted.";
+    if (!window.confirm(confirmMsg)) return;
 
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/admin/users/${id}`, {
@@ -50,24 +53,51 @@ function UsersPage() {
       });
 
       if (res.ok) {
-        alert("User deleted successfully");
+        alert(language === 'ar' ? "تم حذف المستخدم بنجاح" : "User deleted successfully");
         fetchUsers(currentPage);
       } else {
-        alert("Failed to delete user");
+        alert(language === 'ar' ? "فشل حذف المستخدم" : "Failed to delete user");
       }
     } catch (err) {
       console.error(err);
     }
   };
 
+  const t = {
+    title: language === 'ar' ? 'إدارة المستخدمين' : 'Users Management',
+    sub: language === 'ar' ? 'عرض وإدارة المستخدمين المسجلين' : 'View and manage registered users',
+    id: language === 'ar' ? 'الرقم' : 'ID',
+    info: language === 'ar' ? 'بيانات المستخدم' : 'User Info',
+    role: language === 'ar' ? 'الدور' : 'Role',
+    joined: language === 'ar' ? 'تاريخ الانضمام' : 'Joined Date',
+    actions: language === 'ar' ? 'إجراءات' : 'Actions',
+    you: language === 'ar' ? '(أنت)' : '(You)',
+    page: language === 'ar' ? 'صفحة' : 'Page',
+    of: language === 'ar' ? 'من' : 'of',
+  };
+
+  const pageBtnStyle = {
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    border: '1px solid var(--border-color, #cbd5e1)',
+    background: 'var(--card-bg, #ffffff)',
+    color: 'var(--text-main, #0f172a)',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
+  };
+
   if (loading) return <div className="spinner"></div>;
 
   return (
-    <div>
+    <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="admin-header">
         <div>
-          <h1>Users Management</h1>
-          <p>View and manage registered users</p>
+          <h1>{t.title}</h1>
+          <p>{t.sub}</p>
         </div>
       </div>
 
@@ -75,11 +105,11 @@ function UsersPage() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>User Info</th>
-              <th>Role</th>
-              <th>Joined Date</th>
-              <th>Actions</th>
+              <th>{t.id}</th>
+              <th>{t.info}</th>
+              <th>{t.role}</th>
+              <th>{t.joined}</th>
+              <th>{t.actions}</th>
             </tr>
           </thead>
           <tbody>
@@ -112,16 +142,14 @@ function UsersPage() {
                     {user.role}
                   </span>
                 </td>
-                <td>{new Date(user.created_at).toLocaleDateString()}</td>
+                <td>{new Date(user.created_at).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}</td>
                 <td>
-                  {/* منع حذف النفس */}
                   {currentUser && currentUser.id === user.id ? (
-                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>(You)</span>
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{t.you}</span>
                   ) : (
                     <button 
                         onClick={() => handleDelete(user.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}
-                        title="Delete User"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -132,13 +160,27 @@ function UsersPage() {
           </tbody>
         </table>
 
-        {/* Pagination Controls */}
-        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #eee' }}>
-            <span style={{ color: '#64748b', fontSize: '14px' }}>Page {currentPage} of {totalPages}</span>
-            <div style={{ display: 'flex', gap: '10px' }}>
-                <button disabled={!prevPageUrl} onClick={() => setCurrentPage(p => p - 1)} style={{ padding: '6px 12px', background: '#f1f5f9', border: '1px solid #ddd', borderRadius: '6px', cursor: prevPageUrl ? 'pointer' : 'not-allowed' }}>Prev</button>
-                <button disabled={!nextPageUrl} onClick={() => setCurrentPage(p => p + 1)} style={{ padding: '6px 12px', background: '#f1f5f9', border: '1px solid #ddd', borderRadius: '6px', cursor: nextPageUrl ? 'pointer' : 'not-allowed' }}>Next</button>
-            </div>
+        {/* Pagination المطور والممركز */}
+        <div style={{ padding: '15px', borderTop: '1px solid var(--border-color, #eee)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+            <button 
+              disabled={!prevPageUrl} 
+              onClick={() => setCurrentPage(p => p - 1)} 
+              style={{ ...pageBtnStyle, opacity: !prevPageUrl ? 0.4 : 1 }}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-main)' }}>
+              {t.page} {currentPage} {t.of} {totalPages}
+            </span>
+            
+            <button 
+              disabled={!nextPageUrl} 
+              onClick={() => setCurrentPage(p => p + 1)} 
+              style={{ ...pageBtnStyle, opacity: !nextPageUrl ? 0.4 : 1 }}
+            >
+              <ChevronRight size={16} />
+            </button>
         </div>
       </div>
     </div>

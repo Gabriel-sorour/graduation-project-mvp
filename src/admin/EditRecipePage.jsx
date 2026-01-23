@@ -41,6 +41,7 @@ const EditRecipePage = () => {
       try {
         const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
         
+        // 1. جلب المكونات والأقسام أولاً
         const ingRes = await fetch('http://127.0.0.1:8000/api/admin/ingredients?all=1', { headers });
         const ingData = await ingRes.json();
         setAvailableIngredients(ingData.data || ingData);
@@ -49,22 +50,34 @@ const EditRecipePage = () => {
         const optionsData = await optionsRes.json();
         setCategories(optionsData.categories || []);
 
+        // 2. جلب بيانات الوصفة
         const recipeRes = await fetch(`http://127.0.0.1:8000/api/admin/recipes/${id}`, { headers });
         if (!recipeRes.ok) throw new Error('Failed to fetch recipe');
         const recipe = await recipeRes.json();
         
+        // دالة مساعدة لتحويل أول حرف لـ Capital ليتطابق مع الـ Select Options
+        const formatValue = (val) => {
+          if (!val) return '';
+          const str = String(val).trim();
+          return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        };
+
+        // تنظيف الوقت من أي نصوص (مثل "20 min" تتحول لـ 20)
+        const cleanTime = recipe.time ? parseInt(recipe.time) : '';
+
+        // تعبئة الفورم مع حماية ضد الـ null
         setFormData({
           title_en: recipe.title_en || '',
           title_ar: recipe.title_ar || '',
           description_en: recipe.description_en || '',
           description_ar: recipe.description_ar || '',
           category_id: recipe.category_id || '', 
-          meal_type: recipe.meal_type || '',
+          meal_type: formatValue(recipe.meal_type),
           cuisine: recipe.cuisine || '',
-          time: recipe.time || '',
-          difficulty: recipe.difficulty || 'Easy',
+          time: cleanTime, 
+          difficulty: formatValue(recipe.difficulty) || 'Easy',
           calories: recipe.calories || '',
-          temperature: recipe.temperature || '',
+          temperature: formatValue(recipe.temperature),
           image: null
         });
 
@@ -72,28 +85,35 @@ const EditRecipePage = () => {
             setOldImage(recipe.image.startsWith('http') ? recipe.image : `http://127.0.0.1:8000/storage/${recipe.image}`);
         }
 
-        setRecipeIngredients(recipe.ingredients.map(ing => ({
-          id: ing.id,
-          quantity: ing.pivot.quantity,
-          unit: ing.pivot.unit || ''
-        })));
+        // تعبئة المكونات من العلاقة pivot
+        const formattedIngs = (recipe.ingredients || []).map(ing => ({
+          id: ing.id || '',
+          quantity: ing.pivot?.quantity || '',
+          unit: ing.pivot?.unit || ''
+        }));
+        setRecipeIngredients(formattedIngs);
 
-        setSteps(recipe.steps.map(step => ({
-           instruction_en: step.instruction_en,
-           instruction_ar: step.instruction_ar
-        })));
+        // تعبئة الخطوات من جدول الـ steps
+        const formattedSteps = (recipe.steps || []).map(step => ({
+           instruction_en: step.instruction_en || '',
+           instruction_ar: step.instruction_ar || ''
+        }));
+        setSteps(formattedSteps);
 
         setLoading(false);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error loading recipe:", error);
         setLoading(false);
-        showAlert(language === 'ar' ? 'خطأ' : 'Error', language === 'ar' ? 'فشل تحميل الوصفة' : 'Failed to fetch recipe');
+        showAlert(language === 'ar' ? 'خطأ' : 'Error', 'Failed to fetch recipe');
       }
     };
     if(token) fetchData();
   }, [id, token, language, showAlert]);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
   
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -124,12 +144,17 @@ const EditRecipePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    
+    // استخدام FormData لدعم رفع الصور مع الـ PUT (عن طريق _method)
     const data = new FormData();
     data.append('_method', 'PUT'); 
 
     Object.keys(formData).forEach(key => {
-        if (key === 'image') { if (formData.image) data.append('image', formData.image); }
-        else data.append(key, formData[key] || '');
+        if (key === 'image') { 
+          if (formData.image) data.append('image', formData.image); 
+        } else {
+          data.append(key, formData[key] ?? '');
+        }
     });
 
     recipeIngredients.forEach((ing, index) => {
@@ -141,25 +166,25 @@ const EditRecipePage = () => {
     });
 
     steps.forEach((step, index) => {
-      if(step.instruction_en) {
-        data.append(`steps[${index}][instruction_en]`, step.instruction_en);
-        data.append(`steps[${index}][instruction_ar]`, step.instruction_ar);
+      if(step.instruction_en || step.instruction_ar) {
+        data.append(`steps[${index}][instruction_en]`, step.instruction_en || '');
+        data.append(`steps[${index}][instruction_ar]`, step.instruction_ar || '');
       }
     });
 
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/admin/recipes/${id}`, {
-        method: 'POST',
+        method: 'POST', // Laravel يطلب POST عند وجود ملفات مع _method=PUT
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
         body: data,
       });
 
-      if (!response.ok) throw new Error('Update failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Update failed');
+      }
       
-      showAlert(
-          language === 'ar' ? 'تم بنجاح' : 'Success',
-          language === 'ar' ? 'تم تحديث الوصفة بنجاح' : 'Recipe updated successfully!'
-      );
+      showAlert(language === 'ar' ? 'تم بنجاح' : 'Success', 'Recipe updated successfully!');
       navigate('/admin/recipes');
     } catch (error) {
       console.error(error);
@@ -172,7 +197,7 @@ const EditRecipePage = () => {
   const selectedCategoryName = categories.find(c => c.id == formData.category_id)?.name_en;
   const isMeal = selectedCategoryName === 'Meal';
 
-  if (loading) return <div className="admin-recipe-container" style={{textAlign:'center', marginTop:'50px'}}><Loader className="spin" /> {language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</div>;
+  if (loading) return <div className="admin-recipe-container" style={{textAlign:'center', padding:'100px'}}><Loader className="spin" size={40} /></div>;
 
   return (
     <div className="admin-recipe-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
@@ -216,7 +241,6 @@ const EditRecipePage = () => {
                     value={formData.meal_type} 
                     onChange={handleChange}
                     disabled={!isMeal}
-                    style={{ opacity: !isMeal ? 0.6 : 1 }}
                 >
                     <option value="">Select Type</option>
                     <option value="Breakfast">Breakfast</option>
@@ -269,7 +293,7 @@ const EditRecipePage = () => {
             <input type="file" accept="image/*" onChange={handleImageChange} id="edit-img-upload" style={{display:'none'}} />
             <label htmlFor="edit-img-upload" className="admin-upload-label">
                 {previewImage ? (
-                    <img src={previewImage} alt="New Preview" className="admin-preview-img" />
+                    <img src={previewImage} alt="Preview" className="admin-preview-img" />
                 ) : oldImage ? (
                     <img src={oldImage} alt="Current" className="admin-preview-img" />
                 ) : (
@@ -305,10 +329,10 @@ const EditRecipePage = () => {
                   </select>
                 </div>
                 <div style={{flex: 1}}>
-                  <input type="text" placeholder={language === 'ar' ? 'الكمية' : 'Qty'} value={ing.quantity} onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)} className="admin-form-input" />
+                  <input type="text" placeholder="Qty" value={ing.quantity} onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)} className="admin-form-input" />
                 </div>
                 <div style={{flex: 1}}>
-                  <input type="text" placeholder={language === 'ar' ? 'الوحدة' : 'Unit'} value={ing.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} className="admin-form-input" />
+                  <input type="text" placeholder="Unit" value={ing.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)} className="admin-form-input" />
                 </div>
                 <button type="button" className="admin-remove-btn" onClick={() => removeIngredientRow(index)}>
                     <Trash2 size={16} />
@@ -328,7 +352,7 @@ const EditRecipePage = () => {
             <div key={index} className="admin-step-row">
                 <div className="admin-step-header">
                     <span>{language === 'ar' ? 'خطوة' : 'Step'} {index + 1}</span>
-                    <button type="button" className="admin-remove-btn" onClick={() => removeStepRow(index)} style={{height:'30px', width:'30px'}}>
+                    <button type="button" className="admin-remove-btn" onClick={() => removeStepRow(index)}>
                         <Trash2 size={14} />
                     </button>
                 </div>
