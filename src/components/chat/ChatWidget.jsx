@@ -23,6 +23,16 @@ function ChatWidget() {
   const widgetRef = useRef(null);
   const lastScrollY = useRef(0);
 
+  const prevTokenRef = useRef(token);
+  useEffect(() => {
+    if (prevTokenRef.current && !token) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      setIsOpen(false);
+      clearChat();
+    }
+    prevTokenRef.current = token;
+  }, [token, clearChat]);
+
   const t = {
     title: language === 'ar' ? 'شيف ساج' : 'Chef Sage',
     placeholder: language === 'ar' ? 'اسأل الشيف...' : 'Ask the chef...',
