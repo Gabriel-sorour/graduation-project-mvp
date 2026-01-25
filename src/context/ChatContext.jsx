@@ -54,6 +54,12 @@ export function ChatProvider({ children }) {
   const sendMessage = async (userText, token) => {
     if (!userText.trim()) return;
 
+    // Check if token exists to avoid 401/500 errors
+    if (!token) {
+      console.error("Chat Error: Auth token is missing. Please log in.");
+      return;
+    }
+
     // Add User Message
     const userMsg = { id: Date.now(), text: userText, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
@@ -68,19 +74,28 @@ export function ChatProvider({ children }) {
           'Authorization': `Bearer ${token}`,
           'Accept-Language': language
         },
-        body: JSON.stringify({ prompt: userText })
+        body: JSON.stringify({ 
+          prompt: userText, 
+          lang: language 
+        })
       });
 
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) {
+        // [SURGERY] Get detailed error text if status is 500
+        const errorText = await response.text();
+        console.error("Server Error Details:", errorText);
+        throw new Error(`Server returned ${response.status}`);
+      }
 
       const data = await response.json();
 
       let botText = language === 'ar' ? "جاري التفكير..." : "Thinking...";
       
+      // Fixed extraction logic to match SmartChatController structure
       if (data.message) {
         botText = data.message;
-      } else if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        botText = data.candidates[0].content.parts[0].text;
+      } else if (data.answer) {
+        botText = data.answer;
       }
 
       const botMsg = { 
@@ -93,7 +108,7 @@ export function ChatProvider({ children }) {
       setMessages(prev => [...prev, botMsg]);
 
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Fetch Error:", error);
       
       const errorMsg = language === 'ar' 
         ? "عذراً، أواجه مشكلة في الاتصال بخادم المطبخ حالياً."

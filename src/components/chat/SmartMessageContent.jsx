@@ -4,28 +4,34 @@ import { Clock, Flame, ChefHat, CheckSquare, List, Heart, ArrowRight } from 'luc
 import { useLanguage } from '../../context/LanguageContext';
 
 // --- 1. RecipeCard Component ---
-const RecipeCard = ({ recipe, missingItems }) => {
+const RecipeCard = ({ recipe, missingItems, onInteract }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
   const handleClick = (e) => {
     e.stopPropagation();
     if (recipe && recipe.id) {
-
       const isPantryMode = Array.isArray(missingItems);
-
       const navigationState = {
         isPantryMode: isPantryMode,
         missingIngredients: missingItems || []
       };
-
       navigate(`/recipe/${recipe.id}`, { state: navigationState });
+      if (onInteract) onInteract();
     }
   };
 
   const t = {
     missing: language === 'ar' ? 'ينقصك: ' : 'Missing: '
   };
+
+  // Logic to handle title_ar or title_en based on context
+  const displayTitle = language === 'ar' ? (recipe.title_ar || recipe.title) : (recipe.title_en || recipe.title);
+  
+  // Logic to handle image URL correctly
+  const displayImage = recipe.image ? 
+    (recipe.image.startsWith('http') ? recipe.image : `http://127.0.0.1:8000/${recipe.image}`) : 
+    '/placeholder-food.jpg';
 
   return (
     <div
@@ -35,12 +41,12 @@ const RecipeCard = ({ recipe, missingItems }) => {
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <img
-        src={recipe.image ? `http://127.0.0.1:8000/${recipe.image}` : '/placeholder-food.jpg'}
-        alt={recipe.title}
+        src={displayImage}
+        alt={displayTitle}
         className="recipe-img"
       />
       <div className="recipe-details">
-        <h4>{recipe.title}</h4>
+        <h4>{displayTitle}</h4>
         <div className="recipe-meta">
           <span><Clock size={14} /> {recipe.time}</span>
           <span><Flame size={14} /> {recipe.calories}</span>
@@ -75,13 +81,14 @@ const StepsList = ({ steps }) => {
 };
 
 // --- 3. ItemsList Component (Pantry & Shopping) ---
-const ItemsList = ({ title, items, type }) => {
+const ItemsList = ({ title, items, type, onInteract }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
   const handleCardClick = () => {
     const tabName = type === 'shopping' ? 'shopping' : 'pantry';
     navigate(`/dashboard?tab=${tabName}`);
+    if (onInteract) onInteract();
   };
 
   const t = {
@@ -92,7 +99,7 @@ const ItemsList = ({ title, items, type }) => {
     <div
       className={`smart-card list-card ${type} cursor-pointer hover:shadow-md transition-all`}
       onClick={handleCardClick}
-      title={title} // Title is passed translated from parent
+      title={title} 
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       <div className="card-header flex justify-between">
@@ -122,7 +129,7 @@ const ItemsList = ({ title, items, type }) => {
 };
 
 // --- Main Component (Dispatcher) ---
-const SmartMessageContent = ({ data }) => {
+const SmartMessageContent = ({ data, onInteract }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
@@ -143,22 +150,22 @@ const SmartMessageContent = ({ data }) => {
 
   switch (data.response_type) {
     case 'recipe_card':
-      return <RecipeCard recipe={data.recipe_data || data.recipe} missingItems={data.missing_items} />;
+      return <RecipeCard recipe={data.recipe} missingItems={data.missing_items} onInteract={onInteract} />;
 
     case 'steps_list':
       return <StepsList steps={data.steps} />;
 
     case 'pantry_list':
-      return <ItemsList title={t.pantryItems} items={data.pantry_items || data.pantry?.items || []} type="pantry" />;
+      return <ItemsList title={t.pantryItems} items={data.pantry?.items || []} type="pantry" onInteract={onInteract} />;
 
     case 'shopping_list':
-      return <ItemsList title={t.shoppingList} items={data.items || data.shopping?.items || []} type="shopping" />;
+      return <ItemsList title={t.shoppingList} items={data.shopping?.items || []} type="shopping" onInteract={onInteract} />;
 
     case 'full_inventory':
       return (
         <div className="inventory-grid" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-          <ItemsList title={t.pantry} items={data.pantry?.items || []} type="pantry" />
-          <ItemsList title={t.shopping} items={data.shopping?.items || []} type="shopping" />
+          <ItemsList title={t.pantry} items={data.pantry?.items || []} type="pantry" onInteract={onInteract} />
+          <ItemsList title={t.shopping} items={data.shopping?.items || []} type="shopping" onInteract={onInteract} />
         </div>
       );
 
@@ -181,7 +188,7 @@ const SmartMessageContent = ({ data }) => {
             {recipes.length > 0 ? (
               recipes.map(rec => (
                 <div key={rec.id} style={{ minWidth: '160px' }}>
-                  <RecipeCard recipe={rec} missingItems={rec.missing_items || []} />
+                  <RecipeCard recipe={rec} missingItems={rec.missing_items || []} onInteract={onInteract} />
                 </div>
               ))
             ) : (
@@ -199,7 +206,10 @@ const SmartMessageContent = ({ data }) => {
         <div className="smart-card favorites-card" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           <div
             className="card-header"
-            onClick={() => navigate('/dashboard?tab=favorites')}
+            onClick={() => {
+              navigate('/dashboard?tab=favorites');
+              if (onInteract) onInteract();
+            }}
             title={t.viewAllFav}
           >
             <div className="flex items-center gap-2 text-red-600">
@@ -212,7 +222,7 @@ const SmartMessageContent = ({ data }) => {
             {recipesList.length > 0 ? (
               recipesList.map(rec => (
                 <div key={rec.id} style={{ minWidth: '160px' }}>
-                  <RecipeCard recipe={rec} />
+                  <RecipeCard recipe={rec} onInteract={onInteract} />
                 </div>
               ))
             ) : (

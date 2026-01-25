@@ -37,14 +37,14 @@ function ChatWidget() {
 
   const suggestions = language === 'ar' ? [
     "ماذا يمكنني أن أطبخ بالبيض؟",
-    "عشاء صحي في 30 دقيقة",
-    "لدي دجاج وأرز",
-    "اقترح وصفة حلوى"
+    "عندي اي في البانتري؟",
+    "عندي اي في الشوبنج؟",
+    "اقترح وصفة حلوه"
   ] : [
     "What can I cook with eggs?",
-    "Healthy dinner under 30 mins",
-    "I have chicken and rice",
-    "Suggest a dessert recipe"
+    "What do I have in pnatyr?",
+    "What do i have in shopping",
+    "Suggest a sweet recipe"
   ];
 
   const handleSuggestionClick = async (text) => {
@@ -141,10 +141,10 @@ function ChatWidget() {
                 onClick={handleClear}
                 className="icon-btn"
                 title={t.clearTooltip}
-                disabled={messages.length <= 1}
+                disabled={messages.length <= 1 || isLoading}
                 style={{
-                  opacity: messages.length <= 1 ? 0.3 : 1,
-                  cursor: messages.length <= 1 ? 'default' : 'pointer',
+                  opacity: (messages.length <= 1 || isLoading) ? 0.3 : 1,
+                  cursor: (messages.length <= 1 || isLoading) ? 'default' : 'pointer',
                   transition: 'opacity 0.2s'
                 }}
               >
@@ -175,7 +175,10 @@ function ChatWidget() {
                 <div className="msg-text">{msg.text}</div>
 
                 {msg.sender === 'bot' && msg.apiResponse && (
-                  <SmartMessageContent data={msg.apiResponse} />
+                  <SmartMessageContent 
+                    data={msg.apiResponse} 
+                    onInteract={() => setIsOpen(false)} 
+                  />
                 )}
 
               </div>
