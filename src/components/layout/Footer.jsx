@@ -76,8 +76,12 @@ function Footer() {
         <div className="footer-links">
           <h4>{t.learnMore}</h4>
           <ul>
-            <li><Link to="/about">{t.aboutUs}</Link></li>
-            <li><Link to="/privacy">{t.privacy}</Link></li>
+            <li>
+              <Link to="/about" className="hover:text-green-500 transition-colors">
+                {language === 'ar' ? 'من نحن' : 'About Us'}
+              </Link>
+            </li>
+            <li><Link to="">{t.privacy}</Link></li>
           </ul>
         </div>
 

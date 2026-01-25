@@ -20,6 +20,7 @@ import ProtectedRoute from './pages/auth/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import CookWithPantry from './pages/CookWithPantry';
 import ChatPage from './pages/ChatPage';
+import About from './pages/About';
 
 // Admin Pages
 import AdminLayout from './admin/AdminLayout';
@@ -60,6 +61,12 @@ function App() {
             <PageTransition>
               <RecipeDetail />
             </PageTransition>
+          } />
+
+          <Route path="/about" element={
+              <PageTransition>
+                <About />
+              </PageTransition>
           } />
 
           <Route path="/dashboard" element={
