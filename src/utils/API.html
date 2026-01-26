@@ -4,226 +4,432 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> API </title>
+  <title>Chef Sage API Documentation</title>
   <style>
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f6f7fb;
       margin: 0;
       padding: 40px;
       color: #333;
     }
 
-    h1,
-    h2 {
-      margin-top: 0;
-    }
+    h1, h2 { margin-top: 0; }
+    h1 { color: #2c3e50; }
+    h2 { font-size: 1.25rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
 
-    p.subtitle {
-      color: #666;
-      margin-bottom: 30px;
-    }
+    p.subtitle { color: #666; margin-bottom: 30px; }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+    .container { max-width: 950px; margin: auto; }
 
     .card {
       background: #fff;
       border-radius: 10px;
-      padding: 20px;
+      padding: 25px;
       margin-bottom: 24px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-left: 5px solid transparent;
     }
+    
+    .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); }
+
+    /* Border colors for categories */
+    .card.auth { border-left-color: #2196f3; }
+    .card.recipes { border-left-color: #ff9800; }
+    .card.pantry { border-left-color: #4caf50; }
+    .card.admin { border-left-color: #f44336; }
+    .card.ai { border-left-color: #9c27b0; }
 
     .endpoint {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 12px 0 6px;
+      margin: 15px 0 8px;
       flex-wrap: wrap;
+      background: #fafafa;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #eee;
     }
 
     .method {
       font-weight: bold;
-      padding: 4px 10px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #fff;
+      text-transform: uppercase;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .get { background: #4caf50; }
+    .post { background: #2196f3; }
+    .delete { background: #f44336; }
+    .put { background: #ff9800; }
+    .patch { background: #607d8b; }
+
+    a { text-decoration: none; color: #333; font-family: monospace; font-size: 15px; }
+    a:hover { color: #000; text-decoration: underline; }
+
+    .desc { color: #666; font-size: 14px; margin-left: 5px; margin-bottom: 15px; display: block; }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
+      font-weight: bold;
+    }
+    .badge-auth { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+    .badge-admin { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+    strong { display: block; margin-top: 10px; font-size: 13px; color: #444; }
+    
+    code {
+      background: #2d2d2d;
+      color: #ccc;
+      padding: 10px;
       border-radius: 6px;
       font-size: 13px;
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .get {
-      background: #4caf50;
-    }
-
-    .post {
-      background: #2196f3;
-    }
-
-    .delete {
-      background: #f44336;
-    }
-
-    a {
-      text-decoration: none;
-      color: blue;
-    }
-
-    code {
-      background: #f1f1f1;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 14px;
       display: block;
-      margin-top: 6px;
+      margin-top: 5px;
       white-space: pre-wrap;
+      font-family: monospace;
     }
 
-    .desc {
-      color: #555;
-      margin-bottom: 10px;
-    }
-
-    strong {
-      display: block;
-      margin-top: 14px;
-      margin-bottom: 6px;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 20px 0;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      color: #999;
-      font-size: 14px;
-    }
+    footer { text-align: center; margin-top: 50px; color: #999; font-size: 14px; border-top: 1px solid #eee; padding-top: 20px;}
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1>🍽️ Recipe Backend API</h1>
-    <p class="subtitle">Simple documentation for Laravel backend endpoints</p>
+    <h1>🍽️ Chef Sage API</h1>
+    <p class="subtitle">Complete documentation for backend endpoints (Laravel)</p>
 
-    <div class="card">
-      <h2>📦 Recipes</h2>
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <a href="http://127.0.0.1:8000/api/recipes" target="_blank"><code>http://127.0.0.1:8000/api/recipes</code></a>
-      </div>
-      <p class="desc">Get all recipes with ingredients</p>
-
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <a href="http://127.0.0.1:8000/api/recipes/1"
-          target="_blank"><code>http://127.0.0.1:8000/api/recipes/{id}</code></a>
-      </div>
-      <p class="desc">Get a single recipe by ID</p>
-    </div>
-
-    <div class="card">
-      <h2>🥕 Ingredients</h2>
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <a href="http://127.0.0.1:8000/api/ingredients"
-          target="_blank"><code>http://127.0.0.1:8000/api/ingredients</code></a>
-      </div>
-      <p class="desc">Get all available ingredients</p>
-    </div>
-
-    <div class="card">
-      <h2>🔍 Search Recipes</h2>
+    <div class="card auth">
+      <h2>🔐 Authentication</h2>
+      
       <div class="endpoint">
         <span class="method post">POST</span>
-        <a href="http://127.0.0.1:8000/api/recipes/search"
-          target="_blank"><code>http://127.0.0.1:8000/api/recipes/search</code></a>
+        <a href="http://127.0.0.1:8000/api/register"><code>/api/register</code></a>
       </div>
-      <p class="desc">Search recipes by ingredients (JSON body)</p>
-      <strong>Headers:</strong>
-      <code>Content-Type: application/json</code>
-      <code>Accept: application/json</code>
-
-      <strong>Body:</strong>
-      <code>{
-  "ingredients": ["Salt", "Tomato"]
-}</code>
-
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <a href="http://127.0.0.1:8000/api/recipes/search?ingredients=Salt,Tomato"
-          target="_blank"><code>http://127.0.0.1:8000/api/recipes/search?ingredients=Salt,Tomato</code></a>
-      </div>
-      <p class="desc">Search recipes using query params (no body)</p>
-    </div>
-
-    <div class="card">
-      <h2>🧺 User Pantry</h2>
-      <div class="endpoint">
-        <span class="method get">GET</span>
-        <a href="http://127.0.0.1:8000/api/user/pantry"
-          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry</code></a>
-      </div>
-      <p class="desc">Get user pantry items</p>
+      <span class="desc">Register a new user</span>
 
       <div class="endpoint">
         <span class="method post">POST</span>
-        <a href="http://127.0.0.1:8000/api/user/pantry"
-          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry</code></a>
+        <a href="http://127.0.0.1:8000/api/login"><code>/api/login</code></a>
       </div>
-      <p class="desc">Add item to pantry</p>
-      <strong>Headers:</strong>
-      <code>Content-Type: application/json</code>
-      <code>Authorization: Bearer {token}</code>
-      <strong>Body:</strong>
-      <code>{
-  "ingredient_id": 1,
-  "quantity": 2
-}</code>
+      <span class="desc">Login and receive token</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="http://127.0.0.1:8000/api/logout"><code>/api/logout</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Logout user (revoke token)</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/me"><code>/api/me</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get current logged-in user details</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="http://127.0.0.1:8000/api/refresh"><code>/api/refresh</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Refresh authentication token</span>
+    </div>
+
+    <div class="card recipes">
+      <h2>🍲 Recipes & Search</h2>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes"><code>/api/recipes</code></a>
+      </div>
+      <span class="desc">Get all recipes</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes/1"><code>/api/recipes/{id}</code></a>
+      </div>
+      <span class="desc">Get a single recipe by ID</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/recipes/top-loved"><code>/api/recipes/top-loved</code></a>
+      </div>
+      <span class="desc">Get top loved recipes</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/recipes/search</code></a>
+      </div>
+      <span class="desc">Search recipes (supports both GET and POST)</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/recipes</code></a>
+      </div>
+      <span class="desc">Create a new recipe (User submission)</span>
+    </div>
+
+    <div class="card pantry">
+      <h2>🥕 Pantry & Ingredients</h2>
+      
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/ingredients"><code>/api/ingredients</code></a>
+      </div>
+      <span class="desc">Get all available ingredients list</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="http://127.0.0.1:8000/api/pantry"><code>/api/pantry</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get user's pantry items</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/pantry/lang</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get user's pantry items (Localized)</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/pantry</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Add item to pantry</span>
 
       <div class="endpoint">
         <span class="method delete">DELETE</span>
-        <a href="http://127.0.0.1:8000/api/user/pantry/{id}"
-          target="_blank"><code>http://127.0.0.1:8000/api/user/pantry/{id}</code></a>
+        <a href="#"><code>/api/pantry/{id}</code></a>
+        <span class="badge badge-auth">Auth</span>
       </div>
-      <p class="desc">Delete pantry item by ID</p>
-      <strong>Headers:</strong>
-      <code>Authorization: Bearer {token}</code>
+      <span class="desc">Remove item from pantry</span>
+
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <a href="#"><code>/api/pantry/{id}/sync</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Remove item and sync</span>
     </div>
 
     <div class="card">
-      <h2>💬 Chatbot</h2>
+      <h2>🛒 Shopping List</h2>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/shopping-list</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get shopping list items</span>
 
       <div class="endpoint">
         <span class="method post">POST</span>
-        <a href="http://127.0.0.1:8000/api/chat" target="_blank">
-          <code>http://127.0.0.1:8000/api/chat</code>
-        </a>
+        <a href="#"><code>/api/shopping-list</code></a>
+        <span class="badge badge-auth">Auth</span>
       </div>
+      <span class="desc">Add item to shopping list</span>
 
-      <p class="desc">Send a message to the chatbot</p>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <a href="#"><code>/api/shopping-list/{id}</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Toggle item status (checked/unchecked)</span>
 
-      <strong>Headers:</strong>
-      <code>Content-Type: application/json</code>
-      <code>Accept: application/json</code>
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <a href="#"><code>/api/shopping-list/{id}</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Delete item from shopping list</span>
 
-      <strong>Body:</strong>
-      <code>{
-  "message": "Hello, how can you help me?"
-}</code>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/shopping/migrate</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Migrate shopping list items to pantry</span>
     </div>
 
+    <div class="card">
+      <h2>❤️ Favorites</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/favorites</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get user favorite recipes</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/favorites</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Add recipe to favorites</span>
+
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <a href="#"><code>/api/favorites/{recipe_id}</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Remove recipe from favorites</span>
+    </div>
+
+    <div class="card ai">
+      <h2>🤖 AI & Smart Features</h2>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/smart-assistant</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Smart Chat Assistant (Authenticated)</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/recipes/match-pantry</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Find recipes matching pantry ingredients</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/recipes/surprise-me</code></a>
+        <span class="badge badge-auth">Auth</span>
+      </div>
+      <span class="desc">Get a random "Surprise Me" recipe</span>
+    </div>
+
+    <div class="card">
+      <h2>📂 Categories</h2>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/getAll</code></a>
+        <span class="badge badge-auth">Auth + CheckPass</span>
+      </div>
+      <span class="desc">Get all categories</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/create</code></a>
+        <span class="badge badge-auth">Auth + CheckPass</span>
+      </div>
+      <span class="desc">Create new category</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/update</code></a>
+        <span class="badge badge-auth">Auth + CheckPass</span>
+      </div>
+      <span class="desc">Update category</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/delete</code></a>
+        <span class="badge badge-auth">Auth + CheckPass</span>
+      </div>
+      <span class="desc">Delete category</span>
+    </div>
+
+    <div class="card">
+      <h2>🛠️ Utilities</h2>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <a href="#"><code>/api/uploadimage</code></a>
+      </div>
+      <span class="desc">Upload an image</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/ping</code></a>
+      </div>
+      <span class="desc">Health check (Pong)</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/test</code></a>
+      </div>
+      <span class="desc">Test connection</span>
+    </div>
+
+    <div class="card admin">
+      <h2>🛡️ Admin Panel (Prefix: /admin)</h2>
+      <p style="font-size:13px; color:#777;">Requires <code>auth:sanctum</code> and <code>admin</code> middleware.</p>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/admin/stats</code></a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <span class="desc">Dashboard Statistics</span>
+
+      <h3>Manage Recipes</h3>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/admin/recipes</code></a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <span class="desc">Get/Filter Admin Recipes</span>
+
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/admin/recipes/options</code></a>
+        <span class="badge badge-admin">Admin</span>
+      </div>
+      <span class="desc">Get Recipe Filter Options</span>
+
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="method put">PUT</span>
+        <span class="method delete">DEL</span>
+        <a href="#"><code>/api/admin/recipes/{id}</code></a>
+      </div>
+      <span class="desc">CRUD Operations for Recipes</span>
+
+      <h3>Manage Users</h3>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/admin/users</code></a>
+      </div>
+      <span class="desc">List all users</span>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="method put">PUT</span>
+        <span class="method delete">DEL</span>
+        <a href="#"><code>/api/admin/users/{id}</code></a>
+      </div>
+      <span class="desc">CRUD Operations for Users</span>
+
+      <h3>Manage Ingredients</h3>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <a href="#"><code>/api/admin/ingredients</code></a>
+      </div>
+      <span class="desc">List all ingredients</span>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <span class="method put">PUT</span>
+        <span class="method delete">DEL</span>
+        <a href="#"><code>/api/admin/ingredients/{id}</code></a>
+      </div>
+      <span class="desc">CRUD Operations for Ingredients</span>
+    </div>
 
     <footer>
-      API End Points
+      Chef Sage API Documentation &copy; 2024
     </footer>
   </div>
 </body>
-
 </html>
