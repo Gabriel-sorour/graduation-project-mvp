@@ -99,8 +99,8 @@ function CookWithPantry() {
 
   // --- Filter Helpers ---
   const toggleFilter = (filterName) => {
-    // منع فتح فلتر meal_type إذا كان التصنيف ليس وجبة
-    if (filterName === 'meal_type' && filters.category !== 'Meal' && filters.category !== '') {
+    // Prevent opening meal_type if category is not Meal
+    if (filterName === 'meal_type' && filters.category !== 'Meal') {
         return;
     }
     setOpenFilter(openFilter === filterName ? null : filterName);
@@ -109,8 +109,8 @@ function CookWithPantry() {
   const selectFilterOption = (key, value) => {
     setFilters(prev => {
         const newFilters = { ...prev, [key]: value };
-        // إذا تغير التصنيف لشيء غير وجبة، نقوم بتصفير نوع الوجبة
-        if (key === 'category' && value !== 'Meal' && value !== '') {
+        // Reset meal_type if category changes to something other than Meal
+        if (key === 'category' && value !== 'Meal') {
             newFilters.meal_type = '';
         }
         return newFilters;
@@ -222,9 +222,10 @@ function CookWithPantry() {
             <button
               className={`filter-chip ${filters.meal_type ? 'active' : ''}`}
               onClick={() => toggleFilter('meal_type')}
+              disabled={filters.category !== 'Meal'}
               style={{
-                opacity: (filters.category !== 'Meal' && filters.category !== '') ? 0.5 : 1,
-                cursor: (filters.category !== 'Meal' && filters.category !== '') ? 'not-allowed' : 'pointer',
+                opacity: filters.category !== 'Meal' ? 0.5 : 1,
+                cursor: filters.category !== 'Meal' ? 'not-allowed' : 'pointer',
                 backgroundColor: (filters.category !== 'Meal' && filters.category !== '') ? '#f1f5f9' : ''
               }}
             >
