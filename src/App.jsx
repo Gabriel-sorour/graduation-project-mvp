@@ -7,6 +7,7 @@ import MobileNav from './components/layout/MobileNav';
 import Footer from './components/layout/Footer';
 import ChatWidget from './components/chat/ChatWidget';
 import PageTransition from './components/common/PageTransition';
+import ScrollToTop from './components/ScrollToTop';
 
 // Public & User Pages
 import Home from './pages/Home';
@@ -39,6 +40,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       {!isAdminRoute && <Navbar />}
 
       <AnimatePresence mode="wait">

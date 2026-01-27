@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ["austere-craniometrically-florencia.ngrok-free.dev"],
+    allowedHosts: "all",
   },
   base: "/graduation-project-mvp/",
 })
