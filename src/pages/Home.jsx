@@ -19,7 +19,10 @@ function Home() {
   const [surpriseLoading, setSurpriseLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // --- Fetch Trending Recipes (Top Loved) ---
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   useEffect(() => {
     setLoading(true);
     
@@ -52,12 +55,10 @@ function Home() {
     return () => clearInterval(interval);
   }, [recipes.length, currentSlide]); 
 
-
   const handleRecipeClick = (id) => {
     navigate(`/recipe/${id}`);
   };
 
-  // --- Surprise Me Logic ---
   const handleSurpriseMe = async () => {
     if (!user) {
       navigate('/login');
@@ -114,7 +115,53 @@ function Home() {
     }
   };
 
-  // --- Translations Helper ---
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      setCurrentSlide((prev) => (prev + 1) % recipes.length);
+    }
+    if (isRightSwipe) {
+      setCurrentSlide((prev) => (prev - 1 + recipes.length) % recipes.length);
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setTouchEnd(null);
+    setTouchStart(e.clientX);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setTouchEnd(e.clientX);
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    
+    if (distance > 50) {
+      setCurrentSlide((prev) => (prev + 1) % recipes.length);
+    } else if (distance < -50) {
+      setCurrentSlide((prev) => (prev - 1 + recipes.length) % recipes.length);
+    }
+  };
+
   const t = {
     heroTitle: language === 'ar' ? <>اطبخ بالمتاح <br /> في <span>مطبخك.</span></> : <>Cook with what <br /> you <span>have.</span></>,
     heroSub: language === 'ar' 
@@ -179,7 +226,17 @@ function Home() {
                 <p>{t.loading}</p>
               </div>
             ) : recipes.length > 0 ? (
-              <div className="slider-wrapper" dir="ltr">
+              <div 
+                className="slider-wrapper" 
+                dir="ltr"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={() => setIsDragging(false)}
+              >
                 <div 
                   className="recipe-grid slider-track"
                   style={{ transform: `translateX(-${currentSlide * 100}%)` }}
