@@ -108,6 +108,7 @@
   margin: 1.5rem 0;
   width: 100%;
 }
+
 /* 
 .profile-settings {
   padding: 0 1.5rem;
@@ -201,14 +202,13 @@ body.dark-mode .setting-label svg {
 
 /* src/styles/Profile.css */
 
-/* تنسيق زر الداشبورد (نفس ستايل زر الرجوع للموقع) */
 .btn-dashboard {
   width: 100%;
   padding: 14px;
   border-radius: 12px;
-  background-color: white; /* خلفية بيضاء */
-  color: var(--primary, #10b981); /* لون النص */
-  border: 2px solid var(--primary, #10b981); /* حدود ملونة */
+  background-color: white;
+  color: var(--primary, #10b981);
+  border: 2px solid var(--primary, #10b981);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -216,7 +216,7 @@ body.dark-mode .setting-label svg {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 15px; /* مسافة بينه وبين زر الخروج */
+  margin-bottom: 15px;
   transition: all 0.2s ease;
 }
 
@@ -225,13 +225,10 @@ body.dark-mode .setting-label svg {
   color: white;
 }
 
-/* تعديل بسيط لزر الخروج عشان يبقوا متناسقين */
 .btn-logout {
   width: 100%;
-  padding: 14px; /* نفس الـ padding */
+  padding: 14px;
   border-radius: 12px;
-  /* باقي الستايل القديم بتاعك هيفضل زي ما هو */
-  /* background: #fee2e2; color: #ef4444; etc... */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,4 +244,10 @@ body.dark-mode .setting-label svg {
 
 .btn-logout:hover {
   background-color: #fecaca;
+}
+
+body.dark-mode .btn-dashboard {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
 }

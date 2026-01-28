@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Mail, LayoutDashboard } from 'lucide-react'; // ✅ ضفنا الأيقونة
+import { User, LogOut, Mail, LayoutDashboard } from 'lucide-react';
 import '../../styles/Profile.css';
 
 const Profile = () => {
@@ -19,7 +19,7 @@ const Profile = () => {
 
   const t = {
     signOut: language === 'ar' ? 'تسجيل الخروج' : 'Sign Out',
-    dashboard: language === 'ar' ? 'لوحة التحكم' : 'Admin Dashboard', // ✅ ترجمة الزرار
+    dashboard: language === 'ar' ? 'لوحة التحكم' : 'Admin Dashboard',
     darkMode: language === 'ar' ? 'الوضع الليلي' : 'Dark Mode'
   };
 
@@ -58,7 +58,6 @@ const Profile = () => {
         {/* Actions */}
         <div className="profile-actions">
           
-          {/* ✅ زر الداشبورد: يظهر فقط للأدمن */}
           {user.role === 'admin' && (
             <button 
               onClick={() => navigate('/admin')} 

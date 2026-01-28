@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Eye, EyeOff } from 'lucide-react'; 
 import './Login.css';
 
@@ -20,6 +21,25 @@ const Register = () => {
 
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { language } = useLanguage();
+
+  const t = {
+    title: language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account',
+    subtitle: language === 'ar' ? 'انضم إلى شيف ساج وابدأ الطهي!' : 'Join SageKitchen and start cooking!',
+    nameLabel: language === 'ar' ? 'الاسم بالكامل' : 'Full Name',
+    namePlaceholder: language === 'ar' ? 'مثال: أحمد علي' : 'e.g. Ahmed Ali',
+    emailLabel: language === 'ar' ? 'البريد الإلكتروني' : 'Email Address',
+    emailPlaceholder: language === 'ar' ? 'name@example.com' : 'name@example.com',
+    passLabel: language === 'ar' ? 'كلمة المرور' : 'Password',
+    passPlaceholder: language === 'ar' ? 'أنشئ كلمة مرور قوية' : 'Create a strong password',
+    confirmPassLabel: language === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password',
+    confirmPassPlaceholder: language === 'ar' ? 'أعد كتابة كلمة المرور' : 'Repeat your password',
+    btn: language === 'ar' ? 'إنشاء حساب' : 'Sign Up',
+    btnLoading: language === 'ar' ? 'جاري الإنشاء...' : 'Creating Account...',
+    footerText: language === 'ar' ? 'لديك حساب بالفعل؟' : 'Already have an account?',
+    signin: language === 'ar' ? 'تسجيل الدخول' : 'Sign In',
+    errorMatch: language === 'ar' ? 'كلمات المرور غير متطابقة!' : 'Passwords do not match!',
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -33,7 +53,7 @@ const Register = () => {
     setError('');
 
     if (formData.password !== formData.password_confirmation) {
-      setError("Passwords do not match!");
+      setError(t.errorMatch);
       return;
     }
 
@@ -55,10 +75,11 @@ const Register = () => {
     }
   };
 
-  // Style helper
+  // 4. ستايل الزرار (ديناميكي حسب اللغة)
   const toggleButtonStyle = {
     position: 'absolute',
-    right: '10px',
+    right: language === 'ar' ? 'auto' : '10px',
+    left: language === 'ar' ? '10px' : 'auto',
     top: '50%',
     transform: 'translateY(-50%)',
     background: 'none',
@@ -67,12 +88,19 @@ const Register = () => {
     color: '#6b7280'
   };
 
+  // 5. ستايل الـ Input (ديناميكي حسب اللغة)
+  const inputStyle = {
+    paddingRight: language === 'ar' ? '12px' : '40px',
+    paddingLeft: language === 'ar' ? '40px' : '12px'
+  };
+
   return (
-    <div className="auth-container">
+    // 6. ضبط الاتجاه RTL/LTR
+    <div className="auth-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Create Account</h2>
-          <p>Join SageKitchen and start cooking!</p>
+          <h2>{t.title}</h2>
+          <p>{t.subtitle}</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
@@ -80,12 +108,12 @@ const Register = () => {
         <form className="auth-form" onSubmit={handleSubmit}>
           {/* Name */}
           <div className="form-group">
-            <label>Full Name</label>
+            <label>{t.nameLabel}</label>
             <input
               type="text"
               name="name"
               className="form-input"
-              placeholder="e.g. Ahmed Ali"
+              placeholder={t.namePlaceholder}
               value={formData.name}
               onChange={handleChange}
               required
@@ -94,12 +122,12 @@ const Register = () => {
 
           {/* Email Field */}
           <div className="form-group">
-            <label>Email Address</label>
+            <label>{t.emailLabel}</label>
             <input
               type="email"
               name="email"
               className="form-input"
-              placeholder="name@example.com"
+              placeholder={t.emailPlaceholder}
               value={formData.email}
               onChange={handleChange}
               required
@@ -108,17 +136,17 @@ const Register = () => {
 
           {/* Password Field */}
           <div className="form-group">
-            <label>Password</label>
+            <label>{t.passLabel}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 className="form-input"
-                placeholder="Create a strong password"
+                placeholder={t.passPlaceholder}
                 value={formData.password}
                 onChange={handleChange}
                 required
-                style={{ paddingRight: '40px' }}
+                style={inputStyle}
               />
               <button
                 type="button"
@@ -132,17 +160,17 @@ const Register = () => {
 
           {/* Confirm Password Field */}
           <div className="form-group">
-            <label>Confirm Password</label>
+            <label>{t.confirmPassLabel}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="password_confirmation"
                 className="form-input"
-                placeholder="Repeat your password"
+                placeholder={t.confirmPassPlaceholder}
                 value={formData.password_confirmation}
                 onChange={handleChange}
                 required
-                style={{ paddingRight: '40px' }}
+                style={inputStyle}
               />
               <button
                 type="button"
@@ -155,13 +183,13 @@ const Register = () => {
           </div>
 
           <button type="submit" className="btn-auth" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+            {isSubmitting ? t.btnLoading : t.btn}
           </button>
         </form>
 
         <div className="auth-footer">
-          Already have an account?
-          <Link to="/login" className="auth-link">Sign In</Link>
+          {t.footerText}{' '}
+          <Link to="/login" className="auth-link">{t.signin}</Link>
         </div>
       </div>
     </div>

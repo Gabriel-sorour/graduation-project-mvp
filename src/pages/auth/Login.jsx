@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Eye, EyeOff } from 'lucide-react';
 import './Login.css';
 
@@ -13,6 +14,20 @@ const Login = () => {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { language } = useLanguage();
+
+  const t = {
+    title: language === 'ar' ? 'مرحباً بعودتك' : 'Welcome Back',
+    subtitle: language === 'ar' ? 'يرجى إدخال بياناتك لتسجيل الدخول.' : 'Please enter your details to sign in.',
+    emailLabel: language === 'ar' ? 'البريد الإلكتروني' : 'Email Address',
+    emailPlaceholder: language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email',
+    passLabel: language === 'ar' ? 'كلمة المرور' : 'Password',
+    passPlaceholder: language === 'ar' ? 'أدخل كلمة المرور' : 'Enter your password',
+    btn: language === 'ar' ? 'تسجيل الدخول' : 'Sign In',
+    btnLoading: language === 'ar' ? 'جاري الدخول...' : 'Signing in...',
+    footerText: language === 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?",
+    signup: language === 'ar' ? 'إنشاء حساب' : 'Sign up',
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,22 +45,23 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-container">
+    // 4. ضبط الاتجاه
+    <div className="auth-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Welcome Back</h2>
-          <p>Please enter your details to sign in.</p>
+          <h2>{t.title}</h2>
+          <p>{t.subtitle}</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email Address</label>
+            <label>{t.emailLabel}</label>
             <input
               type="email"
               className="form-input"
-              placeholder="Enter your email"
+              placeholder={t.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -53,23 +69,28 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label>{t.passLabel}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? "text" : "password"}
                 className="form-input"
-                placeholder="Enter your password"
+                placeholder={t.passPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ paddingRight: '40px' }}
+                // 5. ضبط مكان البادينج حسب اللغة عشان الكلام ما يجيش فوق الأيقونة
+                style={{ 
+                  paddingRight: language === 'ar' ? '12px' : '40px',
+                  paddingLeft: language === 'ar' ? '40px' : '12px'
+                }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 style={{
                   position: 'absolute',
-                  right: '10px',
+                  right: language === 'ar' ? 'auto' : '10px',
+                  left: language === 'ar' ? '10px' : 'auto',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'none',
@@ -84,13 +105,13 @@ const Login = () => {
           </div>
 
           <button type="submit" className="btn-auth" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? t.btnLoading : t.btn}
           </button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account?
-          <Link to="/register" className="auth-link">Sign up</Link>
+          {t.footerText}{' '}
+          <Link to="/register" className="auth-link">{t.signup}</Link>
         </div>
       </div>
     </div>
