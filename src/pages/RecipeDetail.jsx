@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, Clock, Flame, Heart, Plus, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { formatRecipe } from '../utils/recipeUtils';
@@ -23,6 +23,17 @@ function RecipeDetail() {
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [addedIngredients, setAddedIngredients] = useState({});
+  const [toast, setToast] = useState({ show: false, message: '' });
+
+  // Ref to hold the timer ID
+  const toastTimer = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -70,6 +81,23 @@ function RecipeDetail() {
     const result = await addItem(ingredientName, language);
     if (result) {
       setAddedIngredients(prev => ({ ...prev, [ingredientName]: true }));
+      
+      // Clear existing timer if any
+      if (toastTimer.current) {
+        clearTimeout(toastTimer.current);
+      }
+
+      setToast({
+        show: true,
+        message: language === 'ar' 
+          ? `تمت إضافة "${ingredientName}" إلى قائمة التسوق` 
+          : `"${ingredientName}" added to shopping list`
+      });
+
+      // Set new timer
+      toastTimer.current = setTimeout(() => {
+        setToast({ show: false, message: '' });
+      }, 1500);
     }
   };
 
@@ -104,21 +132,17 @@ function RecipeDetail() {
     return 'diff-easy';
   };
 
-  // --- دالة الفحص الذكية للمكونات ---
   const checkIngredientStatus = (ing) => {
     if (!isPantryMode) return 'neutral';
 
-    // استخراج ID واسم المكون الحالي (القادم من الـ API)
     const currentId = ing?.id;
     const cleanName = (ing?.name || '').toLowerCase().trim();
 
     const isMissing = missingIngredients.some(missing => {
-      // 1. المقارنة بالـ ID (الحل الأقوى لتغير اللغة)
       if (typeof missing === 'object' && missing !== null && missing.id) {
         if (currentId && Number(currentId) === Number(missing.id)) return true;
       }
 
-      // 2. المقارنة بالاسم (Fallback)
       const missingName = typeof missing === 'string' ? missing : (missing.name || '');
       const cleanMissing = missingName.toLowerCase().trim();
       
@@ -232,6 +256,13 @@ function RecipeDetail() {
             </div>
           </div>
         </div>
+
+        {toast.show && (
+          <div className="toast-notification">
+            <Check size={18} />
+            <span>{toast.message}</span>
+          </div>
+        )}
       </div>
     </>
   );

@@ -45,7 +45,6 @@ const Login = () => {
   };
 
   return (
-    // 4. ضبط الاتجاه
     <div className="auth-container" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="auth-card">
         <div className="auth-header">
@@ -78,7 +77,6 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                // 5. ضبط مكان البادينج حسب اللغة عشان الكلام ما يجيش فوق الأيقونة
                 style={{ 
                   paddingRight: language === 'ar' ? '12px' : '40px',
                   paddingLeft: language === 'ar' ? '40px' : '12px'
