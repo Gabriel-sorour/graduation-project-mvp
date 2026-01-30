@@ -155,7 +155,7 @@ function ChatPage() {
             {isLoading ? (
                 <Loader2 size={20} className="animate-spin" /> 
             ) : (
-                <Send size={22} className={language === 'ar' ? 'rotate-180' : ''} />
+                <Send size={22} />
             )}
           </button>
         </form>
