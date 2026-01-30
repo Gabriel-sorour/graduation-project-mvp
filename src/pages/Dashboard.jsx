@@ -9,7 +9,7 @@ import '../styles/Dashboard.css';
 
 function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'favorites';
+  const activeTab = searchParams.get('tab') || 'pantry';
   const sidebarRef = useRef(null);
 
   const { language } = useLanguage();
