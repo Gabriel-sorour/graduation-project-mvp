@@ -25,7 +25,7 @@ function Home() {
 
   useEffect(() => {
     setLoading(true);
-    
+
     fetch(`http://127.0.0.1:8000/api/recipes/top-loved?lang=${language}`, {
       headers: {
         'Accept-Language': language
@@ -35,7 +35,7 @@ function Home() {
       .then(result => {
         const rawRecipes = result.data || [];
         const formattedRecipes = rawRecipes.map(recipe => formatRecipe(recipe, language));
-        setRecipes(formattedRecipes); 
+        setRecipes(formattedRecipes);
         setLoading(false);
       })
       .catch(error => {
@@ -53,7 +53,7 @@ function Home() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [recipes.length, currentSlide]); 
+  }, [recipes.length, currentSlide]);
 
   const handleRecipeClick = (id) => {
     navigate(`/recipe/${id}`);
@@ -73,7 +73,7 @@ function Home() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'Accept-Language': language 
+          'Accept-Language': language
         }
       });
 
@@ -82,7 +82,7 @@ function Home() {
         let msg = responseData.message;
 
         if (language === 'ar' && (msg.includes("No suitable recipe") || msg.includes("pantry"))) {
-           msg = "لا توجد وصفة مناسبة مع مكونات مطبخك الحالية.";
+          msg = "لا توجد وصفة مناسبة مع مكونات مطبخك الحالية.";
         }
 
         showAlert(language === 'ar' ? "تنبيه" : "Note", msg);
@@ -154,7 +154,7 @@ function Home() {
     setIsDragging(false);
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
-    
+
     if (distance > 50) {
       setCurrentSlide((prev) => (prev + 1) % recipes.length);
     } else if (distance < -50) {
@@ -163,12 +163,12 @@ function Home() {
   };
 
   const t = {
-    heroTitle: language === 'ar' ? <>اطبخ بالمتاح <br /> في <span>مطبخك.</span></> : <>Cook with what <br /> you <span>have.</span></>,
+    heroTitle: language === 'ar' ? <>اطبخ باللي عندك <br /> في <span>مطبخك.</span></> : <>Cook with what <br /> you <span>have.</span></>,
     heroSub: language === 'ar' 
       ? "اكتشف وصفات تناسب مكونات مطبخك. بدون تعقيد، فقط طعام لذيذ."
       : "Minimalist recipe finder based on your pantry. No clutter, just good food.",
     exploreBtn: language === 'ar' ? "تصفح الوصفات" : "Explore Recipes",
-    cookBtn: language === 'ar' ? "اطبخ بالموجود" : "Cook with what I have",
+    cookBtn: language === 'ar' ? "اطبخ باللي عندك" : "Cook with what I have",
     surpriseBtn: language === 'ar' ? (surpriseLoading ? 'جاري الطهي...' : 'فاجئني') : (surpriseLoading ? 'Cooking...' : 'Surprise Me'),
     trending: language === 'ar' ? "الأكثر رواجاً الآن" : "Trending Now",
     loading: language === 'ar' ? "نختار لك أفضل الوصفات..." : "Curating best recipes for you...",
@@ -186,7 +186,7 @@ function Home() {
         <section className="hero">
           <h1>{t.heroTitle}</h1>
           <p>{t.heroSub}</p>
-          
+
           <div className="hero-buttons">
             <button
               className="btn-secondary btn-large"
@@ -226,8 +226,8 @@ function Home() {
                 <p>{t.loading}</p>
               </div>
             ) : recipes.length > 0 ? (
-              <div 
-                className="slider-wrapper" 
+              <div
+                className="slider-wrapper"
                 dir="ltr"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
@@ -237,19 +237,19 @@ function Home() {
                 onMouseUp={handleMouseUp}
                 onMouseLeave={() => setIsDragging(false)}
               >
-                <div 
+                <div
                   className="recipe-grid slider-track"
                   style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                 >
                   {recipes.map(recipe => (
-                    <div 
-                        key={recipe.id} 
-                        className="slide-item"
-                        dir={language === 'ar' ? 'rtl' : 'ltr'}
-                        style={{ 
-                            textAlign: language === 'ar' ? 'right' : 'left',
-                            direction: language === 'ar' ? 'rtl' : 'ltr' 
-                        }}
+                    <div
+                      key={recipe.id}
+                      className="slide-item"
+                      dir={language === 'ar' ? 'rtl' : 'ltr'}
+                      style={{
+                        textAlign: language === 'ar' ? 'right' : 'left',
+                        direction: language === 'ar' ? 'rtl' : 'ltr'
+                      }}
                     >
                       <RecipeCard
                         recipe={recipe}
@@ -261,8 +261,8 @@ function Home() {
 
                 <div className="slider-dots">
                   {recipes.map((_, idx) => (
-                    <span 
-                      key={idx} 
+                    <span
+                      key={idx}
                       className={`dot ${currentSlide === idx ? 'active' : ''}`}
                       onClick={() => setCurrentSlide(idx)}
                     ></span>
@@ -275,7 +275,7 @@ function Home() {
                 <Heart size={48} style={{ margin: '0 auto 1rem', opacity: 0.3, color: '#ef4444' }} />
                 <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-color)' }}>{t.noTrendingTitle}</h3>
                 <p style={{ color: 'var(--gray)', marginBottom: '1.5rem' }}>{t.noTrendingSub}</p>
-                <button 
+                <button
                   className="btn-primary"
                   onClick={() => navigate('/explore')}
                   style={{ margin: '0 auto' }}
